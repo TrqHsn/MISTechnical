@@ -1,0 +1,135 @@
+<div class="test-api-container">
+  <h1>Test API</h1>
+  
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button 
+      class="tab-btn"
+      [class.active]="activeTab() === 'users'"
+      (click)="activeTab.set('users')">
+      Users
+    </button>
+    <button 
+      class="tab-btn"
+      [class.active]="activeTab() === 'computers'"
+      (click)="activeTab.set('computers')">
+      Computers
+    </button>
+  </div>
+
+  <!-- Users Tab -->
+  @if (activeTab() === 'users') {
+    <div class="tab-content">
+      <div class="search-container">
+        <input 
+          type="text" 
+          class="search-input"
+          placeholder="Search users by name, display name, or SAM account name..."
+          [value]="usersSearchInput()"
+          (input)="onUsersSearchInput($any($event).target.value)"
+          (focus)="usersShowDropdown.set(true)">
+        
+        <!-- Dropdown Results -->
+        @if (usersShowDropdown() && (usersResults().length > 0 || usersLoading())) {
+          <div class="dropdown">
+            @if (usersLoading()) {
+              <div class="loading">Loading...</div>
+            }
+            @for (user of usersResults(); track $index) {
+              <div 
+                class="dropdown-item"
+                (click)="selectUser(user)">
+                <span class="item-text">{{ user['displayName'] || user['sAMAccountName'] || 'User' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Selected User Card -->
+      @if (selectedUser()) {
+        <div class="result-card">
+          <div class="card-header">
+            <h3>User Details</h3>
+            <button class="close-btn" (click)="clearUserSelection()">✕</button>
+          </div>
+          <div class="card-content">
+            @for (key of getObjectKeys(selectedUser()); track key) {
+              <div class="property">
+                <strong>{{ key }}:</strong>
+                <span>{{ selectedUser()?.[key] }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Computers Tab -->
+  @if (activeTab() === 'computers') {
+    <div class="tab-content">
+      <!-- Search Type Toggle -->
+      <div class="search-type-toggle">
+        <button 
+          class="toggle-btn"
+          [class.active]="computersSearchType() === 'name'"
+          (click)="switchComputerSearchType('name')">
+          Search by Name
+        </button>
+        <button 
+          class="toggle-btn"
+          [class.active]="computersSearchType() === 'description'"
+          (click)="switchComputerSearchType('description')">
+          Search by Description
+        </button>
+      </div>
+
+      <div class="search-container">
+        <input 
+          type="text" 
+          class="search-input"
+          [placeholder]="computersSearchType() === 'name' 
+            ? 'Search computers by name...' 
+            : 'Search computers by description...'"
+          [value]="computersSearchInput()"
+          (input)="onComputersSearchInput($any($event).target.value)"
+          (focus)="computersShowDropdown.set(true)">
+        
+        <!-- Dropdown Results -->
+        @if (computersShowDropdown() && (computersResults().length > 0 || computersLoading())) {
+          <div class="dropdown">
+            @if (computersLoading()) {
+              <div class="loading">Loading...</div>
+            }
+            @for (computer of computersResults(); track $index) {
+              <div 
+                class="dropdown-item"
+                (click)="selectComputer(computer)">
+                <span class="item-text">{{ computer['name'] || computer['displayName'] || 'Computer' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Selected Computer Card -->
+      @if (selectedComputer()) {
+        <div class="result-card">
+          <div class="card-header">
+            <h3>Computer Details</h3>
+            <button class="close-btn" (click)="clearComputerSelection()">✕</button>
+          </div>
+          <div class="card-content">
+            @for (key of getObjectKeys(selectedComputer()); track key) {
+              <div class="property">
+                <strong>{{ key }}:</strong>
+                <span>{{ selectedComputer()?.[key] }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

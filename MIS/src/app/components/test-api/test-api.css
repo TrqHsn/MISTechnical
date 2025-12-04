@@ -1,0 +1,368 @@
+.test-api-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1 {
+  text-align: center;
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: #ffffff;
+}
+
+.tab-btn.active {
+  color: #4caf50;
+  border-bottom-color: #4caf50;
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Search Type Toggle (for Computers) */
+.search-type-toggle {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.toggle-btn:hover {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4caf50;
+}
+
+.toggle-btn.active {
+  background: rgba(76, 175, 80, 0.6);
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+/* Search Container */
+.search-container {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4caf50;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(40, 40, 60, 0.95);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.dropdown-item {
+  padding: 1rem;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: rgba(76, 175, 80, 0.3);
+  padding-left: 1.5rem;
+}
+
+.item-text {
+  display: block;
+  word-break: break-word;
+}
+
+.loading {
+  padding: 1rem;
+  text-align: center;
+  color: #4caf50;
+  font-style: italic;
+}
+
+/* Result Card */
+.result-card {
+  background: rgba(76, 175, 80, 0.1);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+.card-header {
+  background: rgba(76, 175, 80, 0.2);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.card-header h3 {
+  color: #4caf50;
+  margin: 0;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #ff0606;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(76, 175, 80, 0.3);
+  border-radius: 5px;
+}
+
+.card-content {
+  padding: 1.5rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.property {
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  border-left: 3px solid #4caf50;
+}
+
+.property strong {
+  color: #141414;
+  display: inline-block;
+  min-width: 150px;
+}
+
+.property span {
+  color: #e0e0e0;
+  word-break: break-word;
+}
+
+.property:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .test-api-container {
+    padding: 1.5rem;
+    border-radius: 15px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tabs {
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-btn {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .search-input {
+    font-size: 1rem;
+  }
+
+  .search-type-toggle {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .toggle-btn {
+    width: 100%;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .close-btn {
+    align-self: flex-end;
+  }
+
+  .property {
+    flex-direction: column;
+  }
+
+  .property strong {
+    min-width: auto;
+    margin-bottom: 0.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .test-api-container {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .tabs {
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .search-input {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .dropdown-item {
+    padding: 0.8rem;
+  }
+
+  .card-content {
+    padding: 1rem;
+  }
+
+  .property {
+    padding: 0.6rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Scrollbar styling */
+.dropdown::-webkit-scrollbar,
+.card-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdown::-webkit-scrollbar-track,
+.card-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.dropdown::-webkit-scrollbar-thumb,
+.card-content::-webkit-scrollbar-thumb {
+  background: rgba(76, 175, 80, 0.5);
+  border-radius: 10px;
+}
+
+.dropdown::-webkit-scrollbar-thumb:hover,
+.card-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 175, 80, 0.8);
+}

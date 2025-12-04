@@ -1,0 +1,23 @@
+<div class="container">
+  <!-- Title Section with Floating Background -->
+  <div class="title-card">
+    <h1 class="title">MIS Technical Team</h1>
+  </div>
+
+  <!-- Buttons Grid -->
+  <div class="buttons-grid">
+    @for (button of buttons; track button.id) {
+      <button 
+        class="btn" 
+        [routerLink]="button.id === 'testapi' ? '/test-api' : null"
+        [attr.data-id]="button.id">
+        {{ button.name }}
+      </button>
+    }
+  </div>
+
+  <!-- Router Outlet for Components -->
+  <div class="content-area">
+    <router-outlet></router-outlet>
+  </div>
+</div>

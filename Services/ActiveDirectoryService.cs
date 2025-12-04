@@ -1,0 +1,264 @@
+using System.DirectoryServices;
+using ADApi.Models;
+
+namespace ADApi.Services;
+
+public class ActiveDirectoryService : IActiveDirectoryService
+{
+    private readonly string _domainPath;
+
+    public ActiveDirectoryService()
+    {
+        // Get the current domain
+        var domain = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain();
+        _domainPath = $"LDAP://{domain.Name}";
+    }
+
+    public async Task<List<UserDto>> SearchUsersByNameAsync(string searchTerm)
+    {
+        return await Task.Run(() =>
+        {
+            var users = new List<UserDto>();
+            
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(Name=*{searchTerm}*)(DisplayName=*{searchTerm}*)(sAMAccountName=*{searchTerm}*)))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.AddRange(new[]
+                {
+                    "sAMAccountName", "displayName", "userPrincipalName", "title", 
+                    "department", "manager", "userAccountControl"
+                });
+
+                var results = searcher.FindAll();
+
+                foreach (SearchResult result in results)
+                {
+                    var user = MapToUserDto(result);
+                    if (user != null)
+                        users.Add(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error searching users: {ex.Message}", ex);
+            }
+
+            return users;
+        });
+    }
+
+    public async Task<UserDto?> GetUserBySamAccountNameAsync(string samAccountName)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(sAMAccountName={samAccountName}))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.AddRange(new[]
+                {
+                    "sAMAccountName", "displayName", "userPrincipalName", "title", 
+                    "department", "manager", "userAccountControl"
+                });
+
+                var result = searcher.FindOne();
+                return result != null ? MapToUserDto(result) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error getting user: {ex.Message}", ex);
+            }
+        });
+    }
+
+    public async Task<List<ComputerDto>> SearchComputersByNameAsync(string searchTerm)
+    {
+        return await Task.Run(() =>
+        {
+            var computers = new List<ComputerDto>();
+
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=computer)(Name=*{searchTerm}*))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.AddRange(new[]
+                {
+                    "name", "description", "operatingSystem"
+                });
+
+                var results = searcher.FindAll();
+
+                foreach (SearchResult result in results)
+                {
+                    var computer = MapToComputerDto(result);
+                    if (computer != null)
+                        computers.Add(computer);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error searching computers: {ex.Message}", ex);
+            }
+
+            return computers;
+        });
+    }
+
+    public async Task<List<ComputerDto>> SearchComputersByDescriptionAsync(string searchTerm)
+    {
+        return await Task.Run(() =>
+        {
+            var computers = new List<ComputerDto>();
+
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=computer)(description=*{searchTerm}*))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.AddRange(new[]
+                {
+                    "name", "description", "operatingSystem"
+                });
+
+                var results = searcher.FindAll();
+
+                foreach (SearchResult result in results)
+                {
+                    var computer = MapToComputerDto(result);
+                    if (computer != null)
+                        computers.Add(computer);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error searching computers by description: {ex.Message}", ex);
+            }
+
+            return computers;
+        });
+    }
+
+    public async Task<ComputerDto?> GetComputerByNameAsync(string computerName)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=computer)(Name={computerName}))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.AddRange(new[]
+                {
+                    "name", "description", "operatingSystem"
+                });
+
+                var result = searcher.FindOne();
+                return result != null ? MapToComputerDto(result) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error getting computer: {ex.Message}", ex);
+            }
+        });
+    }
+
+    private UserDto? MapToUserDto(SearchResult result)
+    {
+        try
+        {
+            var user = new UserDto();
+
+            // sAMAccountName
+            if (result.Properties["sAMAccountName"].Count > 0)
+                user.SamAccountName = result.Properties["sAMAccountName"][0]?.ToString();
+
+            // displayName
+            if (result.Properties["displayName"].Count > 0)
+                user.DisplayName = result.Properties["displayName"][0]?.ToString();
+
+            // userPrincipalName
+            if (result.Properties["userPrincipalName"].Count > 0)
+                user.UserPrincipalName = result.Properties["userPrincipalName"][0]?.ToString();
+
+            // title
+            if (result.Properties["title"].Count > 0)
+                user.Title = result.Properties["title"][0]?.ToString();
+
+            // department
+            if (result.Properties["department"].Count > 0)
+                user.Department = result.Properties["department"][0]?.ToString();
+
+            // manager - extract CN from DN
+            if (result.Properties["manager"].Count > 0)
+            {
+                var managerDN = result.Properties["manager"][0]?.ToString();
+                if (!string.IsNullOrEmpty(managerDN))
+                {
+                    var cnMatch = System.Text.RegularExpressions.Regex.Match(managerDN, @"CN=([^,]+)");
+                    if (cnMatch.Success)
+                        user.Manager = cnMatch.Groups[1].Value;
+                }
+            }
+
+            // enabled status from userAccountControl
+            if (result.Properties["userAccountControl"].Count > 0)
+            {
+                var uac = Convert.ToInt32(result.Properties["userAccountControl"][0]);
+                // Check if account is disabled (bit 2)
+                user.Enabled = (uac & 0x0002) == 0;
+            }
+
+            return user;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private ComputerDto? MapToComputerDto(SearchResult result)
+    {
+        try
+        {
+            var computer = new ComputerDto();
+
+            if (result.Properties["name"].Count > 0)
+                computer.Name = result.Properties["name"][0]?.ToString();
+
+            if (result.Properties["description"].Count > 0)
+                computer.Description = result.Properties["description"][0]?.ToString();
+
+            if (result.Properties["operatingSystem"].Count > 0)
+                computer.OperatingSystem = result.Properties["operatingSystem"][0]?.ToString();
+            return computer;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
