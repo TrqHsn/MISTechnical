@@ -25,14 +25,14 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 using var entry = new DirectoryEntry(_domainPath);
                 using var searcher = new DirectorySearcher(entry)
                 {
-                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(Name=*{searchTerm}*)(DisplayName=*{searchTerm}*)(sAMAccountName=*{searchTerm}*)))",
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(Name=*{searchTerm}*)(DisplayName=*{searchTerm}*)(sAMAccountName=*{searchTerm}*)(userPrincipalName=*{searchTerm}*)))",
                     SearchScope = SearchScope.Subtree
                 };
 
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
                     "sAMAccountName", "displayName", "userPrincipalName", "title", 
-                    "department", "manager", "userAccountControl"
+                    "department", "company", "manager", "userAccountControl"
                 });
 
                 var results = searcher.FindAll();
@@ -69,7 +69,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
                     "sAMAccountName", "displayName", "userPrincipalName", "title", 
-                    "department", "manager", "userAccountControl"
+                    "department", "company", "manager", "userAccountControl"
                 });
 
                 var result = searcher.FindOne();
@@ -211,6 +211,10 @@ public class ActiveDirectoryService : IActiveDirectoryService
             // department
             if (result.Properties["department"].Count > 0)
                 user.Department = result.Properties["department"][0]?.ToString();
+
+            // company
+            if (result.Properties["company"].Count > 0)
+                user.Company = result.Properties["company"][0]?.ToString();
 
             // manager - extract CN from DN
             if (result.Properties["manager"].Count > 0)
