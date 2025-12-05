@@ -9,7 +9,7 @@
     @for (button of buttons; track button.id) {
       <button 
         class="btn" 
-        [routerLink]="button.id === 'testapi' ? '/test-api' : null"
+        [routerLink]="button.id === 'testapi' ? '/test-api' : (button.id === 'sticker' ? '/sticker-print' : null)"
         [attr.data-id]="button.id">
         {{ button.name }}
       </button>
