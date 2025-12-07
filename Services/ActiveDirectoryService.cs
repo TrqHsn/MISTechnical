@@ -32,7 +32,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
                     "sAMAccountName", "displayName", "userPrincipalName", "title", 
-                    "department", "company", "manager", "userAccountControl"
+                    "department", "company","physicalDeliveryOfficeName", "manager", "userAccountControl"
                 });
 
                 var results = searcher.FindAll();
@@ -69,7 +69,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
                     "sAMAccountName", "displayName", "userPrincipalName", "title", 
-                    "department", "company", "manager", "userAccountControl"
+                    "department", "company", "physicalDeliveryOfficeName", "manager", "userAccountControl"
                 });
 
                 var result = searcher.FindOne();
@@ -215,6 +215,10 @@ public class ActiveDirectoryService : IActiveDirectoryService
             // company
             if (result.Properties["company"].Count > 0)
                 user.Company = result.Properties["company"][0]?.ToString();
+
+            // Site
+            if (result.Properties["physicalDeliveryOfficeName"].Count > 0)
+                user.Site = result.Properties["physicalDeliveryOfficeName"][0]?.ToString();
 
             // manager - extract CN from DN
             if (result.Properties["manager"].Count > 0)

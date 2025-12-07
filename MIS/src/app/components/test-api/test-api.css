@@ -344,6 +344,19 @@ h1 {
   }
 }
 
+.property-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-btn {
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+
 /* Scrollbar styling */
 .dropdown::-webkit-scrollbar,
 .card-content::-webkit-scrollbar {

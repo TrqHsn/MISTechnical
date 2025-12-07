@@ -8,6 +8,7 @@ public class UserDto
     public string? Title { get; set; }
     public string? Department { get; set; }
     public string? Company { get; set; }
+    public string? Site { get; set; }
     public string? Manager { get; set; }
     public bool? Enabled { get; set; }
 }

@@ -14,6 +14,19 @@ export class TestApiComponent {
   // Tab management
   activeTab = signal<'users' | 'computers'>('users');
 
+  //Copy text to clipboard
+  copyText(text: string | null | undefined) {
+  if (!text) {
+    return;
+  }
+
+  navigator.clipboard.writeText(text).then(
+    () => console.log('Copied'),
+    err => console.error('Copy failed', err)
+  );
+}
+
+
   // Users search
   usersSearchInput = signal('');
   usersResults = signal<User[]>([]);
