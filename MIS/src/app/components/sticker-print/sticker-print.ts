@@ -14,7 +14,7 @@ export class StickerPrint {
   text2 = signal('');
 
   // Settings that apply to both text boxes / preview / print
-  fontFamily = signal('Arial, Helvetica, sans-serif');
+  fontFamily = signal('Calibri, Courier New, Courier, monospace');
   // Use font size in points (pt) for Word-like control; convert to mm when printing
   fontSizePt = signal(24); // default 24pt
   bold = signal(true);
