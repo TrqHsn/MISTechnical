@@ -93,7 +93,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 using var entry = new DirectoryEntry(_domainPath);
                 using var searcher = new DirectorySearcher(entry)
                 {
-                    Filter = $"(&(objectClass=computer)(Name=*{searchTerm}*))",
+                    Filter = $"(&(objectClass=computer)(|(Name=*{searchTerm}*)(description=*{searchTerm}*)))",
                     SearchScope = SearchScope.Subtree
                 };
 
@@ -114,44 +114,6 @@ public class ActiveDirectoryService : IActiveDirectoryService
             catch (Exception ex)
             {
                 throw new Exception($"Error searching computers: {ex.Message}", ex);
-            }
-
-            return computers;
-        });
-    }
-
-    public async Task<List<ComputerDto>> SearchComputersByDescriptionAsync(string searchTerm)
-    {
-        return await Task.Run(() =>
-        {
-            var computers = new List<ComputerDto>();
-
-            try
-            {
-                using var entry = new DirectoryEntry(_domainPath);
-                using var searcher = new DirectorySearcher(entry)
-                {
-                    Filter = $"(&(objectClass=computer)(description=*{searchTerm}*))",
-                    SearchScope = SearchScope.Subtree
-                };
-
-                searcher.PropertiesToLoad.AddRange(new[]
-                {
-                    "name", "description", "operatingSystem"
-                });
-
-                var results = searcher.FindAll();
-
-                foreach (SearchResult result in results)
-                {
-                    var computer = MapToComputerDto(result);
-                    if (computer != null)
-                        computers.Add(computer);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error searching computers by description: {ex.Message}", ex);
             }
 
             return computers;
@@ -182,6 +144,40 @@ public class ActiveDirectoryService : IActiveDirectoryService
             catch (Exception ex)
             {
                 throw new Exception($"Error getting computer: {ex.Message}", ex);
+            }
+        });
+    }
+
+    public async Task UpdateComputerDescriptionAsync(string computerName, string description)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=computer)(Name={computerName}))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                var result = searcher.FindOne();
+                if (result == null)
+                {
+                    throw new Exception($"Computer '{computerName}' not found");
+                }
+
+                using var computerEntry = result.GetDirectoryEntry();
+                computerEntry.Properties["description"].Clear();
+                if (!string.IsNullOrEmpty(description))
+                {
+                    computerEntry.Properties["description"].Add(description);
+                }
+                computerEntry.CommitChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating computer description: {ex.Message}", ex);
             }
         });
     }

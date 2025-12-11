@@ -12,7 +12,7 @@ import { ApiService, User, Computer } from '../../services/api';
 })
 export class TestApiComponent {
   // Tab management
-  activeTab = signal<'users' | 'computers'>('users');
+  activeTab = signal<'users' | 'computers' | 'update-description'>('users');
 
   //Copy text to clipboard
   copyText(text: string | null | undefined) {
@@ -41,8 +41,27 @@ export class TestApiComponent {
   selectedComputer = signal<Computer | null>(null);
   computersLoading = signal(false);
   computersShowDropdown = signal(false);
-  computersSearchType = signal<'name' | 'description'>('name');
   private computersSearchSubject = new Subject<string>();
+
+  // Update Description Tab
+  sourceComputerSearchInput = signal('');
+  sourceComputerResults = signal<Computer[]>([]);
+  selectedSourceComputer = signal<Computer | null>(null);
+  sourceComputerLoading = signal(false);
+  sourceComputerShowDropdown = signal(false);
+  private sourceComputerSearchSubject = new Subject<string>();
+
+  targetComputerSearchInput = signal('');
+  targetComputerResults = signal<Computer[]>([]);
+  selectedTargetComputer = signal<Computer | null>(null);
+  targetComputerLoading = signal(false);
+  targetComputerShowDropdown = signal(false);
+  private targetComputerSearchSubject = new Subject<string>();
+
+  descriptionInput = signal('');
+  isUpdating = signal(false);
+  updateMessage = signal('');
+
 
   constructor(private apiService: ApiService) {
     // Setup users live search
@@ -77,11 +96,7 @@ export class TestApiComponent {
         this.computersLoading.set(true);
         this.computersShowDropdown.set(true);
         
-        const searchObservable = this.computersSearchType() === 'name'
-          ? this.apiService.searchComputers(searchTerm)
-          : this.apiService.searchComputersByDescription(searchTerm);
-
-        searchObservable.subscribe(
+        this.apiService.searchComputers(searchTerm).subscribe(
           (results) => {
             this.computersResults.set(results.slice(0, 5)); // Max 5 results
             this.computersLoading.set(false);
@@ -95,6 +110,56 @@ export class TestApiComponent {
       } else {
         this.computersResults.set([]);
         this.computersShowDropdown.set(false);
+      }
+    });
+
+    // Setup source computer search (for Update Description tab)
+    this.sourceComputerSearchSubject.pipe(
+      debounceTime(300)
+    ).subscribe(searchTerm => {
+      if (searchTerm.trim()) {
+        this.sourceComputerLoading.set(true);
+        this.sourceComputerShowDropdown.set(true);
+        
+        this.apiService.searchComputers(searchTerm).subscribe(
+          (results) => {
+            this.sourceComputerResults.set(results.slice(0, 5));
+            this.sourceComputerLoading.set(false);
+          },
+          (error) => {
+            console.error('Error searching computers:', error);
+            this.sourceComputerResults.set([]);
+            this.sourceComputerLoading.set(false);
+          }
+        );
+      } else {
+        this.sourceComputerResults.set([]);
+        this.sourceComputerShowDropdown.set(false);
+      }
+    });
+
+    // Setup target computer search (for Update Description tab)
+    this.targetComputerSearchSubject.pipe(
+      debounceTime(300)
+    ).subscribe(searchTerm => {
+      if (searchTerm.trim()) {
+        this.targetComputerLoading.set(true);
+        this.targetComputerShowDropdown.set(true);
+        
+        this.apiService.searchComputers(searchTerm).subscribe(
+          (results) => {
+            this.targetComputerResults.set(results.slice(0, 5));
+            this.targetComputerLoading.set(false);
+          },
+          (error) => {
+            console.error('Error searching computers:', error);
+            this.targetComputerResults.set([]);
+            this.targetComputerLoading.set(false);
+          }
+        );
+      } else {
+        this.targetComputerResults.set([]);
+        this.targetComputerShowDropdown.set(false);
       }
     });
   }
@@ -133,6 +198,78 @@ export class TestApiComponent {
     this.selectedComputer.set(null);
   }
 
+  // Update Description Tab handlers
+  onSourceComputerSearch(value: string) {
+    this.sourceComputerSearchInput.set(value);
+    this.sourceComputerSearchSubject.next(value);
+  }
+
+  selectSourceComputer(computer: Computer) {
+    this.selectedSourceComputer.set(computer);
+    this.sourceComputerShowDropdown.set(false);
+    this.sourceComputerSearchInput.set('');
+    this.sourceComputerResults.set([]);
+    // Auto-populate description input from source computer
+    this.descriptionInput.set(computer['description'] || '');
+    this.updateMessage.set('');
+  }
+
+  onTargetComputerSearch(value: string) {
+    this.targetComputerSearchInput.set(value);
+    this.targetComputerSearchSubject.next(value);
+  }
+
+  selectTargetComputer(computer: Computer) {
+    this.selectedTargetComputer.set(computer);
+    this.targetComputerShowDropdown.set(false);
+    this.targetComputerSearchInput.set('');
+    this.targetComputerResults.set([]);
+  }
+
+  clearSourceComputer() {
+    this.selectedSourceComputer.set(null);
+    this.descriptionInput.set('');
+    this.updateMessage.set('');
+  }
+
+  clearTargetComputer() {
+    this.selectedTargetComputer.set(null);
+  }
+
+  updateComputerDescription() {
+    const targetComputer = this.selectedTargetComputer();
+    const description = this.descriptionInput();
+
+    if (!targetComputer) {
+      this.updateMessage.set('Please select a target computer to update');
+      return;
+    }
+
+    if (!targetComputer['name']) {
+      this.updateMessage.set('Invalid target computer');
+      return;
+    }
+
+    this.isUpdating.set(true);
+    this.updateMessage.set('');
+
+    this.apiService.updateComputerDescription(targetComputer['name'], description).subscribe(
+      (response) => {
+        this.updateMessage.set('Description updated successfully!');
+        this.isUpdating.set(false);
+        setTimeout(() => {
+          this.clearTargetComputer();
+          this.clearSourceComputer();
+        }, 2000);
+      },
+      (error) => {
+        console.error('Error updating description:', error);
+        this.updateMessage.set('Error updating description: ' + (error.error?.message || error.message));
+        this.isUpdating.set(false);
+      }
+    );
+  }
+
   // Get object keys for card display
   getObjectKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
@@ -140,13 +277,4 @@ export class TestApiComponent {
 
   // Make JSON available in template
   JSON = JSON;
-
-  // Switch search type for computers
-  switchComputerSearchType(type: 'name' | 'description') {
-    this.computersSearchType.set(type);
-    this.computersSearchInput.set('');
-    this.computersResults.set([]);
-    this.selectedComputer.set(null);
-    this.computersShowDropdown.set(false);
-  }
 }

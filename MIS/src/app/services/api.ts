@@ -32,11 +32,13 @@ export class ApiService {
     return this.http.get<Computer[]>(`${this.apiUrl}/computers/search?searchTerm=${encodeURIComponent(searchTerm)}`);
   }
 
-  searchComputersByDescription(searchTerm: string): Observable<Computer[]> {
-    return this.http.get<Computer[]>(`${this.apiUrl}/computers/search/description?searchTerm=${encodeURIComponent(searchTerm)}`);
-  }
-
   getComputerByName(computerName: string): Observable<Computer> {
     return this.http.get<Computer>(`${this.apiUrl}/computers/${encodeURIComponent(computerName)}`);
+  }
+
+  updateComputerDescription(computerName: string, description: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/computers/${encodeURIComponent(computerName)}/description`, JSON.stringify(description), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

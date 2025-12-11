@@ -9,13 +9,16 @@
     <button class="tab-btn" [class.active]="activeTab() === 'computers'" (click)="activeTab.set('computers')">
       Computers
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'update-description'" (click)="activeTab.set('update-description')">
+      Update Description
+    </button>
   </div>
 
   <!-- Users Tab -->
   @if (activeTab() === 'users') {
   <div class="tab-content">
     <div class="search-container">
-      <input type="text" class="search-input" placeholder="Search users by name, display name, or SAM account name..."
+      <input type="text" class="search-input" placeholder="Search users by name(single name), username, email..."
         [value]="usersSearchInput()" (input)="onUsersSearchInput($any($event).target.value)"
         (focus)="usersShowDropdown.set(true)">
 
@@ -57,23 +60,10 @@
   <!-- Computers Tab -->
   @if (activeTab() === 'computers') {
   <div class="tab-content">
-    <!-- Search Type Toggle -->
-    <div class="search-type-toggle">
-      <button class="toggle-btn" [class.active]="computersSearchType() === 'name'"
-        (click)="switchComputerSearchType('name')">
-        Search by Name
-      </button>
-      <button class="toggle-btn" [class.active]="computersSearchType() === 'description'"
-        (click)="switchComputerSearchType('description')">
-        Search by Description
-      </button>
-    </div>
-
     <div class="search-container">
-      <input type="text" class="search-input" [placeholder]="computersSearchType() === 'name' 
-            ? 'Search computers by name...' 
-            : 'Search computers by description...'" [value]="computersSearchInput()"
-        (input)="onComputersSearchInput($any($event).target.value)" (focus)="computersShowDropdown.set(true)">
+      <input type="text" class="search-input" placeholder="Search computers by host name, user name or description..."
+        [value]="computersSearchInput()" (input)="onComputersSearchInput($any($event).target.value)"
+        (focus)="computersShowDropdown.set(true)">
 
       <!-- Dropdown Results -->
       @if (computersShowDropdown() && (computersResults().length > 0 || computersLoading())) {
@@ -108,6 +98,97 @@
         </div>
         }
       </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Update Description Tab -->
+  @if (activeTab() === 'update-description') {
+  <div class="tab-content">
+    <!-- Search Box 2: Source Computer (Copy From) -->
+    <div class="search-container">
+      <label class="search-label">Search Computer (Copy Description From)</label>
+      <input type="text" class="search-input" placeholder="Search computers by name or description..."
+        [value]="sourceComputerSearchInput()" (input)="onSourceComputerSearch($any($event).target.value)"
+        (focus)="sourceComputerShowDropdown.set(true)">
+
+      <!-- Dropdown Results -->
+      @if (sourceComputerShowDropdown() && (sourceComputerResults().length > 0 || sourceComputerLoading())) {
+      <div class="dropdown">
+        @if (sourceComputerLoading()) {
+        <div class="loading">Loading...</div>
+        }
+        @for (computer of sourceComputerResults(); track $index) {
+        <div class="dropdown-item" (click)="selectSourceComputer(computer)">
+          <span class="item-text">{{ computer['name'] || 'Computer' }}</span>
+        </div>
+        }
+      </div>
+      }
+    </div>
+
+    <!-- Selected Source Computer -->
+    @if (selectedSourceComputer()) {
+    <div class="selected-item">
+      <span class="selected-text">Source: {{ selectedSourceComputer()?.['name'] }}</span>
+      <button class="clear-btn" (click)="clearSourceComputer()">✕</button>
+    </div>
+    }
+
+    <!-- Search Box 1: Target Computer (Update) -->
+    <div class="search-container">
+      <label class="search-label">Search Computer (Update Description For)</label>
+      <input type="text" class="search-input" placeholder="Search computers by name or description..."
+        [value]="targetComputerSearchInput()" (input)="onTargetComputerSearch($any($event).target.value)"
+        (focus)="targetComputerShowDropdown.set(true)">
+
+      <!-- Dropdown Results -->
+      @if (targetComputerShowDropdown() && (targetComputerResults().length > 0 || targetComputerLoading())) {
+      <div class="dropdown">
+        @if (targetComputerLoading()) {
+        <div class="loading">Loading...</div>
+        }
+        @for (computer of targetComputerResults(); track $index) {
+        <div class="dropdown-item" (click)="selectTargetComputer(computer)">
+          <span class="item-text">{{ computer['name'] || 'Computer' }}</span>
+        </div>
+        }
+      </div>
+      }
+    </div>
+
+    <!-- Selected Target Computer -->
+    @if (selectedTargetComputer()) {
+    <div class="selected-item">
+      <span class="selected-text">Target: {{ selectedTargetComputer()?.['name'] }}</span>
+      <button class="clear-btn" (click)="clearTargetComputer()">✕</button>
+    </div>
+    }
+
+    <!-- Description Input Box -->
+    <div class="description-section">
+      <label class="description-label">Description</label>
+      <textarea class="description-input" 
+        [value]="descriptionInput()" 
+        (input)="descriptionInput.set($any($event).target.value)"
+        placeholder="Enter description to update..."></textarea>
+    </div>
+
+    <!-- Update Button -->
+    <div class="action-buttons">
+      <button class="update-btn" 
+        (click)="updateComputerDescription()" 
+        [disabled]="!selectedTargetComputer() || isUpdating()">
+        {{ isUpdating() ? 'Updating...' : 'Update Description' }}
+      </button>
+    </div>
+
+    <!-- Status Message -->
+    @if (updateMessage()) {
+    <div class="message" [class.success]="updateMessage().includes('successfully')" 
+         [class.error]="updateMessage().includes('Error')">
+      {{ updateMessage() }}
     </div>
     }
   </div>

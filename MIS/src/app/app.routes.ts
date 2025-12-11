@@ -13,6 +13,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/sticker-print/sticker-print').then(m => m.StickerPrint)
   }
   ,
+  {
+    path: 'build-rebuild',
+    loadComponent: () => import('./components/it-build-rebuild/it-build-rebuild.component').then(m => m.ItBuildRebuildComponent)
+  }
+  ,
   // Fallback - redirect any unknown path to test-api
   { path: '**', redirectTo: 'test-api' }
 ];

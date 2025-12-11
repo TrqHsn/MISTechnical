@@ -18,9 +18,9 @@ public class ComputersController : ControllerBase
     }
 
     /// <summary>
-    /// Search computers by name
+    /// Search computers by name or description
     /// </summary>
-    /// <param name="searchTerm">Search term to find computers</param>
+    /// <param name="searchTerm">Search term to find computers by name or description</param>
     /// <returns>List of matching computers</returns>
     [HttpGet("search")]
     public async Task<ActionResult<List<ComputerDto>>> SearchComputers([FromQuery] string searchTerm)
@@ -38,31 +38,6 @@ public class ComputersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching computers");
-            return StatusCode(500, new { error = "An error occurred while searching computers", message = ex.Message });
-        }
-    }
-
-    /// <summary>
-    /// Search computers by description
-    /// </summary>
-    /// <param name="searchTerm">Search term to find computers by description</param>
-    /// <returns>List of matching computers</returns>
-    [HttpGet("search/description")]
-    public async Task<ActionResult<List<ComputerDto>>> SearchComputersByDescription([FromQuery] string searchTerm)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                return BadRequest("Search term cannot be empty");
-            }
-
-            var computers = await _adService.SearchComputersByDescriptionAsync(searchTerm);
-            return Ok(computers);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching computers by description");
             return StatusCode(500, new { error = "An error occurred while searching computers", message = ex.Message });
         }
     }
@@ -95,6 +70,32 @@ public class ComputersController : ControllerBase
         {
             _logger.LogError(ex, "Error getting computer");
             return StatusCode(500, new { error = "An error occurred while getting computer", message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Update computer description
+    /// </summary>
+    /// <param name="computerName">Computer name</param>
+    /// <param name="description">New description</param>
+    /// <returns>Success message</returns>
+    [HttpPut("{computerName}/description")]
+    public async Task<ActionResult> UpdateComputerDescription(string computerName, [FromBody] string description)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(computerName))
+            {
+                return BadRequest("Computer name cannot be empty");
+            }
+
+            await _adService.UpdateComputerDescriptionAsync(computerName, description ?? "");
+            return Ok(new { message = $"Computer '{computerName}' description updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating computer description");
+            return StatusCode(500, new { error = "An error occurred while updating computer description", message = ex.Message });
         }
     }
 }
