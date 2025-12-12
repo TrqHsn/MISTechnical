@@ -12,7 +12,7 @@ import { ApiService, User, Computer } from '../../services/api';
 })
 export class TestApiComponent {
   // Tab management
-  activeTab = signal<'users' | 'computers' | 'update-description'>('users');
+  activeTab = signal<'users' | 'computers' | 'update-description' | 'last-device'>('users');
 
   //Copy text to clipboard
   copyText(text: string | null | undefined) {
@@ -61,6 +61,11 @@ export class TestApiComponent {
   descriptionInput = signal('');
   isUpdating = signal(false);
   updateMessage = signal('');
+
+  // Last Device Tab
+  lastDevices = signal<{ [key: string]: number }>({ SDLL: 0, SDLD: 0, DBOL: 0 });
+  lastDevicesLoading = signal(false);
+  lastDevicesLoaded = signal(false);
 
 
   constructor(private apiService: ApiService) {
@@ -181,6 +186,14 @@ export class TestApiComponent {
     this.selectedUser.set(null);
   }
 
+  // Enter handler for users search - selects first result
+  onUsersSearchEnter() {
+    const results = this.usersResults();
+    if (results && results.length > 0) {
+      this.selectUser(results[0]);
+    }
+  }
+
   // Computers handlers
   onComputersSearchInput(value: string) {
     this.computersSearchInput.set(value);
@@ -214,6 +227,14 @@ export class TestApiComponent {
     this.updateMessage.set('');
   }
 
+  // Select first computer in current computers results when Enter is pressed
+  onComputersSearchEnter() {
+    const results = this.computersResults();
+    if (results && results.length > 0) {
+      this.selectComputer(results[0]);
+    }
+  }
+
   onTargetComputerSearch(value: string) {
     this.targetComputerSearchInput.set(value);
     this.targetComputerSearchSubject.next(value);
@@ -224,6 +245,21 @@ export class TestApiComponent {
     this.targetComputerShowDropdown.set(false);
     this.targetComputerSearchInput.set('');
     this.targetComputerResults.set([]);
+  }
+
+  // Enter handler for source/target search boxes
+  onSourceComputerSearchEnter() {
+    const results = this.sourceComputerResults();
+    if (results && results.length > 0) {
+      this.selectSourceComputer(results[0]);
+    }
+  }
+
+  onTargetComputerSearchEnter() {
+    const results = this.targetComputerResults();
+    if (results && results.length > 0) {
+      this.selectTargetComputer(results[0]);
+    }
   }
 
   clearSourceComputer() {
@@ -273,6 +309,34 @@ export class TestApiComponent {
   // Get object keys for card display
   getObjectKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
+  }
+
+  // Last Device Tab methods
+  loadLastDevices() {
+    if (this.lastDevicesLoaded()) {
+      return; // Already loaded, don't fetch again
+    }
+
+    this.lastDevicesLoading.set(true);
+
+    this.apiService.getLastDevices().subscribe(
+      (data) => {
+        this.lastDevices.set(data);
+        this.lastDevicesLoading.set(false);
+        this.lastDevicesLoaded.set(true);
+      },
+      (error) => {
+        console.error('Error loading last devices:', error);
+        this.lastDevicesLoading.set(false);
+      }
+    );
+  }
+
+  onTabChange(tab: string) {
+    this.activeTab.set(tab as any);
+    if (tab === 'last-device') {
+      this.loadLastDevices();
+    }
   }
 
   // Make JSON available in template

@@ -41,4 +41,9 @@ export class ApiService {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+
+  // Devices API calls
+  getLastDevices(): Observable<{ [key: string]: number }> {
+    return this.http.get<{ [key: string]: number }>(`${this.apiUrl}/devices/last`);
+  }
 }

@@ -12,6 +12,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'update-description'" (click)="activeTab.set('update-description')">
       Update Description
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'last-device'" (click)="onTabChange('last-device')">
+      Last Device
+    </button>
   </div>
 
   <!-- Users Tab -->
@@ -20,7 +23,7 @@
     <div class="search-container">
       <input type="text" class="search-input" placeholder="Search users by name(single name), username, email..."
         [value]="usersSearchInput()" (input)="onUsersSearchInput($any($event).target.value)"
-        (focus)="usersShowDropdown.set(true)">
+        (focus)="usersShowDropdown.set(true)" (keydown.enter)="onUsersSearchEnter()">
 
       <!-- Dropdown Results -->
       @if (usersShowDropdown() && (usersResults().length > 0 || usersLoading())) {
@@ -46,9 +49,12 @@
       </div>
       <div class="card-content">
         @for (key of getObjectKeys(selectedUser()); track key) {
-        <div class="property">
+        <div class="property-btn">
           <strong>{{ key }}:</strong>
           <span>{{ selectedUser()?.[key] }}</span>
+          <button type="button" class="copy-btn" (click)="copyText(selectedUser()?.[key])">
+            Copy
+          </button>
         </div>
         }
       </div>
@@ -63,7 +69,7 @@
     <div class="search-container">
       <input type="text" class="search-input" placeholder="Search computers by host name, user name or description..."
         [value]="computersSearchInput()" (input)="onComputersSearchInput($any($event).target.value)"
-        (focus)="computersShowDropdown.set(true)">
+        (focus)="computersShowDropdown.set(true)" (keydown.enter)="onComputersSearchEnter()">
 
       <!-- Dropdown Results -->
       @if (computersShowDropdown() && (computersResults().length > 0 || computersLoading())) {
@@ -111,7 +117,7 @@
       <label class="search-label">Search Computer (Copy Description From)</label>
       <input type="text" class="search-input" placeholder="Search computers by name or description..."
         [value]="sourceComputerSearchInput()" (input)="onSourceComputerSearch($any($event).target.value)"
-        (focus)="sourceComputerShowDropdown.set(true)">
+        (focus)="sourceComputerShowDropdown.set(true)" (keydown.enter)="onSourceComputerSearchEnter()">
 
       <!-- Dropdown Results -->
       @if (sourceComputerShowDropdown() && (sourceComputerResults().length > 0 || sourceComputerLoading())) {
@@ -141,7 +147,7 @@
       <label class="search-label">Search Computer (Update Description For)</label>
       <input type="text" class="search-input" placeholder="Search computers by name or description..."
         [value]="targetComputerSearchInput()" (input)="onTargetComputerSearch($any($event).target.value)"
-        (focus)="targetComputerShowDropdown.set(true)">
+        (focus)="targetComputerShowDropdown.set(true)" (keydown.enter)="onTargetComputerSearchEnter()">
 
       <!-- Dropdown Results -->
       @if (targetComputerShowDropdown() && (targetComputerResults().length > 0 || targetComputerLoading())) {
@@ -162,6 +168,7 @@
     @if (selectedTargetComputer()) {
     <div class="selected-item">
       <span class="selected-text">Target: {{ selectedTargetComputer()?.['name'] }}</span>
+      <span class="selected-text">Description: {{ selectedTargetComputer()?.['description'] }}</span>
       <button class="clear-btn" (click)="clearTargetComputer()">✕</button>
     </div>
     }
@@ -190,6 +197,30 @@
          [class.error]="updateMessage().includes('Error')">
       {{ updateMessage() }}
     </div>
+    }
+  </div>
+  }
+
+  <!-- Last Device Tab -->
+  @if (activeTab() === 'last-device') {
+  <div class="tab-content last-device-content">
+    @if (lastDevicesLoading()) {
+    <div class="loading">Loading last device numbers...</div>
+    } @else if (lastDevicesLoaded()) {
+    <div class="devices-display">
+      <h3>Highest Device Numbers by Prefix</h3>
+      <div class="devices-grid">
+        @for (prefix of ['SDLL', 'SDLD', 'DBOL']; track prefix) {
+        <div class="device-card">
+          <div class="device-prefix">{{ prefix }}</div>
+          <div class="device-number">{{ lastDevices()[prefix] }}</div>
+          <div class="next-number">Next: {{ prefix }}{{ (lastDevices()[prefix] + 1).toString().padStart(3, '0') }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    } @else {
+    <div class="no-data">Click Load to fetch the latest device numbers</div>
     }
   </div>
   }

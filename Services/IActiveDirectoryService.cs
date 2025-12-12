@@ -9,6 +9,7 @@ public interface IActiveDirectoryService
     Task<List<ComputerDto>> SearchComputersByNameAsync(string searchTerm);
     Task<ComputerDto?> GetComputerByNameAsync(string computerName);
     Task UpdateComputerDescriptionAsync(string computerName, string description);
+    Task<Dictionary<string, int>> GetLastDeviceNumbersAsync();
 }
 
 

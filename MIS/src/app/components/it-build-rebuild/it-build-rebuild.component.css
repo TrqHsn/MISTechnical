@@ -53,8 +53,48 @@
   border-bottom: 2px solid #e0e0e0;
 }
 
+/* 2-Column Layout */
+.form-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.form-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-column .form-section {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Bottom Section for Less Frequently Edited Fields */
+.bottom-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.radio-group-small {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .form-group {
   margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
 .form-group label {
@@ -177,14 +217,16 @@
 
 .preview-value {
   padding: 0.75rem;
-  background: #f8f9fa;
-  border: 1px solid #ddd;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+  border: 1px solid #e0e0e0;
+  border-left: 3px solid #0066cc;
   border-radius: 4px;
   color: #333;
   font-size: 0.95rem;
   min-height: 2.5rem;
   display: flex;
   align-items: center;
+  font-weight: 500;
 }
 
 .preview-value.device-type,
@@ -237,20 +279,21 @@
   gap: 1rem;
   justify-content: flex-end;
   margin-top: 2rem;
-  padding-top: 2rem;
+  padding-top: 1.5rem;
   border-top: 1px solid #e0e0e0;
 }
 
 .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 2rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
@@ -309,7 +352,20 @@
     padding-bottom: 1.5rem;
   }
 
+  .form-columns {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
   .radio-group {
+    grid-template-columns: 1fr;
+  }
+
+  .radio-group-small {
     grid-template-columns: 1fr;
   }
 

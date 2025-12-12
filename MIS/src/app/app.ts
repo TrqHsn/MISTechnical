@@ -14,7 +14,7 @@ export class App {
     { name: 'Label Sticker', id: 'sticker' },
     { name: 'WRANTY', id: 'wranty' },
     { name: 'Jobsheet', id: 'jobsheet' },
-    { name: 'OS installation form', id: 'oif' },
+    { name: 'OS form', id: 'oif' },
     { name: 'Button 5', id: 'button5' },
     { name: 'Test API', id: 'testapi' }
   ];

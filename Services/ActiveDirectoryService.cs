@@ -182,6 +182,79 @@ public class ActiveDirectoryService : IActiveDirectoryService
         });
     }
 
+    public async Task<Dictionary<string, int>> GetLastDeviceNumbersAsync()
+    {
+        return await Task.Run(() =>
+        {
+            var result = new Dictionary<string, int>
+            {
+                { "SDLL", 0 },
+                { "SDLD", 0 },
+                { "DBOL", 0 }
+            };
+
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = "(&(objectClass=computer))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.Add("name");
+
+                var computerNames = new List<string>();
+                var searchResults = searcher.FindAll();
+
+                foreach (SearchResult searchResult in searchResults)
+                {
+                    if (searchResult.Properties["name"].Count > 0)
+                    {
+                        var name = searchResult.Properties["name"][0]?.ToString();
+                        if (!string.IsNullOrEmpty(name))
+                            computerNames.Add(name);
+                    }
+                }
+
+                // Regex pattern: PREFIX + NUMBERS + OPTIONAL LETTER
+                var regex = new System.Text.RegularExpressions.Regex(@"^([A-Z]+)(\d+)([A-Z]*)$");
+                var allowedPrefixes = new[] { "SDLL", "SDLD", "DBOL" };
+
+                // Parse, filter, and group
+                var devices = computerNames
+                    .Select(name =>
+                    {
+                        var match = regex.Match(name);
+                        if (!match.Success) return null;
+                        
+                        var prefix = match.Groups[1].Value;
+                        if (!allowedPrefixes.Contains(prefix)) return null;
+                        
+                        return new
+                        {
+                            Prefix = prefix,
+                            Number = int.Parse(match.Groups[2].Value)
+                        };
+                    })
+                    .Where(x => x != null)
+                    .GroupBy(x => x.Prefix);
+
+                foreach (var group in devices)
+                {
+                    var maxNumber = group.Max(x => x.Number);
+                    result[group.Key] = maxNumber;
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error getting last device numbers: {ex.Message}", ex);
+            }
+        });
+    }
+
     private UserDto? MapToUserDto(SearchResult result)
     {
         try

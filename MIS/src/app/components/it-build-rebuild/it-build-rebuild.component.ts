@@ -42,6 +42,10 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
   sitePreview = signal('');
   divisionPreview = signal('');
   
+  // Track OS from old and new computers separately
+  oldComputerOS = signal('');
+  newComputerOS = signal('');
+  
   // Preview signals - updated explicitly when form values change
   deviceTypePreview = signal('Laptop');
   actionTypePreview = signal('Rebuild');
@@ -134,11 +138,13 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
       this.actionTypePreview.set(actionTypeMap[actionType] || 'Rebuild');
 
       if (actionType === 'N') {
-        // New - disable Old Computer Name
+        // New - disable Old Computer Name and clear it
+        this.form.get('oldComputerName')?.setValue('', { emitEvent: false });
         this.form.get('oldComputerName')?.disable();
         this.form.get('newComputerName')?.enable();
       } else if (actionType === 'R') {
-        // Removal - disable New Computer Name
+        // Removal - disable New Computer Name and clear it
+        this.form.get('newComputerName')?.setValue('', { emitEvent: false });
         this.form.get('oldComputerName')?.enable();
         this.form.get('newComputerName')?.disable();
       } else {
@@ -146,6 +152,9 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
         this.form.get('oldComputerName')?.enable();
         this.form.get('newComputerName')?.enable();
       }
+      
+      // Update operating system preview based on actionType
+      this.updateOperatingSystemPreview(actionType);
     });
 
     // Raised by changes - update preview signal
@@ -234,23 +243,47 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
 
   selectOldComputer(computer: Computer): void {
     const computerName = computer['name'] || '';
+    const osValue = computer['operatingSystem'] || '';
+    this.oldComputerOS.set(osValue);
     this.form.patchValue({
       oldComputerName: computerName,
       description: computer['description'] || '',
-      operatingSystem: computer['operatingSystem'] || '',
+      operatingSystem: osValue,
       newComputerName: computerName,
     });
-    this.operatingSystemPreview.set(computer['operatingSystem'] || '');
+    // Update preview based on current actionType
+    const actionType = this.form.get('actionType')?.value;
+    this.updateOperatingSystemPreview(actionType);
     this.oldComputerShowDropdown.set(false);
     this.oldComputerResults.set([]);
   }
 
+  onOldComputerSearchEnter(): void {
+    const results = this.oldComputerResults();
+    if (results && results.length > 0) {
+      this.selectOldComputer(results[0]);
+    }
+  }
+
   selectNewComputer(computer: Computer): void {
+    const osValue = computer['operatingSystem'] || '';
+    this.newComputerOS.set(osValue);
     this.form.patchValue({
       newComputerName: computer['name'] || '',
+      operatingSystem: osValue,
     });
+    // Update preview based on current actionType
+    const actionType = this.form.get('actionType')?.value;
+    this.updateOperatingSystemPreview(actionType);
     this.newComputerShowDropdown.set(false);
     this.newComputerResults.set([]);
+  }
+
+  onNewComputerSearchEnter(): void {
+    const results = this.newComputerResults();
+    if (results && results.length > 0) {
+      this.selectNewComputer(results[0]);
+    }
   }
 
   selectUsername(user: User): void {
@@ -262,6 +295,13 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
     this.divisionPreview.set(user['company'] || '');
     this.usernameShowDropdown.set(false);
     this.usernameResults.set([]);
+  }
+
+  onUsernameSearchEnter(): void {
+    const results = this.usernameResults();
+    if (results && results.length > 0) {
+      this.selectUsername(results[0]);
+    }
   }
 
   clearAll(): void {
@@ -400,6 +440,16 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
     const day = String(date.getDate()).padStart(2, '0');
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
+  }
+
+  private updateOperatingSystemPreview(actionType: string): void {
+    if (actionType === 'R') {
+      // Removal: use old computer OS
+      this.operatingSystemPreview.set(this.oldComputerOS());
+    } else {
+      // New and Rebuild: use new computer OS
+      this.operatingSystemPreview.set(this.newComputerOS());
+    }
   }
 
   ngOnDestroy(): void {

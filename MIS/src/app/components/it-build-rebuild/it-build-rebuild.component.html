@@ -1,246 +1,236 @@
 <div class="brbr-form-container">
   <div class="form-header">
     <h1>IT Build/Rebuild/Removal Form</h1>
-    <p class="subtitle">Complete the form below to generate form</p>
   </div>
 
   <form [formGroup]="form" class="brbr-form">
-    <div class="form-section">
-      <h2>Computer Information</h2>
+    <!-- Main 2-Column Section -->
+    <div class="form-columns">
+      <!-- Left Column -->
+      <div class="form-column">
+        <!-- Form Type (Action) -->
+        <div class="form-group">
+          <label>Form Type (Action)</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="actionType"
+                value="N"
+                class="radio-input"
+              />
+              <span class="radio-text">New</span>
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="actionType"
+                value="RB"
+                class="radio-input"
+              />
+              <span class="radio-text">Rebuild</span>
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="actionType"
+                value="R"
+                class="radio-input"
+              />
+              <span class="radio-text">Removal</span>
+            </label>
+          </div>
+        </div>
 
-      <!-- Old Computer Name -->
-      <div class="form-group">
-        <label for="oldComputerName">Old Computer Name</label>
-        <div class="search-container">
-          <input
-            type="text"
-            id="oldComputerName"
-            class="search-input"
-            formControlName="oldComputerName"
-            placeholder="Search for computer..."
-            [value]="oldComputerSearchInput()"
-            (input)="onOldComputerSearch($any($event).target.value)"
-            (focus)="oldComputerShowDropdown.set(true)"
-          />
-          @if (oldComputerShowDropdown() && (oldComputerResults().length > 0 || oldComputerLoading())) {
-          <div class="dropdown">
-            @if (oldComputerLoading()) {
-            <div class="loading">Loading...</div>
-            }
-            @for (computer of oldComputerResults(); track $index) {
-            <div class="dropdown-item" (click)="selectOldComputer(computer)">
-              <span>{{ computer['name'] }}</span>
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="search-container">
+            <input
+              type="text"
+              id="username"
+              class="search-input"
+              formControlName="username"
+              placeholder="Search by username, display name or email..."
+              [value]="usernameSearchInput()"
+              (input)="onUsernameSearch($any($event).target.value)"
+              (focus)="usernameShowDropdown.set(true)"
+              (keydown.enter)="onUsernameSearchEnter()"
+            />
+            @if (usernameShowDropdown() && (usernameResults().length > 0 || usernameLoading())) {
+            <div class="dropdown">
+              @if (usernameLoading()) {
+              <div class="loading">Loading...</div>
+              }
+              @for (user of usernameResults(); track $index) {
+              <div class="dropdown-item" (click)="selectUsername(user)">
+                <span class="user-display">{{ user['displayName'] || user['sAMAccountName'] }}</span>
+                <span class="user-detail">{{ user['sAMAccountName'] }}</span>
+              </div>
+              }
             </div>
             }
           </div>
-          }
         </div>
-        <div class="preview-group">
-          <div class="preview-item">
-            <span class="preview-label">Operating System:</span>
-            <span class="preview-value">{{ operatingSystemPreview() || 'N/A' }}</span>
+
+        <!-- Device Type -->
+        <div class="form-group">
+          <label>Device Type</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="deviceType"
+                value="Laptop"
+                class="radio-input"
+              />
+              <span class="radio-text">Laptop</span>
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="deviceType"
+                value="Desktop"
+                class="radio-input"
+              />
+              <span class="radio-text">Desktop</span>
+            </label>
           </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            class="text-input"
+            formControlName="description"
+            placeholder="Computer description..."
+            rows="2"
+          ></textarea>
+        </div>
+
+        <!-- Company/Division -->
+        <div class="form-group">
+          <label>Company/Division</label>
+          <div class="preview-value">{{ divisionPreview() || 'N/A' }}</div>
+        </div>
+
+        <!-- AD Group -->
+        <div class="form-group">
+          <label for="adGroup">AD Group</label>
+          <input
+            type="text"
+            id="adGroup"
+            class="text-input"
+            formControlName="adGroup"
+            placeholder="AD Group..."
+          />
         </div>
       </div>
 
-      <!-- New Computer Name -->
-      <div class="form-group">
-        <label for="newComputerName">New Computer Name</label>
-        <div class="search-container">
-          <input
-            type="text"
-            id="newComputerName"
-            class="search-input"
-            formControlName="newComputerName"
-            placeholder="Search for computer..."
-            [value]="newComputerSearchInput()"
-            (input)="onNewComputerSearch($any($event).target.value)"
-            (focus)="newComputerShowDropdown.set(true)"
-          />
-          @if (newComputerShowDropdown() && (newComputerResults().length > 0 || newComputerLoading())) {
-          <div class="dropdown">
-            @if (newComputerLoading()) {
-            <div class="loading">Loading...</div>
-            }
-            @for (computer of newComputerResults(); track $index) {
-            <div class="dropdown-item" (click)="selectNewComputer(computer)">
-              <span>{{ computer['name'] }}</span>
+      <!-- Right Column -->
+      <div class="form-column">
+        <!-- Old Computer Name -->
+        <div class="form-group">
+          <label for="oldComputerName">Old Computer Name</label>
+          <div class="search-container">
+            <input
+              type="text"
+              id="oldComputerName"
+              class="search-input"
+              formControlName="oldComputerName"
+              placeholder="Search for computer..."
+              [value]="oldComputerSearchInput()"
+              (input)="onOldComputerSearch($any($event).target.value)"
+              (focus)="oldComputerShowDropdown.set(true)"
+              (keydown.enter)="onOldComputerSearchEnter()"
+            />
+            @if (oldComputerShowDropdown() && (oldComputerResults().length > 0 || oldComputerLoading())) {
+            <div class="dropdown">
+              @if (oldComputerLoading()) {
+              <div class="loading">Loading...</div>
+              }
+              @for (computer of oldComputerResults(); track $index) {
+              <div class="dropdown-item" (click)="selectOldComputer(computer)">
+                <span>{{ computer['name'] }}</span>
+              </div>
+              }
             </div>
             }
           </div>
-          }
         </div>
-      </div>
 
-      <!-- Description -->
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          class="text-input"
-          formControlName="description"
-          placeholder="Computer description..."
-          rows="3"
-        ></textarea>
-      </div>
-
-      <!-- Device Type -->
-      <div class="form-group">
-        <label>Device Type</label>
-        <div class="radio-group">
-          <label class="radio-label">
+        <!-- New Computer Name -->
+        <div class="form-group">
+          <label for="newComputerName">New Computer Name</label>
+          <div class="search-container">
             <input
-              type="radio"
-              formControlName="deviceType"
-              value="Laptop"
-              class="radio-input"
+              type="text"
+              id="newComputerName"
+              class="search-input"
+              formControlName="newComputerName"
+              placeholder="Search for computer..."
+              [value]="newComputerSearchInput()"
+              (input)="onNewComputerSearch($any($event).target.value)"
+              (focus)="newComputerShowDropdown.set(true)"
+              (keydown.enter)="onNewComputerSearchEnter()"
             />
-            <span class="radio-text">Laptop</span>
-          </label>
-          <label class="radio-label">
-            <input
-              type="radio"
-              formControlName="deviceType"
-              value="Desktop"
-              class="radio-input"
-            />
-            <span class="radio-text">Desktop</span>
-          </label>
-        </div>
-        <div class="preview-value device-type">
-          Selected: {{ deviceTypePreview() }}
-        </div>
-      </div>
-
-      <!-- Action Type -->
-      <div class="form-group">
-        <label>Form Type (Action)</label>
-        <div class="radio-group">
-          <label class="radio-label">
-            <input
-              type="radio"
-              formControlName="actionType"
-              value="N"
-              class="radio-input"
-            />
-            <span class="radio-text">New</span>
-          </label>
-          <label class="radio-label">
-            <input
-              type="radio"
-              formControlName="actionType"
-              value="RB"
-              class="radio-input"
-            />
-            <span class="radio-text">Rebuild</span>
-          </label>
-          <label class="radio-label">
-            <input
-              type="radio"
-              formControlName="actionType"
-              value="R"
-              class="radio-input"
-            />
-            <span class="radio-text">Removal</span>
-          </label>
-        </div>
-        <div class="preview-value action-type">
-          Action: {{ actionTypePreview() }}
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h2>User Information</h2>
-
-      <!-- Username -->
-      <div class="form-group">
-        <label for="username">Username</label>
-        <div class="search-container">
-          <input
-            type="text"
-            id="username"
-            class="search-input"
-            formControlName="username"
-            placeholder="Search by SAM account, UPN, or display name..."
-            [value]="usernameSearchInput()"
-            (input)="onUsernameSearch($any($event).target.value)"
-            (focus)="usernameShowDropdown.set(true)"
-          />
-          @if (usernameShowDropdown() && (usernameResults().length > 0 || usernameLoading())) {
-          <div class="dropdown">
-            @if (usernameLoading()) {
-            <div class="loading">Loading...</div>
-            }
-            @for (user of usernameResults(); track $index) {
-            <div class="dropdown-item" (click)="selectUsername(user)">
-              <span class="user-display">{{ user['displayName'] || user['sAMAccountName'] }}</span>
-              <span class="user-detail">{{ user['sAMAccountName'] }}</span>
+            @if (newComputerShowDropdown() && (newComputerResults().length > 0 || newComputerLoading())) {
+            <div class="dropdown">
+              @if (newComputerLoading()) {
+              <div class="loading">Loading...</div>
+              }
+              @for (computer of newComputerResults(); track $index) {
+              <div class="dropdown-item" (click)="selectNewComputer(computer)">
+                <span>{{ computer['name'] }}</span>
+              </div>
+              }
             </div>
             }
           </div>
-          }
         </div>
-      </div>
 
-      <!-- Site Preview -->
-      <div class="form-group">
-        <label>Site</label>
-        <div class="preview-value">{{ sitePreview() || 'N/A' }}</div>
-      </div>
-
-      <!-- Division Preview -->
-      <div class="form-group">
-        <label>Company/Division</label>
-        <div class="preview-value">{{ divisionPreview() || 'N/A' }}</div>
-      </div>
-
-      <!-- AD Group -->
-      <div class="form-group">
-        <label for="adGroup">AD Group</label>
-        <input
-          type="text"
-          id="adGroup"
-          class="text-input"
-          formControlName="adGroup"
-          placeholder="AD Group..."
-        />
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h2>Request Details</h2>
-
-      <!-- Raised By -->
-      <div class="form-group">
-        <label>Raised By</label>
-        <div class="radio-group">
-          @for (option of raisedByOptions; track option.value) {
-          <label class="radio-label">
-            <input
-              type="radio"
-              formControlName="raisedBy"
-              [value]="option.value"
-              class="radio-input"
-            />
-            <span class="radio-text">{{ option.label }}</span>
-          </label>
-          }
+        <!-- Raised By -->
+        <div class="form-group">
+          <label>Raised By</label>
+          <div class="radio-group">
+            @for (option of raisedByOptions; track option.value) {
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="raisedBy"
+                [value]="option.value"
+                class="radio-input"
+              />
+              <span class="radio-text">{{ option.label }}</span>
+            </label>
+            }
+          </div>
         </div>
-        <div class="preview-value">
-          Raised by: {{ raisedByPreview() }}
-        </div>
-      </div>
 
-      <!-- Raised Date -->
-      <div class="form-group">
-        <label for="raisedDate">Raised Date</label>
-        <input
-          type="date"
-          id="raisedDate"
-          class="text-input"
-          formControlName="raisedDate"
-        />
+        <!-- Site -->
+        <div class="form-group">
+          <label>Site</label>
+          <div class="preview-value">{{ sitePreview() || 'N/A' }}</div>
+        </div>
+
+        <!-- Operating System -->
+        <div class="form-group">
+          <label>Operating System</label>
+          <div class="preview-value">{{ operatingSystemPreview() || 'N/A' }}</div>
+        </div>
+
+        <!-- Raised Date -->
+        <div class="form-group">
+          <label for="raisedDate">Raised Date</label>
+          <input
+            type="date"
+            id="raisedDate"
+            class="text-input"
+            formControlName="raisedDate"
+          />
+        </div>
       </div>
     </div>
 
