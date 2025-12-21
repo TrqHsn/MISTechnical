@@ -16,6 +16,6 @@ export class App {
     { name: 'Jobsheet', id: 'jobsheet' },
     { name: 'OS form', id: 'oif' },
     { name: 'Button 5', id: 'button5' },
-    { name: 'Test API', id: 'testapi' }
+    { name: 'AD Tools', id: 'testapi' }
   ];
 }

@@ -56,8 +56,8 @@ h1 {
 }
 
 .tab-btn.active {
-  color: #4caf50;
-  border-bottom-color: #4caf50;
+  color: #000000;
+  border-bottom-color: #000000;
 }
 
 .tab-content {

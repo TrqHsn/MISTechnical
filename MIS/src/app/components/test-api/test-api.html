@@ -1,5 +1,5 @@
 <div class="test-api-container">
-  <h1>Test API</h1>
+  <h1>AD Tools</h1>
 
   <!-- Tab Navigation -->
   <div class="tabs">
@@ -208,13 +208,13 @@
     <div class="loading">Loading last device numbers...</div>
     } @else if (lastDevicesLoaded()) {
     <div class="devices-display">
-      <h3>Highest Device Numbers by Prefix</h3>
+      <h3>Next Device Name</h3>
       <div class="devices-grid">
         @for (prefix of ['SDLL', 'SDLD', 'DBOL']; track prefix) {
         <div class="device-card">
           <div class="device-prefix">{{ prefix }}</div>
-          <div class="device-number">{{ lastDevices()[prefix] }}</div>
-          <div class="next-number">Next: {{ prefix }}{{ (lastDevices()[prefix] + 1).toString().padStart(3, '0') }}</div>
+          <div class="device-number">{{ (lastDevices()[prefix] + + 1).toString().padStart(3, '0') }}</div>
+          <div class="next-number">Last: {{ prefix }}{{ lastDevices()[prefix]  }}</div>
         </div>
         }
       </div>
