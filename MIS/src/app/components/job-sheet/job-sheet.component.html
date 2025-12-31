@@ -1,0 +1,124 @@
+<!-- <<div class="jobsheet">
+  <div class="header">
+    <h1>SHANTA DENIMS LIMITED</h1>
+    <div class="ticket">TICKET # <input [(ngModel)]="ticket" class="ticket-input" /></div>
+  </div>
+
+  <div class="top-fields">
+    <div class="field search-field">
+      <label>Username</label>
+      <input [value]="usersSearchInput" (input)="onUsernameInput($any($event).target.value)" (focus)="usersShowDropdown = true" (blur)="onUsernameBlur()" (keydown.enter)="onUsernameEnter()" />
+      <div class="dropdown" *ngIf="usersShowDropdown && (usersResults.length > 0 || usersLoading)">
+        <div class="loading" *ngIf="usersLoading">Loading...</div>
+        <div class="dropdown-item" *ngFor="let user of usersResults; let i = index" (click)="selectUser(user)">
+          <span class="item-text">{{ user['displayName'] || user['sAMAccountName'] || user['samAccountName'] || user['SamAccountName'] || 'User' }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Name</label>
+      <input [(ngModel)]="name" />
+    </div>
+    <div class="field">
+      <label>Designation</label>
+      <input [(ngModel)]="designation" />
+    </div>
+    <div class="field">
+      <label>Production</label>
+      <input [(ngModel)]="production" />
+    </div>
+    <div class="field">
+      <label>Department</label>
+      <input [(ngModel)]="department" />
+    </div>
+    <div class="field">
+      <label>Site</label>
+      <input [(ngModel)]="site" />
+    </div>
+    <div class="field full">
+      <label>Asset no</label>
+      <input [(ngModel)]="assetNo" />
+    </div>
+  </div>
+
+  <div class="diagnosis">
+    <label>Diagnosis and subsequent action</label>
+    <div class="grid">
+      <div class="col">
+        <label>Complain</label>
+        <textarea [(ngModel)]="complain"></textarea>
+      </div>
+      <div class="col">
+        <label>Our Findings</label>
+        <textarea [(ngModel)]="findings"></textarea>
+      </div>
+      <div class="col">
+        <label>Solutions</label>
+        <textarea [(ngModel)]="solutions"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="items">
+    <label>Items Required for Service and Repair (From inventory or to be purchased)</label>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Part Description</th>
+          <th>Part no</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items; index as i">
+          <td>{{i+1}}</td>
+          <td><input [(ngModel)]="item.part" /></td>
+          <td><input [(ngModel)]="item.partNo" /></td>
+          <td><input type="number" [(ngModel)]="item.qty" /></td>
+          <td><input type="number" [(ngModel)]="item.price" /></td>
+          <td>{{ (item.qty || 0) * (item.price || 0) }}</td>
+          <td><button (click)="removeItem(i)">Remove</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="items-actions">
+      <button (click)="addItem()">Add item</button>
+    </div>
+  </div>
+
+  <div class="status">
+    <div class="left">
+      <label>Job Sheet Status</label>
+      <input [(ngModel)]="jobStatus" />
+    </div>
+    <div class="right">
+      <label>Follow up Date</label>
+      <input [(ngModel)]="followUpDate" type="date" />
+      <label>Agreed By</label>
+      <input [(ngModel)]="agreedBy" />
+    </div>
+  </div>
+
+  <div class="signatures">
+    <div class="sig">
+      <label>Raised By:</label>
+      <input [(ngModel)]="raisedBy" />
+    </div>
+    <div class="sig">
+      <label>Requested By:</label>
+      <input [(ngModel)]="requestedBy" />
+    </div>
+    <div class="sig">
+      <label>Verified By:</label>
+      <input [(ngModel)]="verifiedBy" />
+    </div>
+  </div>
+</div> -->
+
+
+<h1>UNDER CONSTRUCTION</h1>
+<h2>View Disable</h2>
