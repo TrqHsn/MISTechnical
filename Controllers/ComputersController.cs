@@ -97,7 +97,41 @@ public class ComputersController : ControllerBase
             _logger.LogError(ex, "Error updating computer description");
             return StatusCode(500, new { error = "An error occurred while updating computer description", message = ex.Message });
         }
+        }
+
+        /// <summary>
+        /// Partially update computer description (accepts JSON object { "description": "..." }) and returns updated computer
+        /// </summary>
+        /// <param name="computerName">Computer name</param>
+        /// <param name="body">Object containing the new description</param>
+        /// <returns>Updated computer details</returns>
+        [HttpPatch("{computerName}/description")]
+        public async Task<ActionResult<ComputerDto>> PatchUpdateComputerDescription(string computerName, [FromBody] UpdateDescriptionDto body)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(computerName))
+                {
+                    return BadRequest("Computer name cannot be empty");
+                }
+
+                var description = body?.Description ?? "";
+                await _adService.UpdateComputerDescriptionAsync(computerName, description);
+
+                var computer = await _adService.GetComputerByNameAsync(computerName);
+                if (computer == null)
+                {
+                    return NotFound($"Computer with name '{computerName}' not found after update");
+                }
+
+                return Ok(computer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating computer description");
+                return StatusCode(500, new { error = "An error occurred while updating computer description", message = ex.Message });
+            }
+        }
     }
-}
 
 

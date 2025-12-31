@@ -115,9 +115,12 @@
     <!-- Search Box 2: Source Computer (Copy From) -->
     <div class="search-container">
       <label class="search-label">Search Computer (Copy Description From)</label>
-      <input type="text" class="search-input" placeholder="Search computers by name or description..."
-        [value]="sourceComputerSearchInput()" (input)="onSourceComputerSearch($any($event).target.value)"
-        (focus)="sourceComputerShowDropdown.set(true)" (keydown.enter)="onSourceComputerSearchEnter()">
+      <div class="search-row">
+        <input type="text" class="search-input" placeholder="Search computers by name or description..."
+          [value]="sourceComputerSearchInput()" (input)="onSourceComputerSearch($any($event).target.value)"
+          (focus)="sourceComputerShowDropdown.set(true)" (keydown.enter)="onSourceComputerSearchEnter()">
+        <button type="button" class="search-btn" (click)="triggerSourceSearch()">Search</button>
+      </div>
 
       <!-- Dropdown Results -->
       @if (sourceComputerShowDropdown() && (sourceComputerResults().length > 0 || sourceComputerLoading())) {
@@ -145,9 +148,12 @@
     <!-- Search Box 1: Target Computer (Update) -->
     <div class="search-container">
       <label class="search-label">Search Computer (Update Description For)</label>
-      <input type="text" class="search-input" placeholder="Search computers by name or description..."
-        [value]="targetComputerSearchInput()" (input)="onTargetComputerSearch($any($event).target.value)"
-        (focus)="targetComputerShowDropdown.set(true)" (keydown.enter)="onTargetComputerSearchEnter()">
+      <div class="search-row">
+        <input type="text" class="search-input" placeholder="Search computers by name or description..."
+          [value]="targetComputerSearchInput()" (input)="onTargetComputerSearch($any($event).target.value)"
+          (focus)="targetComputerShowDropdown.set(true)" (keydown.enter)="onTargetComputerSearchEnter()">
+        <button type="button" class="search-btn" (click)="triggerTargetSearch()">Search</button>
+      </div>
 
       <!-- Dropdown Results -->
       @if (targetComputerShowDropdown() && (targetComputerResults().length > 0 || targetComputerLoading())) {
@@ -182,8 +188,9 @@
         placeholder="Enter description to update..."></textarea>
     </div>
 
-    <!-- Update Button -->
+    <!-- Update and Clear Buttons -->
     <div class="action-buttons">
+      <button class="clear-all-btn" (click)="clearAll()">Clear All</button>
       <button class="update-btn" 
         (click)="updateComputerDescription()" 
         [disabled]="!selectedTargetComputer() || isUpdating()">

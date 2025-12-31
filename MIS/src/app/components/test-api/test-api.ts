@@ -227,6 +227,18 @@ export class TestApiComponent {
     this.updateMessage.set('');
   }
 
+  // Trigger search via button for source search
+  triggerSourceSearch() {
+    this.sourceComputerShowDropdown.set(true);
+    this.sourceComputerSearchSubject.next(this.sourceComputerSearchInput());
+  }
+
+  // Trigger search via button for target search
+  triggerTargetSearch() {
+    this.targetComputerShowDropdown.set(true);
+    this.targetComputerSearchSubject.next(this.targetComputerSearchInput());
+  }
+
   // Select first computer in current computers results when Enter is pressed
   onComputersSearchEnter() {
     const results = this.computersResults();
@@ -270,6 +282,18 @@ export class TestApiComponent {
 
   clearTargetComputer() {
     this.selectedTargetComputer.set(null);
+  }
+
+  clearAll() {
+    this.clearSourceComputer();
+    this.clearTargetComputer();
+    this.sourceComputerSearchInput.set('');
+    this.targetComputerSearchInput.set('');
+    this.sourceComputerResults.set([]);
+    this.targetComputerResults.set([]);
+    this.descriptionInput.set('');
+    this.updateMessage.set('');
+    this.isUpdating.set(false);
   }
 
   updateComputerDescription() {

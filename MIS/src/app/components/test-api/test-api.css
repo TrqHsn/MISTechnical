@@ -398,6 +398,45 @@ h1 {
   font-size: 0.95rem;
 }
 
+/* Search row (input + button) */
+.search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-btn {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  border: none;
+  color: #ffffff;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.25);
+}
+
+/* Clear All button - red on the left */
+.clear-all-btn {
+  background: linear-gradient(135deg, #f44336, #e53935);
+  border: none;
+  color: #ffffff;
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.25);
+}
+
 .description-input {
   width: 100%;
   min-height: 120px;

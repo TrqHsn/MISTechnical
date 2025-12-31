@@ -16,6 +16,7 @@
 - Single-process Web API that communicates directly with AD via LDAP (`System.DirectoryServices`).
 - No database/ORM is used; domain data is read/written directly to AD (e.g., update computer description).
 - Angular UI (`MIS/`) consumes API at `/api/...`. CORS policy `AllowAngularApp` allows `http://localhost:4200` and `http://10.140.9.10:4200`.
+- Note: `SearchComputersByName` searches **both** computer `name` and `description` using a single `GET /api/computers/search?searchTerm=...` endpoint — there is **no** separate `search/description` route in code (README may list an outdated route).
 - Service boundary: controllers call `IActiveDirectoryService` — mock this interface for unit tests or to simulate AD.
 
 ## Runtime & important runtime notes ⚠️
@@ -31,7 +32,8 @@
 ## Important implementation details to remember 🧠
 - Device numbering: `GetLastDeviceNumbersAsync` expects computer names matching regex `^([A-Z]+)(\d+)([A-Z]*)$` and only considers prefixes `SDLL`, `SDLD`, `DBOL`.
 - Manager extraction: manager DN is parsed with a `CN=...` regex to produce a readable manager name.
-- Update endpoint uses plain JSON-string body: `PUT /api/computers/{computerName}/description` with JSON string body (see `ApiService.updateComputerDescription`).
+- Update endpoint uses plain JSON-string body: `PUT /api/computers/{computerName}/description` with JSON string body (see `ApiService.updateComputerDescription`). Implementation clears the `description` property and calls `DirectoryEntry.CommitChanges()` to persist the update.
+- Search computers uses a combined LDAP filter that checks both `name` and `description`, so use the single `/api/computers/search` endpoint for both purposes.
 
 ## Typical developer workflows (commands) ▶️
 - API (root):

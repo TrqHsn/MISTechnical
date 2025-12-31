@@ -15,7 +15,6 @@ export class App {
     { name: 'WRANTY', id: 'wranty' },
     { name: 'Jobsheet', id: 'jobsheet' },
     { name: 'OS form', id: 'oif' },
-    { name: 'Button 5', id: 'button5' },
     { name: 'AD Tools', id: 'testapi' }
   ];
 }
