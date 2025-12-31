@@ -4,13 +4,19 @@
     <h1 class="title">MIS Technical Team</h1>
   </div>
 
+  <!-- Work Timer (7:30 -> 16:30) - fixed to viewport top-right -->
+  <div class="work-timer global-work-timer" [attr.data-state]="timerState()">
+    <div class="timer-label">{{ timerLabel() }}</div>
+    <div class="timer-value">{{ timerValue() }}</div>
+  </div>
+
   <!-- Buttons Row (single-line) -->
   <div class="buttons-row">
 
     @for (button of buttons; track button.id) {
       <button 
         class="btn" 
-        [routerLink]="button.id === 'testapi' ? '/test-api' : (button.id === 'sticker' ? '/sticker-print' : (button.id === 'oif' ? '/build-rebuild' : null))"
+        [routerLink]="button.id === 'testapi' ? '/test-api' : (button.id === 'sticker' ? '/sticker-print' : (button.id === 'wranty' ? '/wranty' : (button.id === 'oif' ? '/build-rebuild' : null)))"
         [attr.data-id]="button.id">
         {{ button.name }}
       </button>

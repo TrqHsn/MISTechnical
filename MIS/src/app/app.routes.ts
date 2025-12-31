@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/it-build-rebuild/it-build-rebuild.component').then(m => m.ItBuildRebuildComponent)
   }
   ,
+  {
+    path: 'wranty',
+    loadComponent: () => import('./components/warranty-claim/warranty-claim.component').then(m => m.WarrantyClaim)
+  }
+  ,
   // Fallback - redirect any unknown path to test-api
   { path: '**', redirectTo: 'test-api' }
 ];

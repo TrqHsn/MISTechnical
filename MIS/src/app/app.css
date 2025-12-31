@@ -9,6 +9,7 @@
 
 /* Title Section */
 .title-card {
+  position: relative;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -17,6 +18,53 @@
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
   border: 1px solid rgba(255, 255, 255, 0.18);
   animation: float 3s ease-in-out infinite;
+}
+
+/* Work timer (top-right) */
+.work-timer {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.95), rgba(76, 175, 80, 0.95));
+  color: #0b0b0b;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  min-width: 140px;
+}
+
+.work-timer[data-state="running"] {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(33, 150, 243, 0.95));
+  color: #ffffff;
+}
+
+.work-timer[data-state="next"] {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.95), rgba(255, 193, 7, 0.95));
+  color: #0b0b0b;
+}
+
+.work-timer .timer-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.work-timer .timer-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+@media (max-width: 480px) {
+  .work-timer {
+    top: 0.6rem;
+    right: 0.6rem;
+    min-width: 120px;
+    padding: 0.5rem 0.8rem;
+  }
 }
 
 .title {
