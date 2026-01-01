@@ -5,9 +5,9 @@
   </div>
 
   <!-- Work Timer (7:30 -> 16:30) - fixed to viewport top-right -->
-  <div class="work-timer global-work-timer" [attr.data-state]="timerState()">
-    <div class="timer-label">{{ timerLabel() }}</div>
-    <div class="timer-value">{{ timerValue() }}</div>
+  <div class="work-timer global-work-timer" [attr.data-state]="timerState()" style="background: white; border: 2px solid black; color: black;">
+    <div class="timer-label" style="font-size: 18px; font-weight: bold;">{{ timerLabel() }}</div>
+    <div class="timer-value" style="font-size: 28px; font-weight: bold;">{{ timerValue() }}</div>
   </div>
 
   <!-- Buttons Row (single-line) -->
@@ -16,6 +16,7 @@
     @for (button of buttons; track button.id) {
       <button 
         class="btn" 
+        (click)="onTopButtonClick(button.id)"
         [routerLink]="button.id === 'testapi' ? '/test-api' : (button.id === 'sticker' ? '/sticker-print' : (button.id === 'wranty' ? '/wranty' : (button.id === 'oif' ? '/build-rebuild' : null)))"
         [attr.data-id]="button.id">
         {{ button.name }}
@@ -27,4 +28,46 @@
   <div class="content-area">
     <router-outlet></router-outlet>
   </div>
-</div>
+
+  <!-- Unlock Results Modal -->
+  @if (unlockDialogVisible()) {
+  <div class="modal-overlay" (click)="closeUnlockDialog()">
+    <div class="modal" (click)="$any($event).stopPropagation()">
+      <button class="modal-close" (click)="closeUnlockDialog()">✕</button>
+
+      <h1>Unlock AD Accounts</h1>
+
+      @if (isUnlocking()) {
+      <div class="modal-body">
+        <div class="loading">Unlocking accounts...</div>
+      </div>
+      } @else {
+      <div class="modal-body">
+        <div class="results">
+          <div class="result-col">
+            <h2>Unlocked ({{ unlocked().length }})</h2>
+            <ul>
+              @for (u of unlocked(); track $index) {
+              <li>{{ u }}</li>
+              }
+            </ul>
+          </div>
+
+          <div class="result-col">
+            <h2>Failed ({{ failed().length }})</h2>
+            <ul>
+              @for (f of failed(); track $index) {
+              <li><strong>{{ f.samAccountName }}</strong>: {{ f.reason }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+      }
+
+      <div class="modal-actions">
+        <button class="btn" (click)="closeUnlockDialog()">Close</button>
+      </div>
+    </div>
+  </div>
+  }

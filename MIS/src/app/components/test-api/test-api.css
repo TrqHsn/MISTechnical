@@ -553,8 +553,8 @@ h1 {
 }
 
 .device-card {
-  background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(63, 81, 181, 0.2));
-  border: 2px solid rgba(33, 150, 243, 0.5);
+  background: linear-gradient(135deg, rgb(126, 243, 178), rgba(63, 81, 181, 0.2));
+  border: 2px solid rgba(0, 0, 0, 0.637);
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
@@ -570,22 +570,22 @@ h1 {
 
 .device-prefix {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
+  font-size: 2rem;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-bottom: 0.5rem;
 }
 
 .device-number {
-  color: #2196f3;
-  font-size: 2rem;
+  color: #000000;
+  font-size: 4rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
 
 .next-number {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.85rem;
+  font-size: 2rem;
   padding-top: 0.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }

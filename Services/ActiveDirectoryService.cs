@@ -255,6 +255,83 @@ public class ActiveDirectoryService : IActiveDirectoryService
         });
     }
 
+    public async Task<UnlockResultDto> UnlockAllLockedUsersAsync()
+    {
+        return await Task.Run(() =>
+        {
+            var result = new UnlockResultDto();
+
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    // lockoutTime >= 1 indicates locked accounts
+                    Filter = "(&(objectClass=user)(objectCategory=person)(lockoutTime>=1))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.AddRange(new[] { "sAMAccountName", "distinguishedName" });
+
+                var results = searcher.FindAll();
+
+                foreach (SearchResult sr in results)
+                {
+                    try
+                    {
+                        var sam = sr.Properties["sAMAccountName"].Count > 0 ? sr.Properties["sAMAccountName"][0]?.ToString() : null;
+                        var de = sr.GetDirectoryEntry();
+
+                        if (sam == null)
+                        {
+                            result.Failed.Add(new UnlockFailureDto { SamAccountName = "<unknown>", Reason = "Missing sAMAccountName" });
+                            continue;
+                        }
+
+                        try
+                        {
+                            // Try using the ADSI UnlockAccount method
+                            de.Invoke("UnlockAccount", null);
+                            de.CommitChanges();
+                            result.Unlocked.Add(sam);
+                        }
+                        catch (Exception invEx)
+                        {
+                            try
+                            {
+                                // Fallback: attempt to clear lockoutTime
+                                if (de.Properties.Contains("lockoutTime"))
+                                {
+                                    de.Properties["lockoutTime"].Value = 0;
+                                    de.CommitChanges();
+                                    result.Unlocked.Add(sam);
+                                }
+                                else
+                                {
+                                    result.Failed.Add(new UnlockFailureDto { SamAccountName = sam, Reason = $"No lockoutTime property, invoke error: {invEx.Message}" });
+                                }
+                            }
+                            catch (Exception ex2)
+                            {
+                                result.Failed.Add(new UnlockFailureDto { SamAccountName = sam, Reason = ex2.Message });
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        result.Failed.Add(new UnlockFailureDto { SamAccountName = "<unknown>", Reason = ex.Message });
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error unlocking users: {ex.Message}", ex);
+            }
+        });
+    }
+
     private UserDto? MapToUserDto(SearchResult result)
     {
         try

@@ -1,5 +1,6 @@
 import { Component, signal, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
+import { ApiService } from './services/api';
 
 @Component({
   selector: 'app-root',
@@ -11,11 +12,13 @@ export class App {
   protected readonly title = signal('MIS');
 
   buttons = [
-    { name: 'Label Sticker', id: 'sticker' },
-    { name: 'WRANTY', id: 'wranty' },
+    { name: 'Sticker', id: 'sticker' },
+    { name: 'Warranty', id: 'wranty' },
     { name: 'Jobsheet', id: 'jobsheet' },
     { name: 'OS form', id: 'oif' },
-    { name: 'AD Tools', id: 'testapi' }
+    { name: 'AD Tools', id: 'testapi' },
+    { name: 'Update', id: 'update' },
+    { name: 'Unlock', id: 'unlock' }
   ];
 
   // Work timer (7:30 -> 16:30 local time)
@@ -24,8 +27,48 @@ export class App {
   timerState = signal('inactive'); // 'inactive'|'running'|'next'
   private _timerInterval: any;
 
-  constructor() {
+  // Unlock modal state
+  unlockDialogVisible = signal(false);
+  isUnlocking = signal(false);
+  unlocked = signal<string[]>([]);
+  failed = signal<{ samAccountName: string; reason: string }[]>([]);
+
+  constructor(private apiService: ApiService) {
     this.startWorkTimer();
+  }
+
+  onTopButtonClick(id: string) {
+    if (id === 'unlock') {
+      this.openUnlockDialog();
+    }
+  }
+
+  openUnlockDialog() {
+    this.unlockDialogVisible.set(true);
+    this.unlocked.set([]);
+    this.failed.set([]);
+    this.performUnlock();
+  }
+
+  closeUnlockDialog() {
+    this.unlockDialogVisible.set(false);
+    this.isUnlocking.set(false);
+  }
+
+  performUnlock() {
+    this.isUnlocking.set(true);
+    this.apiService.unlockAllUsers().subscribe(
+      (res) => {
+        this.unlocked.set(res.unlocked || []);
+        this.failed.set((res.failed || []).map(f => ({ samAccountName: (f as any).samAccountName || (f as any).SamAccountName || '<unknown>', reason: (f as any).reason || (f as any).Reason || 'Unknown' })));
+        this.isUnlocking.set(false);
+      },
+      (err) => {
+        console.error('Unlock failed', err);
+        this.failed.set([{ samAccountName: '<error>', reason: err.error?.message || err.message || 'Unknown error' }]);
+        this.isUnlocking.set(false);
+      }
+    );
   }
 
   ngOnDestroy(): void {

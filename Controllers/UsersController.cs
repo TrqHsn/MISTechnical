@@ -72,6 +72,25 @@ public class UsersController : ControllerBase
             return StatusCode(500, new { error = "An error occurred while getting user", message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Unlock all currently locked user accounts in AD
+    /// </summary>
+    /// <returns>Lists of unlocked SAM account names and failures</returns>
+    [HttpPost("unlock-all")]
+    public async Task<ActionResult<UnlockResultDto>> UnlockAllLockedUsers()
+    {
+        try
+        {
+            var result = await _adService.UnlockAllLockedUsersAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error unlocking users");
+            return StatusCode(500, new { error = "An error occurred while unlocking users", message = ex.Message });
+        }
+    }
 }
 
 

@@ -46,4 +46,9 @@ export class ApiService {
   getLastDevices(): Observable<{ [key: string]: number }> {
     return this.http.get<{ [key: string]: number }>(`${this.apiUrl}/devices/last`);
   }
+
+  // Unlock all locked AD user accounts
+  unlockAllUsers(): Observable<{ unlocked: string[]; failed: { samAccountName: string; reason: string }[] }> {
+    return this.http.post<{ unlocked: string[]; failed: { samAccountName: string; reason: string }[] }>(`${this.apiUrl}/users/unlock-all`, null);
+  }
 }
