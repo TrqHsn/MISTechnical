@@ -255,6 +255,159 @@ public class ActiveDirectoryService : IActiveDirectoryService
         });
     }
 
+    public async Task UpdateUserAttributesByUserPrincipalNameAsync(string userPrincipalName, ADApi.Models.UpdateUserDto updateDto)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userPrincipalName)) throw new Exception("userPrincipalName cannot be empty");
+
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(userPrincipalName={userPrincipalName}))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                var result = searcher.FindOne();
+                if (result == null)
+                {
+                    throw new Exception($"User with userPrincipalName '{userPrincipalName}' not found");
+                }
+
+                using var userEntry = result.GetDirectoryEntry();
+
+                // Update department
+                if (updateDto?.Department != null)
+                {
+                    userEntry.Properties["department"].Clear();
+                    if (!string.IsNullOrWhiteSpace(updateDto.Department))
+                        userEntry.Properties["department"].Add(updateDto.Department);
+                }
+
+                // Update title (and also set description to the same value)
+                if (updateDto?.Title != null)
+                {
+                    userEntry.Properties["title"].Clear();
+                    if (!string.IsNullOrWhiteSpace(updateDto.Title))
+                        userEntry.Properties["title"].Add(updateDto.Title);
+
+                    // Mirror to description per request
+                    userEntry.Properties["description"].Clear();
+                    if (!string.IsNullOrWhiteSpace(updateDto.Title))
+                        userEntry.Properties["description"].Add(updateDto.Title);
+                }
+
+                // If description explicitly provided and title wasn't provided, set it
+                if (updateDto?.Description != null && updateDto?.Title == null)
+                {
+                    userEntry.Properties["description"].Clear();
+                    if (!string.IsNullOrWhiteSpace(updateDto.Description))
+                        userEntry.Properties["description"].Add(updateDto.Description);
+                }
+
+                // Update manager if provided - resolve manager UPN, sAMAccountName, or DisplayName to distinguishedName
+                if (updateDto?.Manager != null)
+                {
+                    var managerId = updateDto.Manager.Trim();
+                    if (!string.IsNullOrEmpty(managerId))
+                    {
+                        string? managerDN = null;
+
+                        // Try to resolve by userPrincipalName or sAMAccountName first
+                        using (var mgrSearcher = new DirectorySearcher(entry)
+                        {
+                            SearchScope = SearchScope.Subtree
+                        })
+                        {
+                            mgrSearcher.Filter = $"(&(objectClass=user)(objectCategory=person)(|(userPrincipalName={managerId})(sAMAccountName={managerId})))";
+                            mgrSearcher.PropertiesToLoad.AddRange(new[] { "distinguishedName", "sAMAccountName", "displayName" });
+                            var mgrResult = mgrSearcher.FindOne();
+                            if (mgrResult != null && mgrResult.Properties["distinguishedName"].Count > 0)
+                            {
+                                managerDN = mgrResult.Properties["distinguishedName"][0]?.ToString();
+                            }
+                        }
+
+                        // If not found, try exact displayName match (user display names are expected to be unique and contain a comma)
+                        if (managerDN == null)
+                        {
+                            using (var mgrSearch2 = new DirectorySearcher(entry)
+                            {
+                                SearchScope = SearchScope.Subtree
+                            })
+                            {
+                                mgrSearch2.Filter = $"(&(objectClass=user)(objectCategory=person)(displayName={managerId}))";
+                                mgrSearch2.PropertiesToLoad.AddRange(new[] { "distinguishedName", "sAMAccountName", "displayName" });
+                                var mgrResults = mgrSearch2.FindAll();
+                                if (mgrResults != null && mgrResults.Count == 1 && mgrResults[0].Properties["distinguishedName"].Count > 0)
+                                {
+                                    managerDN = mgrResults[0].Properties["distinguishedName"][0]?.ToString();
+                                }
+                                else if (mgrResults != null && mgrResults.Count > 1)
+                                {
+                                    throw new Exception($"Ambiguous manager displayName '{managerId}' returned multiple matches");
+                                }
+                            }
+                        }
+
+                        if (managerDN == null)
+                        {
+                            throw new Exception($"Manager '{managerId}' not found");
+                        }
+
+                        userEntry.Properties["manager"].Clear();
+                        userEntry.Properties["manager"].Add(managerDN);
+                    }
+                }
+
+
+                userEntry.CommitChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating user attributes: {ex.Message}", ex);
+            }
+        });
+    }
+
+    public async Task<List<ADApi.Models.UserDto>> FindUsersByDisplayNameAsync(string displayName)
+    {
+        return await Task.Run(() =>
+        {
+            var matches = new List<ADApi.Models.UserDto>();
+            try
+            {
+                using var entry = new DirectoryEntry(_domainPath);
+                using var searcher = new DirectorySearcher(entry)
+                {
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(displayName={displayName}))",
+                    SearchScope = SearchScope.Subtree
+                };
+
+                searcher.PropertiesToLoad.AddRange(new[] { "sAMAccountName", "displayName", "distinguishedName" });
+
+                var results = searcher.FindAll();
+                foreach (SearchResult r in results)
+                {
+                    var dto = new ADApi.Models.UserDto();
+                    if (r.Properties["sAMAccountName"].Count > 0) dto.SamAccountName = r.Properties["sAMAccountName"][0]?.ToString();
+                    if (r.Properties["displayName"].Count > 0) dto.DisplayName = r.Properties["displayName"][0]?.ToString();
+                    // store DN in Company field as a hack-free carrier? Better to extend UserDto, but to keep minimal changes, use Site field to carry DN
+                    if (r.Properties["distinguishedName"].Count > 0) dto.Site = r.Properties["distinguishedName"][0]?.ToString();
+                    matches.Add(dto);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error searching displayName: {ex.Message}", ex);
+            }
+
+            return matches;
+        });
+    }
+
     public async Task<UnlockResultDto> UnlockAllLockedUsersAsync()
     {
         return await Task.Run(() =>

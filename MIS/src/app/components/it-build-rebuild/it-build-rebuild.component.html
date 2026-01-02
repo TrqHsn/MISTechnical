@@ -189,6 +189,12 @@
             </div>
             }
           </div>
+          @if (form.get('newComputerName')?.value) {
+          <div class="form-group">
+            <label>Computer Description (Selected)</label>
+            <div class="preview-value">{{ newComputerDescription() || 'N/A' }}</div>
+          </div>
+          }
         </div>
 
         <!-- Raised By -->

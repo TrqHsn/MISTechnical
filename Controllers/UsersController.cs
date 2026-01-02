@@ -74,6 +74,45 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
+    /// Update attributes for a user identified by userPrincipalName (UPN)
+    /// </summary>
+    /// <param name="userPrincipalName">User Principal Name (UPN)</param>
+    /// <param name="updateDto">Fields to update (department, title, manager)</param>
+    [HttpPut("{userPrincipalName}/attributes")]
+    public async Task<IActionResult> UpdateUserAttributes(string userPrincipalName, [FromBody] UpdateUserDto updateDto)
+    {
+        try
+        {
+            await _adService.UpdateUserAttributesByUserPrincipalNameAsync(userPrincipalName, updateDto);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user attributes for {userPrincipalName}", userPrincipalName);
+            return StatusCode(500, new { error = "An error occurred while updating user attributes", message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Resolve manager displayName to matching users (exact match)
+    /// </summary>
+    [HttpGet("resolve-manager")]
+    public async Task<ActionResult<List<UserDto>>> ResolveManager([FromQuery] string displayName)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(displayName)) return BadRequest("displayName required");
+            var matches = await _adService.FindUsersByDisplayNameAsync(displayName);
+            return Ok(matches);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resolving manager displayName {displayName}", displayName);
+            return StatusCode(500, new { error = "An error occurred while resolving manager", message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Unlock all currently locked user accounts in AD
     /// </summary>
     /// <returns>Lists of unlocked SAM account names and failures</returns>

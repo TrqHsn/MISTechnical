@@ -51,4 +51,9 @@ export class ApiService {
   unlockAllUsers(): Observable<{ unlocked: string[]; failed: { samAccountName: string; reason: string }[] }> {
     return this.http.post<{ unlocked: string[]; failed: { samAccountName: string; reason: string }[] }>(`${this.apiUrl}/users/unlock-all`, null);
   }
+
+  // Update user attributes by userPrincipalName (UPN)
+  updateUserAttributes(userPrincipalName: string, payload: { department?: string; title?: string; manager?: string }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/${encodeURIComponent(userPrincipalName)}/attributes`, payload);
+  }
 }

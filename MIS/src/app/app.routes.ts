@@ -23,6 +23,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/warranty-claim/warranty-claim.component').then(m => m.WarrantyClaim)
   }
   ,
+  {
+    path: 'update',
+    loadComponent: () => import('./components/update-user-info/update-user-info.component').then(m => m.UpdateUserInfoComponent)
+  }
+  ,
   // Fallback - redirect any unknown path to test-api
   { path: '**', redirectTo: 'test-api' }
 ];

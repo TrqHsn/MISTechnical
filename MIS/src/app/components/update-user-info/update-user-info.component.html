@@ -1,0 +1,124 @@
+<div class="update-container">
+  <h1>Update User Info (XLSX)</h1>
+
+  <div class="upload-row">
+    <div class="upload-left">
+      <input id="fileInput" type="file" (change)="onFileSelected($any($event))" accept=".xlsx" />
+      <label class="upload-btn" for="fileInput">Upload XLSX</label>
+      @if (fileName()) {
+      <div class="file-name">{{ fileName() }}</div>
+      }
+    </div>
+
+    @if (rows().length > 0) {
+    <div class="upload-actions">
+      <button class="btn btn-success" (click)="preparePreview()" [disabled]="isUpdating() || rows().length === 0">Preview Changes</button>
+      <button class="btn btn-danger" (click)="clearAll()" [disabled]="isUpdating() || rows().length === 0">Clear</button>
+    </div>
+    }
+  </div>
+
+  @if (headerError()) {
+  <div class="error">{{ headerError() }}</div>
+  }
+  @if (rowLimitError()) {
+  <div class="error">{{ rowLimitError() }}</div>
+  }
+
+  @if (rows().length > 0) {
+  <div class="preview">
+    <h2>Preview (first 100 rows)</h2>
+    <table>
+      <thead>
+        <tr><th>UPN</th><th>Department</th><th>Title</th><th>Manager</th></tr>
+      </thead>
+      <tbody>
+        @for (row of rows().slice(0,100); track $index) {
+        <tr>
+          <td>{{ row.upn }}</td>
+          <td>{{ row.department }}</td>
+          <td>{{ row.title }}</td>
+          <td>{{ row.manager }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="actions">
+      <button class="btn btn-success" (click)="preparePreview()" [disabled]="isUpdating()">Preview Changes</button>
+      <button class="btn btn-danger" (click)="clearAll()" [disabled]="isUpdating()">Clear</button>
+      <div class="progress">{{ progress() }}</div>
+    </div>
+  
+    @if (showPreviewModal()) {
+    <div class="modal-overlay" (click)="showPreviewModal.set(false)">
+      <div class="modal" (click)="$any($event).stopPropagation()">
+        <button class="modal-close" (click)="showPreviewModal.set(false)">✕</button>
+        <h2>Preview Changes ({{ previewRows().length }})</h2>
+        <div class="preview-list">
+          <table>
+            <thead><tr><th>UPN</th><th>Dept</th><th>Title</th><th>Manager</th></tr></thead>
+            <tbody>
+              @for (r of previewRows().slice(0,200); track $index) {
+              <tr>
+                <td>{{ r.upn }}</td>
+                <td>{{ r.department }}</td>
+                <td>{{ r.title }}</td>
+                <td>{{ r.manager }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-success" (click)="startUpdates()">Apply Updates</button>
+          <button class="btn" (click)="showPreviewModal.set(false)">Cancel</button>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  @if (showFailedModal()) {
+  <div class="modal-overlay" (click)="closeFailedModal()">
+    <div class="modal" (click)="$any($event).stopPropagation()">
+      <button class="modal-close" (click)="closeFailedModal()">✕</button>
+      <h2>Failed Updates ({{ failedRows().length }})</h2>
+      <div class="failed-list">
+        <table>
+          <thead><tr><th>UPN</th><th>Department</th><th>Title</th><th>Manager</th><th>Error</th></tr></thead>
+          <tbody>
+            @for (f of failedRows(); track $index) {
+            <tr>
+              <td>{{ f.upn }}</td>
+              <td>{{ f.department }}</td>
+              <td>{{ f.title }}</td>
+              <td>{{ f.manager }}</td>
+              <td>{{ f.error }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" (click)="downloadFailedXlsx()">Download Failed XLSX</button>
+        <button class="btn" (click)="closeFailedModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (showSuccessModal()) {
+  <div class="modal-overlay" (click)="showSuccessModal.set(false)">
+    <div class="modal" (click)="$any($event).stopPropagation()">
+      <button class="modal-close" (click)="showSuccessModal.set(false)">✕</button>
+      <h2>All updates applied successfully</h2>
+      <div class="modal-actions">
+        <button class="btn btn-success" (click)="closeSuccessAndClear()">OK</button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

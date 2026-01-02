@@ -25,14 +25,18 @@
 - **Swagger:** Available in Development at `/swagger`.
 
 ## Key patterns & conventions 🔧
-- AD operations are wrapped in `Task.Run(...)` to avoid blocking; methods are `async` but internally use synchronous DirectoryEntry APIs.
-- Mapping logic lives in `ActiveDirectoryService` (`MapToUserDto`, `MapToComputerDto`). Mapping errors are swallowed and return `null` (be careful when refactoring).
-- Controllers return consistent error patterns: `BadRequest`, `NotFound`, or `StatusCode(500, new { error = ..., message = ... })` with logged exceptions.
+- AD calls are synchronous DirectoryEntry/DirectorySearcher operations wrapped in `Task.Run(...)` to keep async method signatures.
+- Mapping and parsing live in `ActiveDirectoryService` (`MapToUserDto`, `MapToComputerDto`). Mapping exceptions are typically swallowed (returning `null`) — be careful when changing these mappings.
+- Controllers follow a consistent error contract: return `BadRequest`, `NotFound`, or `StatusCode(500, new { error, message })` and **log** exceptions with ILogger.
 
-## Important implementation details to remember 🧠
+## Important implementation details & gotchas 🧠
+- Title <-> Description mirroring: when updating user attributes, **Title** is mirrored into **Description** if provided. Both backend and frontend implement this behavior; keep them in sync when changing update logic.
+- Manager resolution: `UpdateUserAttributesByUserPrincipalNameAsync` accepts manager identifiers as UPN, sAMAccountName, or DisplayName. It resolves UPN/sAMAccountName first, then attempts an **exact** displayName match and will throw on ambiguous results.
+- Unlocking users: `UnlockAllLockedUsersAsync` tries `de.Invoke("UnlockAccount")` then falls back to clearing `lockoutTime` if needed; returned `UnlockResultDto` contains `unlocked` and `failed` lists.
 - Device numbering: `GetLastDeviceNumbersAsync` expects computer names matching regex `^([A-Z]+)(\d+)([A-Z]*)$` and only considers prefixes `SDLL`, `SDLD`, `DBOL`.
-- Manager extraction: manager DN is parsed with a `CN=...` regex to produce a readable manager name.
-- Update endpoint uses plain JSON-string body: `PUT /api/computers/{computerName}/description` with JSON string body (see `ApiService.updateComputerDescription`). Implementation clears the `description` property and calls `DirectoryEntry.CommitChanges()` to persist the update.
+- Computer description endpoints:
+  - `PUT /api/computers/{computerName}/description` expects a JSON string body (e.g., `"New description"`).
+  - `PATCH /api/computers/{computerName}/description` accepts `{ "description": "..." }` and returns the updated `ComputerDto`.
 - Search computers uses a combined LDAP filter that checks both `name` and `description`, so use the single `/api/computers/search` endpoint for both purposes.
 
 ## Typical developer workflows (commands) ▶️

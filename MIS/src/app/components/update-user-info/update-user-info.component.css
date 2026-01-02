@@ -1,0 +1,20 @@
+.update-container { padding: 20px; }
+.upload-row { display:flex; gap: 12px; align-items:center; justify-content: space-between; }
+.upload-left { display:flex; gap: 12px; align-items:center; }
+.upload-row input[type="file"] { display: none; }
+.upload-btn { background: linear-gradient(180deg,#2d6a4f,#1b4332); color: white; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.upload-actions { display:flex; gap: 12px; align-items:center; }
+.file-name { font-style: italic; margin-left: 8px; }
+.btn { padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; background: #eee; }
+.btn-success { background: #2f9e44; color: white; }
+.btn-danger { background: #d9480f; color: white; }
+.preview table { width:100%; border-collapse: collapse; }
+.preview th, .preview td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }
+.actions { margin-top: 12px; display:flex; gap:8px; align-items:center; }
+.progress { margin-left: 8px; font-weight: bold; }
+.modal-overlay { position: fixed; inset: 0; display:flex; justify-content:center; align-items:center; background: rgba(0,0,0,0.5); }
+.modal { background: white; padding: 16px; max-width: 900px; width: 90%; position: relative; border-radius: 6px; }
+.modal-close { position: absolute; right: 8px; top: 8px; background: transparent; border: none; cursor: pointer; font-size: 18px; }
+.modal-actions { display:flex; gap:12px; justify-content:flex-end; margin-top: 12px; }
+.failed-list table { width:100%; border-collapse: collapse; }
+.failed-list th, .failed-list td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }

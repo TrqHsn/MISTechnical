@@ -11,6 +11,11 @@ public interface IActiveDirectoryService
     Task UpdateComputerDescriptionAsync(string computerName, string description);
     Task<Dictionary<string, int>> GetLastDeviceNumbersAsync();
 
+    // Update attributes for a user identified by userPrincipalName (UPN)
+    Task UpdateUserAttributesByUserPrincipalNameAsync(string userPrincipalName, ADApi.Models.UpdateUserDto updateDto);
+    // Resolve users by display name (exact match)
+    Task<List<ADApi.Models.UserDto>> FindUsersByDisplayNameAsync(string displayName);
+
     // Unlock all locked user accounts in AD. Returns lists of unlocked and failures.
     Task<ADApi.Models.UnlockResultDto> UnlockAllLockedUsersAsync();
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { debounceTime, Subject } from 'rxjs';
@@ -46,6 +46,10 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
   oldComputerOS = signal('');
   newComputerOS = signal('');
   
+  // Store descriptions separately for old and new computer selections
+  oldComputerDescription = signal('');
+  newComputerDescription = signal('');
+  
   // Preview signals - updated explicitly when form values change
   deviceTypePreview = signal('Laptop');
   actionTypePreview = signal('Rebuild');
@@ -59,7 +63,7 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
     { value: 'Piyer Mollah', label: 'Piyer Mollah' },
   ];
 
-  constructor(private fb: FormBuilder, private apiService: ApiService) {
+  constructor(private fb: FormBuilder, private apiService: ApiService, private cdr: ChangeDetectorRef) {
     this.initializeForm();
   }
 
@@ -245,9 +249,11 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
     const computerName = computer['name'] || '';
     const osValue = computer['operatingSystem'] || '';
     this.oldComputerOS.set(osValue);
+    const oldDesc = computer['description'] || '';
+    this.oldComputerDescription.set(oldDesc);
     this.form.patchValue({
       oldComputerName: computerName,
-      description: computer['description'] || '',
+      description: oldDesc,
       operatingSystem: osValue,
       newComputerName: computerName,
     });
@@ -268,10 +274,15 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
   selectNewComputer(computer: Computer): void {
     const osValue = computer['operatingSystem'] || '';
     this.newComputerOS.set(osValue);
+    const desc = computer['description'] || '';
+    // Patch the form and explicitly set the description control to ensure binding updates
     this.form.patchValue({
       newComputerName: computer['name'] || '',
       operatingSystem: osValue,
     });
+    this.newComputerDescription.set(desc);
+    // Do NOT populate the main description textarea for New Computer selection.
+    // Only update the preview signal so users can see target description without changing the form field.
     // Update preview based on current actionType
     const actionType = this.form.get('actionType')?.value;
     this.updateOperatingSystemPreview(actionType);
@@ -321,6 +332,8 @@ export class ItBuildRebuildComponent implements OnInit, OnDestroy {
     this.oldComputerSearchInput.set('');
     this.newComputerSearchInput.set('');
     this.usernameSearchInput.set('');
+    this.oldComputerDescription.set('');
+    this.newComputerDescription.set('');
   }
 
   async downloadExcel(): Promise<void> {
