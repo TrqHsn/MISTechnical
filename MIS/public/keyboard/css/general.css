@@ -1,0 +1,196 @@
+/*
+--- 01 TYPOGRAPHY SYSTEM
+
+- Font sizes (px)
+10 / 12 / 14 / 16 / 18 / 20 / 24 / 30 / 36 / 44 / 52 / 62 / 74 / 86 / 98
+
+- Font weights
+Default: 400
+Bold: 700
+
+- Line heights
+Default: 1
+
+- Letter spacing
+default: 1
+
+
+--- 02 WHITESPACE
+
+- Spacing system (px)
+2 / 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 80 / 96 / 128
+
+
+--- 03 BORDER-RADIUS
+
+Default: 6px
+small: 4px
+
+
+--- 04 COLORS (List is not complete)
+
+- Primary: 
+#343a40 
+
+- Shades "Darker": 
+#2f343a (10%)
+#2a2e33 (20%)
+#1f2326 (40%)
+#15171a (60%)
+#0a0c0d (80%)
+
+- Tints "Lighter": 
+#484e53 (10%)
+#5d6166 (20%)
+#85898c (40%)
+#aeb0b3 (60%)
+#d6d8d9 (80%)
+
+- Accents: 
+#228be6 
+#3c56da
+#2a309c
+
+
+- Greys:
+#f1f3f5 
+#e7f5ff 
+#adb5bd 
+#555555 
+
+*/
+
+/***********/
+/* DEFAULT */
+/***********/
+
+:root {
+  --def-fs: 62.5%;
+  --ff: 'Segoe UI', sans-serif;
+  --color-primary: #343a40;
+  --color-primary-darker: #333;
+  --color-primary-lighter: #555;
+
+  /* -------- DEFAULT KEYBOARD THEME | RETRO -------- */
+  /* - INSPIRED BY KBParadise VX80 Olivette Neo TKL - */
+  --key-border-radius: 0.6rem;
+
+  --box-shadow-keycaps-value: inset 0 -0.2rem 0 0.3rem;
+  --box-shadow-keycaps-hover-value: inset 0 -0.1rem 0 0.2rem;
+
+  --box-shadow-keycaps: var(--box-shadow-keycaps-value)
+    var(--color-keycaps-shadow);
+  --box-shadow-keycaps-hover: var(--box-shadow-keycaps-hover-value)
+    var(--color-keycaps-shadow);
+
+  --box-shadow-keycaps-accent: var(--box-shadow-keycaps-value)
+    var(--color-keycaps-shadow-accent);
+  --box-shadow-keycaps-accent-hover: var(--box-shadow-keycaps-hover-value)
+    var(--color-keycaps-shadow-accent);
+
+  --box-shadow-keycaps-pressed: var(--box-shadow-keycaps-value)
+    var(--color-keycaps-shadow-pressed);
+  --box-shadow-keycaps-pressed-hover: var(--box-shadow-keycaps-hover-value)
+    var(--color-keycaps-shadow-pressed);
+
+  --color-keyboard: #3c3e4a;
+  --color-keyboard-border: #303642;
+
+  --color-keycaps-legends: #555;
+  --color-keycaps-bg: #f8f9fa;
+  --color-keycaps-shadow: #adb5bd;
+
+  --color-keycaps-legends-accent: #555;
+  --color-keycaps-bg-accent: #e2e3e6;
+  --color-keycaps-shadow-accent: #97a0a8;
+
+  --color-keycaps-legends-pressed: #2f3674;
+  --color-keycaps-bg-pressed: #a4a9b0;
+  --color-keycaps-shadow-pressed: #7f8489;
+
+  /* styling background of elements */
+
+  --color-bg: linear-gradient(
+    45deg,
+    #e9ecef,
+    #ced4da,
+    #adb5bd,
+    #eaebf1,
+    #c1c3d5
+  );
+
+  --color-bg-title: linear-gradient(
+    45deg,
+    #14181c,
+    #506070,
+    #2e3235,
+    #506070,
+    #2e3235,
+    #506070,
+    #14181c
+  );
+
+  --color-bg-toggle: linear-gradient(45deg, #4dabf7, #228be6, #1c70c0, #3c56da);
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  /* Percentage of user's browser font-size setting */
+  font-size: var(--def-fs);
+  overflow-x: hidden;
+}
+
+body {
+  /* Segoe UI is the official Font used in Microsoft products
+     including Windows and Surface lineup */
+  font-family: var(--ff);
+  line-height: 1;
+  font-weight: 400;
+  color: var(--color-primary);
+}
+
+/******************************/
+/* GENRAL REUSABLE COMPONENTS */
+/******************************/
+
+.heading-primary {
+  font-weight: 700;
+  color: var(--color-primary-darker);
+  letter-spacing: -0.5px;
+  font-size: 5.2rem;
+  line-height: 1.05;
+  margin-bottom: 3.2rem;
+}
+
+.paragraph {
+  font-size: 2rem;
+  color: var(--color-primary);
+  line-height: 1.6;
+  margin-bottom: 4.8rem;
+}
+
+.link:link,
+.link:visited {
+  display: inline-block;
+  color: var(--color-primary);
+  text-decoration: none;
+  padding-top: 10px;
+}
+
+.link:hover,
+.link:active {
+  color: var(--color-primary-lighter);
+}
+
+/***************************/
+/* HELPER/SETTINGS CLASSES */
+/***************************/
+
+.center-text {
+  text-align: center;
+}

@@ -14,11 +14,10 @@ export class App {
   buttons = [
     { name: 'Sticker', id: 'sticker' },
     { name: 'Warranty', id: 'wranty' },
-    { name: 'Jobsheet', id: 'jobsheet' },
     { name: 'OS form', id: 'oif' },
     { name: 'AD Tools', id: 'testapi' },
     { name: 'Update', id: 'update' },
-    { name: 'testKeyboard', id: 'tkeyboard' },
+    { name: 'Test Keyboard', id: 'tkeyboard' },
     { name: 'Unlock', id: 'unlock' }
   ];
 
@@ -41,6 +40,13 @@ export class App {
   onTopButtonClick(id: string) {
     if (id === 'unlock') {
       this.openUnlockDialog();
+      return;
+    }
+
+    // Open the archived keyboard tester in a new tab
+    if (id === 'tkeyboard') {
+      window.open('/keyboard/index.html', '_blank');
+      return;
     }
   }
 

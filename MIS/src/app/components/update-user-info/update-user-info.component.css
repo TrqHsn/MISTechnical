@@ -18,3 +18,4 @@
 .modal-actions { display:flex; gap:12px; justify-content:flex-end; margin-top: 12px; }
 .failed-list table { width:100%; border-collapse: collapse; }
 .failed-list th, .failed-list td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }
+.h2text { color: #ffffff; }

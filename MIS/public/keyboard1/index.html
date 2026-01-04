@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Tester Tool</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <header>
+        <h1>Keyboard Tester Tool</h1>
+        <p class="subtitle">Test your keyboard functionality and view detailed key press statistics</p>
+    </header>
+
+    <div class="container">
+        <div class="keyboard-display">
+            <div class="toggle-switch">
+                <label class="switch">
+                    <input type="checkbox" id="soundToggle">
+                    <span class="slider"></span>
+                </label>
+                <span>Key press sound</span>
+            </div>
+            
+            <div class="keyboard-visual" id="keyboardVisual">
+                <!-- Keys will be added dynamically with JavaScript -->
+            </div>
+
+            <textarea class="test-area" id="testArea" placeholder="Type here to test your keyboard..."></textarea>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-title">
+                    <span>🔑</span>
+                    <span>Keys Pressed</span>
+                </div>
+                <div class="stat-value" id="keysPressed">0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-title">
+                    <span>⏱️</span>
+                    <span>Last Key Pressed</span>
+                </div>
+                <div class="stat-value" id="lastKey">None</div>
+                <div>Key code: <span id="lastKeyCode">-</span></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-title">
+                    <span>📊</span>
+                    <span>Key Press History</span>
+                </div>
+                <div class="key-history" id="keyHistory"></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-title">
+                    <span>⚡</span>
+                    <span>Keys Per Minute</span>
+                </div>
+                <div class="stat-value" id="kpm">0</div>
+                <div>Calculated over last 10 seconds</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h2>How to Use This Tool</h2>
+        <ul>
+            <li>Start typing in the test area or press any key on your keyboard</li>
+            <li>The virtual keyboard will light up to show which keys are being pressed</li>
+            <li>View real-time statistics about your key presses</li>
+            <li>Toggle key press sounds on/off using the switch</li>
+            <li>Check for stuck or non-responsive keys</li>
+            <li>Monitor your typing speed with the Keys Per Minute (KPM) counter</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Keyboard Tester Tool &copy; 2023 | Designed for comprehensive keyboard testing</p>
+    </div>
+
+    <script src="./script.js"></script>
+</body>
+</html>
