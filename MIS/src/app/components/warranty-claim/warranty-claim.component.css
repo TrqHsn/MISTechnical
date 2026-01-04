@@ -1,7 +1,8 @@
 .container {
   font-family: Arial, sans-serif;
-  background: #f5f6fa;
+  background: rgba(255,255,255,0.04);
   padding: 50px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;

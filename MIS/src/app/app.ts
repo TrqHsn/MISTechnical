@@ -18,6 +18,7 @@ export class App {
     { name: 'OS form', id: 'oif' },
     { name: 'AD Tools', id: 'testapi' },
     { name: 'Update', id: 'update' },
+    { name: 'testKeyboard', id: 'tkeyboard' },
     { name: 'Unlock', id: 'unlock' }
   ];
 
