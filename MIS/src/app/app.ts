@@ -18,7 +18,9 @@ export class App {
     { name: 'AD Tools', id: 'testapi' },
     { name: 'Update', id: 'update' },
     { name: 'Test Keyboard', id: 'tkeyboard' },
-    { name: 'Unlock', id: 'unlock' }
+    { name: 'Stress Test', id: 'stresstest' },
+    { name: 'Unlock', id: 'unlock' },
+    { name: 'demo', id: 'demo' },
   ];
 
   // Work timer (7:30 -> 16:30 local time)
@@ -37,15 +39,33 @@ export class App {
     this.startWorkTimer();
   }
 
-  onTopButtonClick(id: string) {
+  onTopButtonClick(evt: Event, id: string) {
     if (id === 'unlock') {
       this.openUnlockDialog();
+      evt.preventDefault();
       return;
     }
 
     // Open the archived keyboard tester in a new tab
     if (id === 'tkeyboard') {
+      evt.preventDefault();
       window.open('/keyboard/index.html', '_blank');
+      return;
+    }
+
+    // Open Stress Test in a new tab
+    if (id === 'stresstest') {
+      evt.preventDefault();
+      evt.stopPropagation();
+      window.open('/stress', '_blank');
+      return;
+    }
+
+    // Open static Keyboard Tester in a new tab
+    if (id === 'demo') {
+      evt.preventDefault();
+      evt.stopPropagation();
+      window.open('/demo', '_blank');
       return;
     }
   }

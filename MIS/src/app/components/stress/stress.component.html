@@ -1,0 +1,42 @@
+<canvas #canvas class="stress-canvas"></canvas>
+
+<div class="controls">
+  <h3>GPU Stress Test</h3>
+
+  <label>Objects: <span class="value">{{ objectCount }}</span></label>
+  <input type="range" min="1000" max="20000" step="100" [value]="objectCount" (input)="onObjectsChange($event)" />
+
+  <label>Segments: <span class="value">{{ geometrySegments }}</span></label>
+  <input type="range" min="8" max="128" step="1" [value]="geometrySegments" (input)="onSegmentsChange($event)" />
+
+  <label class="toggle"><input type="checkbox" [checked]="shadowsEnabled" (change)="onToggleShadows($event)" /> Enable shadows</label>
+
+  <label class="toggle"><input type="checkbox" [checked]="postProcessing" (change)="onTogglePostprocessing()" /> Enable post-processing / FXAA</label>
+
+  <div class="stats">
+    <div><strong>Objects:</strong> {{ objectCount }}</div>
+    <div><strong>Segments:</strong> {{ geometrySegments }}</div>
+    <div><strong>Resolution:</strong> {{ resolutionDisplay }}</div>
+  </div>
+
+  <small class="hint">Use sliders to instantly scale load. Toggle shadows/post-processing to vary GPU cost.</small>
+
+  <hr />
+
+  <div class="cpu-controls">
+    <label class="toggle"><input type="checkbox" [checked]="cpuEnabled" (change)="onCpuToggle()" /> Enable CPU stress</label>
+
+    <label>Threads: <span class="value">{{ cpuThreads }}</span></label>
+    <input type="range" min="1" max="16" step="1" [value]="cpuThreads" (input)="onCpuThreadsChange($event)" />
+
+    <label>Intensity: <span class="value">{{ cpuIntensity }}</span></label>
+    <input type="range" min="1000" max="1000000" step="1000" [value]="cpuIntensity" (input)="onCpuIntensityChange($event)" />
+
+    <div class="stats">
+      <div><strong>CPU ops/s:</strong> {{ cpuOpsPerSec }}</div>
+      <div><strong>Threads:</strong> {{ cpuThreads }}</div>
+      <div><strong>Intensity:</strong> {{ cpuIntensity }}</div>
+    </div>
+    <small class="hint">CPU stress runs in Web Workers to keep UI responsive while loading CPU cores.</small>
+  </div>
+</div>

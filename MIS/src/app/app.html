@@ -2,17 +2,16 @@
   <!-- Title Section with Floating Background -->
   <div class="title-card">
     <h1 class="title">MIS Technical Team</h1>
+    <!-- Work Timer (7:30 -> 16:30) -->
+    <div class="work-timer" [attr.data-state]="timerState()">
+      <div class="timer-label">{{ timerLabel() }}</div>
+      <div class="timer-value">{{ timerValue() }}</div>
+    </div>
   </div>
 
   <!-- Logo (top-left) -->
   <div class="global-logo" title="Sohid Usman">
     <img src="/SohidUsman.jpg" alt="Sohid Usman" />
-  </div>
-
-  <!-- Work Timer (7:30 -> 16:30) - fixed to viewport top-right -->
-  <div class="work-timer global-work-timer" [attr.data-state]="timerState()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 3px solid #764ba2; color: #000000; border-radius: 12px; padding: 16px; margin-right: 16px; box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);">
-    <div class="timer-label" style="font-size: 22px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">{{ timerLabel() }}</div>
-    <div class="timer-value" style="font-size: 48px; font-weight: bold; margin-top: 8px;">{{ timerValue() }}</div>
   </div>
 
   <!-- Buttons Row (single-line) -->
@@ -21,8 +20,8 @@
     @for (button of buttons; track button.id) {
       <button 
         class="btn" 
-        (click)="onTopButtonClick(button.id)"
-        [routerLink]="button.id === 'testapi' ? '/test-api' : (button.id === 'sticker' ? '/sticker-print' : (button.id === 'wranty' ? '/wranty' : (button.id === 'oif' ? '/build-rebuild' : (button.id === 'update' ? '/update' : null))))"
+        (click)="onTopButtonClick($event, button.id)"
+        [routerLink]="button.id === 'testapi' ? '/test-api' : button.id === 'sticker' ? '/sticker-print' : button.id === 'wranty' ? '/wranty' : button.id === 'oif' ? '/build-rebuild' : button.id === 'update' ? '/update' : null"
         [attr.data-id]="button.id">
         {{ button.name }}
       </button>

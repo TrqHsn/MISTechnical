@@ -28,6 +28,16 @@ export const routes: Routes = [
     loadComponent: () => import('./components/update-user-info/update-user-info.component').then(m => m.UpdateUserInfoComponent)
   }
   ,
+  {
+    path: 'stress',
+    loadComponent: () => import('./components/stress/stress.component').then(m => m.StressComponent)
+  }
+  ,
+  {
+    path: 'demo',
+    loadComponent: () => import('./components/keyboard-tester/keyboard-tester.component').then(m => m.KeyboardTesterComponent)
+  }
+  ,
   // Fallback - redirect any unknown path to test-api
   { path: '**', redirectTo: 'test-api' }
 ];
