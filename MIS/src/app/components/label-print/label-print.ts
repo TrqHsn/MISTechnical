@@ -2,13 +2,13 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-sticker-print',
+  selector: 'app-label-print',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './sticker-print.html',
-  styleUrls: ['./sticker-print.css'],
+  templateUrl: './label-print.html',
+  styleUrls: ['./label-print.css'],
 })
-export class StickerPrint {
+export class LabelPrint {
   // Two editable text boxes (shared settings affect both)
   text1 = signal('');
   text2 = signal('');

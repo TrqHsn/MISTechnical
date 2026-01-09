@@ -4,13 +4,13 @@ import * as THREE from 'three';
 // Postprocessing modules from three/examples are dynamically imported at runtime to avoid TypeScript resolution issues
 
 @Component({
-  selector: 'app-stress',
+  selector: 'app-stress-cpu-gpu',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './stress.component.html',
-  styleUrls: ['./stress.component.css']
+  templateUrl: './stress-cpu-gpu.component.html',
+  styleUrls: ['./stress-cpu-gpu.component.css']
 })
-export class StressComponent implements AfterViewInit, OnDestroy {
+export class StressCpuGpuComponent implements AfterViewInit, OnDestroy {
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
   // Environment check

@@ -1,11 +1,11 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 
 @Component({
-  selector: 'app-warranty-claim',
-  templateUrl: './warranty-claim.component.html',
-  styleUrls: ['./warranty-claim.component.css']
+  selector: 'app-service-tag',
+  templateUrl: './service-tag.component.html',
+  styleUrls: ['./service-tag.component.css']
 })
-export class WarrantyClaim {
+export class ServiceTag {
   
   @ViewChild('whereToClaim') whereToClaim!: ElementRef;
   @ViewChild('hostName') hostName!: ElementRef;

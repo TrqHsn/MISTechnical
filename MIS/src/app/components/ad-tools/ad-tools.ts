@@ -5,12 +5,12 @@ import { debounceTime, Subject } from 'rxjs';
 import { ApiService, User, Computer } from '../../services/api';
 
 @Component({
-  selector: 'app-test-api',
+  selector: 'app-ad-tools',
   imports: [CommonModule, FormsModule],
-  templateUrl: './test-api.html',
-  styleUrl: './test-api.css',
+  templateUrl: './ad-tools.html',
+  styleUrl: './ad-tools.css',
 })
-export class TestApiComponent {
+export class AdToolsComponent {
   // Tab management
   activeTab = signal<'users' | 'computers' | 'update-description' | 'last-device'>('users');
 

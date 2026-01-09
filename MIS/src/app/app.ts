@@ -21,6 +21,7 @@ export class App {
     { name: 'Stress Test', id: 'stresstest' },
     { name: 'Unlock', id: 'unlock' },
     { name: 'Inventory', id: 'inventory' },
+    { name: 'Test1', id: 'test1' },
 
   ];
 
@@ -58,7 +59,7 @@ export class App {
     if (id === 'stresstest') {
       evt.preventDefault();
       evt.stopPropagation();
-      window.open('/stress', '_blank');
+      window.open('/stress-cpu-gpu', '_blank');
       return;
     }
 

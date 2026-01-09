@@ -6,13 +6,13 @@ import { ApiService, User, Computer } from '../../services/api';
 import * as ExcelJS from 'exceljs';
 
 @Component({
-  selector: 'app-it-build-rebuild',
+  selector: 'app-os-installation-form',
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './it-build-rebuild.component.html',
-  styleUrl: './it-build-rebuild.component.css',
+  templateUrl: './os-installation-form.component.html',
+  styleUrl: './os-installation-form.component.css',
   standalone: true,
 })
-export class ItBuildRebuildComponent implements OnInit, OnDestroy {
+export class OsInstallationFormComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   private destroy$ = new Subject<void>();
 

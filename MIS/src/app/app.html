@@ -1,13 +1,13 @@
 <div class="container">
   <!-- Title Section with Floating Background -->
-  <div class="title-card">
+  <!-- <div class="title-card">
     <h1 class="title">MIS Technical Team</h1>
-    <!-- Work Timer (7:30 -> 16:30) -->
+    Work Timer (7:30 -> 16:30)
     <div class="work-timer" [attr.data-state]="timerState()">
       <div class="timer-label">{{ timerLabel() }}</div>
       <div class="timer-value">{{ timerValue() }}</div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Logo (top-left) -->
   <div class="global-logo" title="Sohid Usman">
@@ -21,7 +21,7 @@
       <button 
         class="btn" 
         (click)="onTopButtonClick($event, button.id)"
-        [routerLink]="button.id === 'testapi' ? '/test-api' : button.id === 'sticker' ? '/sticker-print' : button.id === 'wranty' ? '/wranty' : button.id === 'oif' ? '/build-rebuild' : button.id === 'update' ? '/update' : button.id === 'inventory' ? '/inventory' : null"
+        [routerLink]="button.id === 'testapi' ? '/ad-tools' : button.id === 'sticker' ? '/label-print' : button.id === 'wranty' ? '/service-tag' : button.id === 'oif' ? '/os-installation-form' : button.id === 'update' ? '/update' : button.id === 'inventory' ? '/inventory' : button.id === 'test1' ? '/test1' : null"
         [attr.data-id]="button.id">
         {{ button.name }}
       </button>

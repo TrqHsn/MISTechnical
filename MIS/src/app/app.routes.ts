@@ -2,25 +2,25 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   // Default redirect so root URL serves the SPA route
-  { path: '', redirectTo: 'test-api', pathMatch: 'full' },
+  { path: '', redirectTo: 'ad-tools', pathMatch: 'full' },
   {
-    path: 'test-api',
-    loadComponent: () => import('./components/test-api/test-api').then(m => m.TestApiComponent)
+    path: 'ad-tools',
+    loadComponent: () => import('./components/ad-tools/ad-tools').then(m => m.AdToolsComponent)
   }
   ,
   {
-    path: 'sticker-print',
-    loadComponent: () => import('./components/sticker-print/sticker-print').then(m => m.StickerPrint)
+    path: 'label-print',
+    loadComponent: () => import('./components/label-print/label-print').then(m => m.LabelPrint)
   }
   ,
   {
-    path: 'build-rebuild',
-    loadComponent: () => import('./components/it-build-rebuild/it-build-rebuild.component').then(m => m.ItBuildRebuildComponent)
+    path: 'os-installation-form',
+    loadComponent: () => import('./components/os-installation-form/os-installation-form.component').then(m => m.OsInstallationFormComponent)
   }
   ,
   {
-    path: 'wranty',
-    loadComponent: () => import('./components/warranty-claim/warranty-claim.component').then(m => m.WarrantyClaim)
+    path: 'service-tag',
+    loadComponent: () => import('./components/service-tag/service-tag.component').then(m => m.ServiceTag)
   }
   ,
   {
@@ -29,8 +29,8 @@ export const routes: Routes = [
   }
   ,
   {
-    path: 'stress',
-    loadComponent: () => import('./components/stress/stress.component').then(m => m.StressComponent)
+    path: 'stress-cpu-gpu',
+    loadComponent: () => import('./components/stress-cpu-gpu/stress-cpu-gpu.component').then(m => m.StressCpuGpuComponent)
   }
   ,
   {
@@ -38,6 +38,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/inventory-search/inventory-search.component').then(m => m.InventorySearchComponent)
   }
   ,
-  // Fallback - redirect any unknown path to test-api
-  { path: '**', redirectTo: 'test-api' }
+  {
+    path: 'test1',
+    loadComponent: () => import('./components/test1/test1').then(m => m.Test1Component)
+  }
+  ,
+  // Fallback - redirect any unknown path to ad-tools
+  { path: '**', redirectTo: 'ad-tools' }
 ];
