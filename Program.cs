@@ -10,6 +10,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.WebHost.UseUrls("http://localhost:5001");
 
+// Register HttpClient for making HTTP requests
+builder.Services.AddHttpClient();
+
 // Register Active Directory service
 builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
 

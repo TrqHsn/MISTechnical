@@ -20,7 +20,8 @@ export class App {
     { name: 'Test Keyboard', id: 'tkeyboard' },
     { name: 'Stress Test', id: 'stresstest' },
     { name: 'Unlock', id: 'unlock' },
-    { name: 'demo', id: 'demo' },
+    { name: 'Inventory', id: 'inventory' },
+
   ];
 
   // Work timer (7:30 -> 16:30 local time)

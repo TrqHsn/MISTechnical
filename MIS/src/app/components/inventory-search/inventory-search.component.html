@@ -1,0 +1,111 @@
+<div class="inventory-container">
+  <h1>Inventory Search</h1>
+  <p class="subtitle">Load from server or upload a file to search inventory data</p>
+
+  <!-- Combined Load/Upload Section -->
+  <div class="load-upload-section">
+    <button 
+      class="server-load-button"
+      (click)="loadFromServer()"
+      [disabled]="isLoadingFromServer()"
+    >
+      {{ isLoadingFromServer() ? '⏳ Loading...' : '🌐 Load Latest' }}
+    </button>
+
+    <label class="file-upload-label">
+      <input 
+        type="file" 
+        accept=".xlsx,.csv" 
+        (change)="onFileSelected($event)"
+        class="file-input"
+      />
+      <span class="upload-button">
+        📁 Upload File
+      </span>
+    </label>
+
+    @if (dataSource() === 'server') {
+      <span class="data-source-indicator">✅ Server</span>
+    }
+    @if (dataSource() === 'upload') {
+      <span class="data-source-indicator">✅ {{ fileName() }}</span>
+    }
+  </div>
+
+  @if (fileError()) {
+    <div class="error-message">
+      ❌ {{ fileError() }}
+    </div>
+  }
+
+  <!-- Search Section - Disabled until file uploaded -->
+  <div class="search-section" [class.disabled]="!fileUploaded()">
+    <!-- Column Selector Dropdown -->
+    <div class="column-selector">
+      <label for="columnSelect">Search in Column:</label>
+      <select 
+        id="columnSelect"
+        [ngModel]="selectedColumn()"
+        (ngModelChange)="onColumnChange($event)"
+        [disabled]="!fileUploaded()"
+        class="column-dropdown"
+      >
+        @for (col of columnOptions(); track col.value) {
+          <option [value]="col.value">{{ col.label }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Search Input with Live Search -->
+    <div class="search-input-wrapper">
+      <input 
+        type="text"
+        placeholder="Type to search..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($any($event.target).value)"
+        (keydown)="onSearchKeydown($event)"
+        [disabled]="!fileUploaded()"
+        class="search-input"
+      />
+      
+      @if (isSearching()) {
+        <div class="searching-indicator">Searching...</div>
+      }
+
+      <!-- Search Results Dropdown - Top 10 -->
+      @if (showDropdown() && searchResults().length > 0) {
+        <div class="results-dropdown">
+          @for (result of searchResults(); track $index) {
+            <div 
+              class="result-item"
+              (click)="onSelectResult(result)"
+            >
+              {{ getResultDisplay(result) }}
+            </div>
+          }
+        </div>
+      }
+
+      @if (showDropdown() && searchResults().length === 0 && !isSearching() && searchTerm()) {
+        <div class="results-dropdown">
+          <div class="no-results">No results found</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Selected Row Display -->
+  @if (selectedRow()) {
+    <div class="row-display">
+      <h2>Full Row Data</h2>
+      <div class="data-grid">
+        @for (key of getSearchableRowKeys(); track key) {
+          <div class="grid-item">
+            <div class="grid-label">{{ getColumnLabel(key) }}</div>
+            <div class="grid-value">{{ formatValue(selectedRow()![key]) }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

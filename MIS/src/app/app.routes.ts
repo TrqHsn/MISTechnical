@@ -34,8 +34,8 @@ export const routes: Routes = [
   }
   ,
   {
-    path: 'demo',
-    loadComponent: () => import('./components/keyboard-tester/keyboard-tester.component').then(m => m.KeyboardTesterComponent)
+    path: 'inventory',
+    loadComponent: () => import('./components/inventory-search/inventory-search.component').then(m => m.InventorySearchComponent)
   }
   ,
   // Fallback - redirect any unknown path to test-api

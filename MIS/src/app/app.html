@@ -21,7 +21,7 @@
       <button 
         class="btn" 
         (click)="onTopButtonClick($event, button.id)"
-        [routerLink]="button.id === 'testapi' ? '/test-api' : button.id === 'sticker' ? '/sticker-print' : button.id === 'wranty' ? '/wranty' : button.id === 'oif' ? '/build-rebuild' : button.id === 'update' ? '/update' : null"
+        [routerLink]="button.id === 'testapi' ? '/test-api' : button.id === 'sticker' ? '/sticker-print' : button.id === 'wranty' ? '/wranty' : button.id === 'oif' ? '/build-rebuild' : button.id === 'update' ? '/update' : button.id === 'inventory' ? '/inventory' : null"
         [attr.data-id]="button.id">
         {{ button.name }}
       </button>
