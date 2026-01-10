@@ -9,6 +9,11 @@ export const routes: Routes = [
   }
   ,
   {
+    path: 'print',
+    loadComponent: () => import('./components/print/print').then(m => m.Print)
+  }
+  ,
+  {
     path: 'label-print',
     loadComponent: () => import('./components/label-print/label-print').then(m => m.LabelPrint)
   }
@@ -24,23 +29,18 @@ export const routes: Routes = [
   }
   ,
   {
-    path: 'update',
-    loadComponent: () => import('./components/update-user-info/update-user-info.component').then(m => m.UpdateUserInfoComponent)
-  }
-  ,
-  {
     path: 'stress-cpu-gpu',
     loadComponent: () => import('./components/stress-cpu-gpu/stress-cpu-gpu.component').then(m => m.StressCpuGpuComponent)
   }
   ,
   {
-    path: 'inventory',
-    loadComponent: () => import('./components/inventory-search/inventory-search.component').then(m => m.InventorySearchComponent)
+    path: 'network',
+    loadComponent: () => import('./components/network/network').then(m => m.NetworkComponent)
   }
   ,
   {
-    path: 'test1',
-    loadComponent: () => import('./components/test1/test1').then(m => m.Test1Component)
+    path: 'inventory',
+    loadComponent: () => import('./components/inventory-search/inventory-search.component').then(m => m.InventorySearchComponent)
   }
   ,
   // Fallback - redirect any unknown path to ad-tools

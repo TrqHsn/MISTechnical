@@ -1,0 +1,196 @@
+<div class="print-container">
+  <h1>Print Tools</h1>
+
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'label'" (click)="activeTab.set('label')">
+      Label
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'service-tag'" (click)="activeTab.set('service-tag')">
+      Service Tag
+    </button>
+  </div>
+
+  <!-- Label Tab -->
+  @if (activeTab() === 'label') {
+  <div class="tab-content">
+    <div class="sticker-container">
+      <h2>Sticker Print</h2>
+
+      <div class="settings-and-inputs">
+        <div class="settings-panel">
+          <h3>Text Format</h3>
+          <label>Font Family
+            <select (change)="setFontFamily($any($event).target.value)" [value]="fontFamily()">
+              <option value="Calibri, Courier New, Courier, monospace">Calibri</option>
+              <option value="Arial, Helvetica, sans-serif">Arial</option>
+              <option value="'Times New Roman', Times, serif">Times New Roman</option>
+              <option value="'Courier New', Courier, monospace">Courier New</option>
+              <option value="Roboto, Arial, sans-serif">Roboto</option>
+            </select>
+          </label>
+
+          <label class="font-size-row">Font Size
+            <div class="font-size-controls">
+              <button type="button" class="size-btn" (click)="decreaseFont()">−</button>
+              <input class="size-input" type="number" min="1" max="72" step="1" (input)="setFontSizePt($any($event).target.value)" [value]="fontSizePt()" />
+              <button type="button" class="size-btn" (click)="increaseFont()">+</button>
+            </div>
+          </label>
+
+          <div class="toggles-row">
+            <button type="button" class="bold-btn" [class.active]="bold()" (click)="toggleBold()" title="Toggle Bold">B</button>
+            <button type="button" class="caps-btn" [class.active]="caps()" (click)="toggleCaps()" title="Toggle ALL CAPS">Aa</button>
+          </div>
+        </div>
+
+        <div class="inputs-panel">
+          <label class="input-label">Line 1</label>
+          <input class="sticker-input" type="text" placeholder="Top line"
+            (input)="setText1($any($event).target.value)"
+            [value]="text1()"
+            [style.text-transform]="caps() ? 'uppercase' : 'none'"
+            [style.font-weight]="bold() ? '700' : '400'"
+          />
+<br>
+          <label class="input-label">Line 2</label>
+          <input class="sticker-input" type="text" placeholder="Bottom line"
+            (input)="setText2($any($event).target.value)"
+            [value]="text2()"
+            [style.text-transform]="caps() ? 'uppercase' : 'none'"
+            [style.font-weight]="bold() ? '700' : '400'"
+          />
+        </div>
+      </div>
+
+      <div class="preview-wrap">
+        <h3>Preview</h3>
+        <div class="preview-scale">
+          <div class="preview-panels">
+            <div class="preview-panel">
+              <h2>Line 1</h2>
+              <div
+                class="sticker-preview"
+                [style.font-family]="fontFamily()"
+                [style.font-size]="fontSizePt() + 'pt'"
+                [style.font-weight]="bold() ? '700' : '400'"
+              >
+                <div class="line">{{ text1() || ' ' }}</div>
+              </div>
+            </div>
+
+            <div class="preview-panel">
+              <h4>Line 2</h4>
+              <div
+                class="sticker-preview"
+                [style.font-family]="fontFamily()"
+                [style.font-size]="fontSizePt() + 'pt'"
+                [style.font-weight]="bold() ? '700' : '400'"
+              >
+                <div class="line">{{ text2() || ' ' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class="print-actions">
+          <button class="btn primary print-button" (click)="printLabelServer()" [disabled]="isPrinting()">
+            {{ isPrinting() ? 'Printing...' : 'Print via Server' }}
+          </button>
+          <button class="btn secondary print-button" (click)="printLabel()" style="margin-left: 10px;">
+            Print via Browser
+          </button>
+          @if (printStatus()) {
+          <div class="print-status">{{ printStatus() }}</div>
+          }
+          <br>
+          <br>
+          <h3>** Print via server, name printer "SEWOO Label Printer" <br>** Print from browser set margin to none and paper size to 60x15 mm  in printer **</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Service Tag Tab -->
+  @if (activeTab() === 'service-tag') {
+  <div class="tab-content">
+    <div #printSection class="service-container">
+      <div class="print-wrapper">
+        <table class="form-table">
+          <tr>
+            <td colspan="2">
+              <input 
+                type="text" 
+                class="header-input" 
+                placeholder="Where to claim / Service"
+                #whereToClaim
+              >
+            </td>
+          </tr>
+
+          <tr>
+            <th>Host Name</th>
+            <td>
+              <input 
+                type="text" 
+                #hostName
+              >
+            </td>
+          </tr>
+
+          <tr>
+            <th>Device Model</th>
+            <td>
+              <input 
+                type="text" 
+                #deviceModel
+              >
+            </td>
+          </tr>
+
+          <tr>
+            <th>Sending Date</th>
+            <td>
+              <input 
+                type="text" 
+                #sendingDate
+              >
+            </td>
+          </tr>
+
+          <tr>
+            <th>Current Condition</th>
+            <td>
+              <textarea 
+                rows="3"
+                #currentCondition
+              ></textarea>
+            </td>
+          </tr>
+
+          <tr>
+            <th>Problem Details</th>
+            <td>
+              <textarea 
+                rows="3"
+                #problemDetails
+              ></textarea>
+            </td>
+          </tr>
+
+          <tr>
+            <th>Contacts</th>
+            <td>Piyer Mollah - +8801752800084<br>Ridoan Zahan - +8801712158121</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-clear" (click)="clearAll()">Clear All</button>
+        <button class="btn-print" (click)="printServiceTag()">Print</button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

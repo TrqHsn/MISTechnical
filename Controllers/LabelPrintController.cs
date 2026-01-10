@@ -6,6 +6,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/print")]
+[System.Runtime.Versioning.SupportedOSPlatform("windows")]
 public class LabelPrintController : ControllerBase
 {
     private readonly ILogger<LabelPrintController> _logger;
@@ -22,15 +23,28 @@ public class LabelPrintController : ControllerBase
         {
             PrintDocument pd = new PrintDocument();
 
-            pd.PrinterSettings.PrinterName = "Sewoo LK-24";
+            pd.PrinterSettings.PrinterName = "SEWOO Label Printer"; // Adjust printer name as needed
 
             // 60x15 mm → hundredths of inch
             pd.DefaultPageSettings.PaperSize = new PaperSize("Label60x15", 236, 59);
             pd.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
 
+            int currentPage = 0;
+            string text1 = request.Text1 ?? "";
+            string text2 = request.Text2 ?? "";
+
+            if (request.Caps)
+            {
+                text1 = text1.ToUpper();
+                text2 = text2.ToUpper();
+            }
+
             pd.PrintPage += (s, e) =>
             {
-                RectangleF area = e.PageBounds;
+                if (e.Graphics == null) return;
+                
+                RectangleF area = e.MarginBounds;
+                float pageWidth = e.PageBounds.Width;
 
                 using Font font = new Font(
                     request.FontFamily ?? "Arial",
@@ -44,39 +58,37 @@ public class LabelPrintController : ControllerBase
                     LineAlignment = StringAlignment.Center
                 };
 
-                string text1 = request.Text1 ?? "";
-                string text2 = request.Text2 ?? "";
+                // Calculate vertical positioning
+                float lineHeight = font.Height;
+                float offsetY = 8f; // Offset to avoid top clipping
+                float startY = ((area.Height - lineHeight) / 2) + offsetY;
 
-                if (request.Caps)
+                // Single line centered on the label
+                RectangleF rect = new RectangleF(
+                    0,
+                    startY,
+                    pageWidth,
+                    lineHeight
+                );
+
+                // Print current page text
+                string textToPrint = currentPage == 0 ? text1 : text2;
+                e.Graphics.DrawString(textToPrint, font, Brushes.Black, rect, format);
+
+                currentPage++;
+
+                // Print second page if both text1 and text2 exist
+                bool hasText1 = !string.IsNullOrWhiteSpace(text1);
+                bool hasText2 = !string.IsNullOrWhiteSpace(text2);
+                
+                if (hasText1 && hasText2 && currentPage == 1)
                 {
-                    text1 = text1.ToUpper();
-                    text2 = text2.ToUpper();
+                    e.HasMorePages = true;
                 }
-
-                // Draw both lines centered
-                float midY = area.Height / 2;
-                float spacing = font.Height;
-
-                // Top line
-                RectangleF rect1 = new RectangleF(
-                    area.X,
-                    midY - spacing,
-                    area.Width,
-                    spacing
-                );
-
-                // Bottom line
-                RectangleF rect2 = new RectangleF(
-                    area.X,
-                    midY,
-                    area.Width,
-                    spacing
-                );
-
-                e.Graphics.DrawString(text1, font, Brushes.Black, rect1, format);
-                e.Graphics.DrawString(text2, font, Brushes.Black, rect2, format);
-
-                e.HasMorePages = false;
+                else
+                {
+                    e.HasMorePages = false;
+                }
             };
 
             pd.Print();

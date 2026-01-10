@@ -595,3 +595,261 @@ h1 {
   font-size: 1rem;
   text-align: center;
 }
+
+/* Update User Tab */
+.update-user-content {
+  padding: 1rem 0;
+}
+
+.update-user-content h2 {
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  text-align: left;
+}
+
+.update-user-content h3 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.upload-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.upload-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.upload-row input[type="file"] {
+  display: none;
+}
+
+.upload-btn {
+  background: linear-gradient(180deg, #2d6a4f, #1b4332);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+}
+
+.upload-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.file-name {
+  font-style: italic;
+  margin-left: 8px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-success {
+  background: #2f9e44;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #2b8a3e;
+}
+
+.btn-danger {
+  background: #d9480f;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c23d0c;
+}
+
+.preview {
+  margin-top: 1.5rem;
+}
+
+.preview table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview th,
+.preview td {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.preview th {
+  background: rgba(76, 175, 80, 0.2);
+  font-weight: 600;
+  text-align: left;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.progress {
+  margin-left: 8px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.error {
+  background: rgba(244, 67, 54, 0.3);
+  border: 1px solid rgba(244, 67, 54, 0.6);
+  color: #f44336;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  background: rgba(40, 40, 60, 0.98);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  padding: 1.5rem;
+  max-width: 900px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal h2 {
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.modal-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 0, 0, 0.5);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.preview-list,
+.failed-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.preview-list table,
+.failed-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.preview-list th,
+.preview-list td,
+.failed-list th,
+.failed-list td {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: left;
+}
+
+.preview-list th,
+.failed-list th {
+  background: rgba(76, 175, 80, 0.2);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.info-text {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #4caf50;
+}
+
+.info-text h3 {
+  color: #4caf50;
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.info-text p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+}

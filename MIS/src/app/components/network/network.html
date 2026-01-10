@@ -1,0 +1,65 @@
+<div class="network-container">
+  <h1>Network Tools</h1>
+
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'ping'" (click)="activeTab.set('ping')">
+      Ping
+    </button>
+  </div>
+
+  <!-- Ping Tab -->
+  @if (activeTab() === 'ping') {
+    <div class="tab-content">
+      <div class="ping-section">
+        <div class="input-group">
+          <label for="pingAddress">IP Address or Hostname</label>
+          <input 
+            type="text" 
+            id="pingAddress"
+            class="text-input" 
+            placeholder="e.g., 192.168.1.1 or google.com"
+            [(ngModel)]="pingAddress"
+            (ngModelChange)="pingAddress.set($event)"
+            (keydown.enter)="executePing()"
+          />
+        </div>
+
+        <div class="button-row">
+          @if (!isPinging()) {
+            <button 
+              class="btn primary ping-btn" 
+              (click)="executePing()"
+            >
+              📡 Start Ping
+            </button>
+          } @else {
+            <button 
+              class="btn danger stop-btn" 
+              (click)="stopPing()"
+            >
+              🛑 Stop Ping
+            </button>
+          }
+          <button 
+            class="btn secondary clear-btn" 
+            (click)="clearPing()"
+          >
+            Clear
+          </button>
+        </div>
+
+        <div class="result-container">
+          <div class="result-header">
+            <h3>Result:</h3>
+            <div class="status-lights">
+              <div class="status-light" [class.active]="deviceStatus() === 'online'" [class.online]="deviceStatus() === 'online'" title="Online"></div>
+              <div class="status-light" [class.active]="deviceStatus() === 'offline'" [class.offline]="deviceStatus() === 'offline'" title="Offline"></div>
+            </div>
+          </div>
+          <pre class="ping-result cmd-style" #pingResultElement>{{ pingResult() || '' }}</pre>
+        </div>
+      </div>
+    </div>
+  }
+</div>

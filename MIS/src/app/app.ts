@@ -12,17 +12,14 @@ export class App {
   protected readonly title = signal('MIS');
 
   buttons = [
-    { name: 'Sticker', id: 'sticker' },
-    { name: 'Warranty', id: 'wranty' },
+    { name: 'Print', id: 'print' },
     { name: 'OS form', id: 'oif' },
     { name: 'AD Tools', id: 'testapi' },
-    { name: 'Update', id: 'update' },
     { name: 'Test Keyboard', id: 'tkeyboard' },
     { name: 'Stress Test', id: 'stresstest' },
     { name: 'Unlock', id: 'unlock' },
     { name: 'Inventory', id: 'inventory' },
-    { name: 'Test1', id: 'test1' },
-
+    { name: 'Network', id: 'network' },
   ];
 
   // Work timer (7:30 -> 16:30 local time)
