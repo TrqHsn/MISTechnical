@@ -1,0 +1,24 @@
+<div class="device-tool-container">
+  <h1>Device Testing Tools</h1>
+
+  <div class="tools-grid">
+    @for (tool of tools; track tool.id) {
+      <div class="tool-card" (click)="openTool(tool.url)">
+        <div class="tool-icon">{{ tool.name }}</div>
+        <div class="tool-info">
+          <h3>{{ tool.name }}</h3>
+          <p>{{ tool.description }}</p>
+        </div>
+        <div class="tool-action">
+          <button class="btn-launch">Launch →</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="info-section">
+    <p class="info-text">
+      💡 <strong>Note:</strong> All tools open in a new browser tab. Make sure to allow pop-ups if needed.
+    </p>
+  </div>
+</div>

@@ -6,6 +6,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'ping'" (click)="activeTab.set('ping')">
       Ping
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'activeip'" (click)="activeTab.set('activeip')">
+      ActiveIP Scanner
+    </button>
   </div>
 
   <!-- Ping Tab -->
@@ -59,6 +62,78 @@
           </div>
           <pre class="ping-result cmd-style" #pingResultElement>{{ pingResult() || '' }}</pre>
         </div>
+      </div>
+    </div>
+  }
+
+  <!-- ActiveIP Scanner Tab -->
+  @if (activeTab() === 'activeip') {
+    <div class="tab-content">
+      <div class="scanner-section">
+        <div class="input-group">
+          <label for="scanBaseIp">Base IP Address (First 3 Octets)</label>
+          <input 
+            type="text" 
+            id="scanBaseIp"
+            class="text-input" 
+            placeholder="e.g., 10.140.8"
+            [(ngModel)]="scanBaseIp"
+            (ngModelChange)="scanBaseIp.set($event)"
+            (keydown.enter)="executeScan()"
+          />
+          <p class="help-text">Enter the first 3 octets. Will scan .0 to .255</p>
+        </div>
+
+        <div class="button-row">
+          @if (!isScanning()) {
+            <button 
+              class="btn primary scan-btn" 
+              (click)="executeScan()"
+            >
+              🔍 Start Scan
+            </button>
+          } @else {
+            <button 
+              class="btn danger stop-btn" 
+              (click)="stopScan()"
+            >
+              🛑 Stop Scan
+            </button>
+          }
+          <button 
+            class="btn secondary clear-btn" 
+            (click)="clearScan()"
+          >
+            Clear
+          </button>
+        </div>
+
+        @if (scanStatus()) {
+          <div class="status-message" [class.scanning]="isScanning()">
+            {{ scanStatus() }}
+          </div>
+        }
+
+        @if (activeIps().length > 0) {
+          <div class="results-section">
+            <h3>Active IPs ({{ activeIps().length }})</h3>
+            <ul class="ip-list">
+              @for (ip of activeIps(); track ip) {
+                <li class="ip-item">
+                  <a 
+                    [href]="'http://' + ip" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="ip-link"
+                    (click)="$event.preventDefault(); openIp(ip)"
+                  >
+                    {{ ip }}
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
       </div>
     </div>
   }

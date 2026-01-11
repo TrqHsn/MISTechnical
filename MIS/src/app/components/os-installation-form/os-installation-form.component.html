@@ -109,24 +109,6 @@
             rows="2"
           ></textarea>
         </div>
-
-        <!-- Company/Division -->
-        <div class="form-group">
-          <label>Company/Division</label>
-          <div class="preview-value">{{ divisionPreview() || 'N/A' }}</div>
-        </div>
-
-        <!-- AD Group -->
-        <div class="form-group">
-          <label for="adGroup">AD Group</label>
-          <input
-            type="text"
-            id="adGroup"
-            class="text-input"
-            formControlName="adGroup"
-            placeholder="AD Group..."
-          />
-        </div>
       </div>
 
       <!-- Right Column -->
@@ -189,12 +171,12 @@
             </div>
             }
           </div>
-          @if (form.get('newComputerName')?.value) {
+          <!-- @if (form.get('newComputerName')?.value) {
           <div class="form-group">
             <label>Computer Description (Selected)</label>
             <div class="preview-value">{{ newComputerDescription() || 'N/A' }}</div>
           </div>
-          }
+          } -->
         </div>
 
         <!-- Raised By -->
@@ -213,18 +195,6 @@
             </label>
             }
           </div>
-        </div>
-
-        <!-- Site -->
-        <div class="form-group">
-          <label>Site</label>
-          <div class="preview-value">{{ sitePreview() || 'N/A' }}</div>
-        </div>
-
-        <!-- Operating System -->
-        <div class="form-group">
-          <label>Operating System</label>
-          <div class="preview-value">{{ operatingSystemPreview() || 'N/A' }}</div>
         </div>
 
         <!-- Raised Date -->

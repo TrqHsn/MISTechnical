@@ -27,8 +27,64 @@
 /* Work timer */
 .work-timer {
   text-align: center;
-  min-width: 140px;
+  min-width: 200px;
   flex-shrink: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  padding: 1rem 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.work-timer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.work-timer[data-state="running"] {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  box-shadow: 0 8px 20px rgba(56, 239, 125, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.work-timer[data-state="inactive"] {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.5);
+}
+
+.work-timer[data-state="next"] {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  box-shadow: 0 8px 20px rgba(243, 156, 18, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 8px 20px rgba(56, 239, 125, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(56, 239, 125, 0.7);
+  }
 }
 
 /* Logo (top-left) */
@@ -66,19 +122,30 @@
 }
 
 .work-timer .timer-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
 }
 
 .work-timer .timer-value {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #00ff15;
-  letter-spacing: 1px;
-  margin-top: 4px;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 3px;
+  margin-top: 0.5rem;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  font-family: 'Courier New', monospace;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .title {
@@ -196,6 +263,25 @@
   border-color: rgba(255, 255, 255, 0.8);
   box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
   transform: translateY(-5px) scale(1.05);
+}
+
+/* Active/Selected Button - Green */
+.btn-active {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+  border-color: rgba(56, 239, 125, 0.8) !important;
+  box-shadow: 0 8px 25px rgba(56, 239, 125, 0.6) !important;
+  color: #ffffff !important;
+  transform: translateY(-3px) scale(1.08);
+  animation: activeGlow 2s ease-in-out infinite;
+}
+
+@keyframes activeGlow {
+  0%, 100% {
+    box-shadow: 0 8px 25px rgba(56, 239, 125, 0.6);
+  }
+  50% {
+    box-shadow: 0 12px 35px rgba(56, 239, 125, 0.9);
+  }
 }
 
 .btn:active {

@@ -246,6 +246,112 @@
   background: #00cc00;
 }
 
+/* ActiveIP Scanner Section */
+.scanner-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.help-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+.status-message {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.status-message.scanning {
+  background: rgba(33, 150, 243, 0.15);
+  border-color: rgba(33, 150, 243, 0.3);
+  color: #2196f3;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.results-section {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.results-section h3 {
+  margin: 0 0 1rem 0;
+  color: #4caf50;
+  font-size: 1.1rem;
+}
+
+.ip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ip-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.ip-item:hover {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: #4caf50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.ip-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #fff;
+  text-decoration: none;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  text-align: center;
+  transition: color 0.2s;
+}
+
+.ip-link:hover {
+  color: #4caf50;
+}
+
+.ip-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ip-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.ip-list::-webkit-scrollbar-thumb {
+  background: rgba(76, 175, 80, 0.5);
+  border-radius: 4px;
+}
+
+.ip-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 175, 80, 0.7);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .result-container {

@@ -6,14 +6,16 @@
 - **Run:** API via `dotnet run` (listens on `http://localhost:5001`). Frontend with `ng serve` in `MIS/` (listens on `http://localhost:4200`).
 
 ## Where to look (important files) 🔎
-- API entry: `Program.cs` (CORS, URL binding, Swagger)
-- Controllers: `Controllers/` (`UsersController.cs`, `ComputersController.cs`, `DevicesController.cs`)
+- API entry: `Program.cs` (CORS, URL binding, Swagger, DI container)
+- Controllers: `Controllers/` 
+  - AD-related: `UsersController.cs`, `ComputersController.cs`, `DevicesController.cs`
+  - Utility: `NetworkController.cs` (SSE ping streaming), `LabelPrintController.cs` (Windows-only thermal printing), `InventoryController.cs` (CSV proxy)
 - Service: `Services/ActiveDirectoryService.cs` and `IActiveDirectoryService.cs` (core AD logic)
-- DTOs: `Models/` (`UserDto.cs`, `ComputerDto.cs`, `UpdateUserDto.cs`, `UnlockDtos.cs`)
+- DTOs: `Models/` (`UserDto.cs`, `ComputerDto.cs`, `UpdateUserDto.cs`, `UnlockDtos.cs`, `UpdateDescriptionDto.cs`)
 - Frontend API client: `MIS/src/app/services/api.ts` (points at `http://localhost:5001/api`)
 - Main app: `MIS/src/app/app.ts` & `app.html` (root component with work timer, unlock modal, button nav)
 - Routes: `MIS/src/app/app.routes.ts` (lazy-loaded components via `loadComponent`)
-- Components: `MIS/src/app/components/` (test-api, update-user-info, sticker-print, warranty-claim, etc.)
+- Components: `MIS/src/app/components/` (ad-tools, label-print, network, inventory-search, service-tag, stress-cpu-gpu, os-installation-form, job-sheet)
 
 ## Big-picture & architecture 💡
 - **Monolith API:** Single-process .NET Web API that communicates directly with AD via LDAP (`System.DirectoryServices`). No database/ORM; domain data is read/written directly to AD.
@@ -21,6 +23,10 @@
 - **Service boundary:** Controllers call `IActiveDirectoryService` — mock this interface for unit tests or to simulate AD.
 - **CORS:** `AllowAngularApp` policy allows `http://localhost:4200` and `http://10.140.9.252:4200` (IP for deployed frontend).
 - **Search behavior:** `SearchComputersByName` searches **both** computer `name` and `description` using a single `GET /api/computers/search?searchTerm=...` endpoint — there is **no** separate `search/description` route in code (README may list an outdated route).
+- **Additional controllers:**
+  - `NetworkController`: Streaming ping via Server-Sent Events (SSE). Manages background `ping.exe` processes with `ConcurrentDictionary` for session tracking. POST `/api/network/ping/start` returns continuous output; POST `/api/network/ping/stop` terminates by session ID.
+  - `LabelPrintController`: Windows-only (`[SupportedOSPlatform("windows")]`). Prints to "SEWOO Label Printer" using `System.Drawing.Printing`. Accepts label text, font config, and prints 60x15mm thermal labels via POST `/api/print/label`.
+  - `InventoryController`: Reverse proxy to `http://sdlportal.dewhirst.grp/inventory/csv.php?type=all`. Returns CSV data via GET `/api/inventory/csv`. Uses `IHttpClientFactory`.
 
 ## Runtime & important runtime notes ⚠️
 - **Windows + domain join required:** `ActiveDirectoryService` calls `Domain.GetCurrentDomain()` and creates `LDAP://{domain}`; it will fail on non-domain or Linux environments.
@@ -39,7 +45,7 @@
 - **New template syntax:** Uses `@for (item of items; track item.id)` and `@if (condition)` instead of `*ngFor`/`*ngIf`.
 - **Standalone components:** All components are standalone (`standalone: true` or `imports: [...]` in `@Component` decorator).
 - **Lazy loading:** Routes use `loadComponent: () => import('...')` for code-splitting.
-- **Debounced search:** Search inputs use RxJS Subject + `debounceTime(300)` to throttle API calls (see `test-api.ts`).
+- **Debounced search:** Search inputs use RxJS Subject + `debounceTime(300)` to throttle API calls (see `ad-tools.ts`).
 - **Work timer:** Main app component (`app.ts`) includes a work timer that counts time left/until work hours (7:30-16:30).
 
 ## Important implementation details & gotchas 🧠

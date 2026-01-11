@@ -57,10 +57,10 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
 
   // Raised by options
   raisedByOptions = [
-    { value: 'Tareque Hasan', label: 'Tareque Hasan' },
-    { value: 'Nurul Mustafa', label: 'Nurul Mustafa' },
-    { value: 'Ridoan Zahana', label: 'Ridoan Zahana' },
-    { value: 'Piyer Mollah', label: 'Piyer Mollah' },
+    { value: 'Tareque Hasan', label: 'Tareque' },
+    { value: 'Nurul Mustafa', label: 'Mustafa' },
+    { value: 'Ridoan Zahana', label: 'Ridoan' },
+    { value: 'Piyer Mollah', label: 'Piyer' },
   ];
 
   constructor(private fb: FormBuilder, private apiService: ApiService, private cdr: ChangeDetectorRef) {
@@ -114,16 +114,27 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
   }
 
   private setupFormValueChanges(): void {
-    // When oldComputerName changes, auto-detect device type
+    // When oldComputerName changes, auto-detect device type and uppercase
     this.form.get('oldComputerName')?.valueChanges.subscribe(value => {
+      if (value && typeof value === 'string') {
+        const upperValue = value.toUpperCase();
+        if (value !== upperValue) {
+          this.form.patchValue({ oldComputerName: upperValue }, { emitEvent: false });
+        }
+      }
       if (!this.form.get('newComputerName')?.value) {
         this.form.patchValue({ newComputerName: value }, { emitEvent: false });
       }
     });
 
-    // When newComputerName changes, detect device type
-    this.form.get('newComputerName')?.valueChanges.subscribe(() => {
-      // Device type detection happens in computed signal
+    // When newComputerName changes, detect device type and uppercase
+    this.form.get('newComputerName')?.valueChanges.subscribe(value => {
+      if (value && typeof value === 'string') {
+        const upperValue = value.toUpperCase();
+        if (value !== upperValue) {
+          this.form.patchValue({ newComputerName: upperValue }, { emitEvent: false });
+        }
+      }
     });
 
     // Device type changes - update preview signal
@@ -246,16 +257,21 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
   }
 
   selectOldComputer(computer: Computer): void {
-    const computerName = computer['name'] || '';
+    const computerName = (computer['name'] || '').toUpperCase();
     const osValue = computer['operatingSystem'] || '';
     this.oldComputerOS.set(osValue);
     const oldDesc = computer['description'] || '';
     this.oldComputerDescription.set(oldDesc);
+    
+    // Auto-detect device type from 4th character
+    const deviceType = this.detectDeviceType(computerName);
+    
     this.form.patchValue({
       oldComputerName: computerName,
       description: oldDesc,
       operatingSystem: osValue,
       newComputerName: computerName,
+      deviceType: deviceType,
     });
     // Update preview based on current actionType
     const actionType = this.form.get('actionType')?.value;
@@ -272,19 +288,33 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
   }
 
   selectNewComputer(computer: Computer): void {
+    const computerName = (computer['name'] || '').toUpperCase();
     const osValue = computer['operatingSystem'] || '';
     this.newComputerOS.set(osValue);
     const desc = computer['description'] || '';
-    // Patch the form and explicitly set the description control to ensure binding updates
-    this.form.patchValue({
-      newComputerName: computer['name'] || '',
-      operatingSystem: osValue,
-    });
-    this.newComputerDescription.set(desc);
-    // Do NOT populate the main description textarea for New Computer selection.
-    // Only update the preview signal so users can see target description without changing the form field.
-    // Update preview based on current actionType
+    
+    // Auto-detect device type from 4th character
+    const deviceType = this.detectDeviceType(computerName);
+    
+    // Get current action type
     const actionType = this.form.get('actionType')?.value;
+    
+    // If action is 'N' (New), populate description from new computer
+    const patchData: any = {
+      newComputerName: computerName,
+      operatingSystem: osValue,
+      deviceType: deviceType,
+    };
+    
+    if (actionType === 'N') {
+      patchData.description = desc;
+    }
+    
+    // Patch the form
+    this.form.patchValue(patchData);
+    this.newComputerDescription.set(desc);
+    
+    // Update preview based on current actionType
     this.updateOperatingSystemPreview(actionType);
     this.newComputerShowDropdown.set(false);
     this.newComputerResults.set([]);
@@ -453,6 +483,21 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
     const day = String(date.getDate()).padStart(2, '0');
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
+  }
+
+  private detectDeviceType(computerName: string): string {
+    // Check 4th character (index 3) of computer name
+    // L = Laptop, D = Desktop
+    if (computerName && computerName.length >= 4) {
+      const fourthChar = computerName[3].toUpperCase();
+      if (fourthChar === 'L') {
+        return 'Laptop';
+      } else if (fourthChar === 'D') {
+        return 'Desktop';
+      }
+    }
+    // Default to Laptop if can't detect
+    return 'Laptop';
   }
 
   private updateOperatingSystemPreview(actionType: string): void {

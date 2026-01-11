@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
 using System.Drawing.Printing;
+using ADApi.Helpers;
 
 namespace ADApi.Controllers;
 
@@ -10,10 +11,12 @@ namespace ADApi.Controllers;
 public class LabelPrintController : ControllerBase
 {
     private readonly ILogger<LabelPrintController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
-    public LabelPrintController(ILogger<LabelPrintController> logger)
+    public LabelPrintController(ILogger<LabelPrintController> logger, IWebHostEnvironment environment)
     {
         _logger = logger;
+        _environment = environment;
     }
 
     [HttpPost("label")]
@@ -102,6 +105,108 @@ public class LabelPrintController : ControllerBase
             return StatusCode(500, new { error = "Print failed", message = ex.Message });
         }
     }
+
+    [HttpPost("generate-docx")]
+    public IActionResult GenerateDocx([FromBody] NewUserAssignRequest request)
+    {
+        try
+        {
+            var templatePath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "NewUserAssign.docx");
+            
+            if (!System.IO.File.Exists(templatePath))
+            {
+                // Try MIS/public folder
+                templatePath = Path.Combine(_environment.ContentRootPath, "MIS", "public", "NewUserAssign.docx");
+            }
+
+            if (!System.IO.File.Exists(templatePath))
+            {
+                return NotFound(new { error = "Template not found", message = "NewUserAssign.docx template file not found" });
+            }
+
+            var placeholders = new Dictionary<string, string>
+            {
+                { "{{firstName}}", request.FirstName ?? "" },
+                { "{{lastName}}", request.LastName ?? "" },
+                { "{{section}}", request.Section ?? "" },
+                { "{{department}}", request.Department ?? "" },
+                { "{{pro1}}", request.Pro1 ?? "" },
+                { "{{pro2}}", request.Pro2 ?? "" },
+                { "{{pro3}}", request.Pro3 ?? "" },
+                { "{{pro4}}", request.Pro4 ?? "" },
+                { "{{pro5}}", request.Pro5 ?? "" },
+                { "{{con1}}", request.Con1 ?? "" },
+                { "{{con2}}", request.Con2 ?? "" },
+                { "{{con3}}", request.Con3 ?? "" },
+                { "{{con4}}", request.Con4 ?? "" },
+                { "{{con5}}", request.Con5 ?? "" }
+            };
+
+            var docxBytes = DocxHelper.FillTemplate(templatePath, placeholders);
+
+            _logger.LogInformation("DOCX generated successfully for {FirstName} {LastName}", request.FirstName, request.LastName);
+            
+            return File(docxBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+                $"{request.FirstName} {request.LastName} assign form.docx");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating DOCX");
+            return StatusCode(500, new { error = "Generation failed", message = ex.Message });
+        }
+    }
+
+    [HttpPost("silent-print")]
+    public IActionResult SilentPrint([FromBody] NewUserAssignRequest request)
+    {
+        try
+        {
+            var templatePath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "NewUserAssign.docx");
+            
+            if (!System.IO.File.Exists(templatePath))
+            {
+                templatePath = Path.Combine(_environment.ContentRootPath, "MIS", "public", "NewUserAssign.docx");
+            }
+
+            if (!System.IO.File.Exists(templatePath))
+            {
+                return NotFound(new { error = "Template not found", message = "NewUserAssign.docx template file not found" });
+            }
+
+            var placeholders = new Dictionary<string, string>
+            {
+                { "{{firstName}}", request.FirstName ?? "" },
+                { "{{lastName}}", request.LastName ?? "" },
+                { "{{section}}", request.Section ?? "" },
+                { "{{department}}", request.Department ?? "" },
+                { "{{pro1}}", request.Pro1 ?? "" },
+                { "{{pro2}}", request.Pro2 ?? "" },
+                { "{{pro3}}", request.Pro3 ?? "" },
+                { "{{pro4}}", request.Pro4 ?? "" },
+                { "{{pro5}}", request.Pro5 ?? "" },
+                { "{{con1}}", request.Con1 ?? "" },
+                { "{{con2}}", request.Con2 ?? "" },
+                { "{{con3}}", request.Con3 ?? "" },
+                { "{{con4}}", request.Con4 ?? "" },
+                { "{{con5}}", request.Con5 ?? "" }
+            };
+
+            var docxBytes = DocxHelper.FillTemplate(templatePath, placeholders);
+
+            // Silent print to default printer
+            var fileName = $"{request.FirstName}_{request.LastName}_assign.docx";
+            PrintHelper.SilentPrint(docxBytes, fileName);
+
+            _logger.LogInformation("Silent print successful for {FirstName} {LastName}", request.FirstName, request.LastName);
+            
+            return Ok(new { message = "Document sent to printer successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during silent print");
+            return StatusCode(500, new { error = "Print failed", message = ex.Message });
+        }
+    }
 }
 
 public class LabelRequest
@@ -112,4 +217,22 @@ public class LabelRequest
     public float? FontSize { get; set; }
     public bool Bold { get; set; }
     public bool Caps { get; set; }
+}
+
+public class NewUserAssignRequest
+{
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? Section { get; set; }
+    public string? Department { get; set; }
+    public string? Pro1 { get; set; }
+    public string? Pro2 { get; set; }
+    public string? Pro3 { get; set; }
+    public string? Pro4 { get; set; }
+    public string? Pro5 { get; set; }
+    public string? Con1 { get; set; }
+    public string? Con2 { get; set; }
+    public string? Con3 { get; set; }
+    public string? Con4 { get; set; }
+    public string? Con5 { get; set; }
 }

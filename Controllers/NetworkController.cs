@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Concurrent;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace ADApi.Controllers
 {
@@ -11,6 +13,7 @@ namespace ADApi.Controllers
     {
         private readonly ILogger<NetworkController> _logger;
         private static readonly ConcurrentDictionary<string, Process> _activeProcesses = new();
+        private static readonly ConcurrentDictionary<string, CancellationTokenSource> _activeScanners = new();
 
         public NetworkController(ILogger<NetworkController> logger)
         {
@@ -109,6 +112,159 @@ namespace ADApi.Controllers
             }
         }
 
+        [HttpGet("scan/stream")]
+        public async Task ScanIpRange([FromQuery] string baseIp)
+        {
+            Response.ContentType = "text/event-stream";
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("Connection", "keep-alive");
+
+            if (string.IsNullOrWhiteSpace(baseIp))
+            {
+                await WriteSSE("ERROR:Please enter a valid base IP (first 3 octets)");
+                return;
+            }
+
+            // Validate base IP format (should be 3 octets)
+            var parts = baseIp.Trim().Split('.');
+            if (parts.Length != 3 || !parts.All(p => byte.TryParse(p, out _)))
+            {
+                await WriteSSE("ERROR:Invalid IP format. Please enter exactly 3 octets (e.g., 10.140.8)");
+                return;
+            }
+
+            var sessionId = Guid.NewGuid().ToString();
+            var cts = new CancellationTokenSource();
+            _activeScanners[sessionId] = cts;
+
+            try
+            {
+                await WriteSSE($"SESSION:{sessionId}");
+                await WriteSSE($"STATUS:Scanning {baseIp}.0 - {baseIp}.255...");
+
+                var tasks = new List<Task>();
+                var semaphore = new SemaphoreSlim(50); // Limit concurrent scans
+
+                for (int i = 0; i <= 255; i++)
+                {
+                    if (cts.Token.IsCancellationRequested)
+                        break;
+
+                    var ip = $"{baseIp}.{i}";
+                    var task = Task.Run(async () =>
+                    {
+                        await semaphore.WaitAsync(cts.Token);
+                        try
+                        {
+                            if (await IsIpActiveAsync(ip, cts.Token))
+                            {
+                                await WriteSSE($"IP:{ip}");
+                            }
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    }, cts.Token);
+
+                    tasks.Add(task);
+                }
+
+                await Task.WhenAll(tasks);
+                await WriteSSE("STATUS:Scan completed");
+            }
+            catch (OperationCanceledException)
+            {
+                await WriteSSE("STATUS:Scan stopped by user");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during IP scan for {BaseIp}", baseIp);
+                await WriteSSE($"ERROR:{ex.Message}");
+            }
+            finally
+            {
+                _activeScanners.TryRemove(sessionId, out _);
+                cts.Dispose();
+            }
+        }
+
+        [HttpPost("scan/stop")]
+        public IActionResult StopScan([FromBody] StopScanRequest request)
+        {
+            try
+            {
+                if (_activeScanners.TryRemove(request.SessionId, out var cts))
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                    return Ok(new { success = true, message = "Scan stopped" });
+                }
+
+                return NotFound(new { success = false, message = "No active scan session found" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error stopping scan for session {SessionId}", request.SessionId);
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        private async Task<bool> IsIpActiveAsync(string ip, CancellationToken cancellationToken)
+        {
+            // Try ICMP ping first
+            if (await PingAsync(ip, cancellationToken))
+                return true;
+
+            // If ping fails, try common TCP ports
+            var ports = new[] { 80, 443, 3389 };
+            foreach (var port in ports)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    return false;
+
+                if (await TcpCheckAsync(ip, port, cancellationToken))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private async Task<bool> PingAsync(string ip, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var ping = new Ping();
+                var reply = await ping.SendPingAsync(ip, 1000);
+                return reply.Status == IPStatus.Success;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private async Task<bool> TcpCheckAsync(string ip, int port, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var client = new TcpClient();
+                var connectTask = client.ConnectAsync(ip, port);
+                var timeoutTask = Task.Delay(500, cancellationToken);
+                var completedTask = await Task.WhenAny(connectTask, timeoutTask);
+                
+                if (completedTask == connectTask && client.Connected)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // Connection failed
+            }
+            return false;
+        }
+
         private async Task WriteSSE(string data)
         {
             await Response.WriteAsync($"data: {data}\n\n");
@@ -122,6 +278,11 @@ namespace ADApi.Controllers
     }
 
     public class StopPingRequest
+    {
+        public string SessionId { get; set; } = string.Empty;
+    }
+
+    public class StopScanRequest
     {
         public string SessionId { get; set; } = string.Empty;
     }

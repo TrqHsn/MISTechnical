@@ -39,6 +39,16 @@ export const routes: Routes = [
   }
   ,
   {
+    path: 'device-tool',
+    loadComponent: () => import('./components/device-tool/device-tool').then(m => m.DeviceToolComponent)
+  }
+  ,
+  {
+    path: 'new-user-assign',
+    loadComponent: () => import('./components/new-user-assign-form/new-user-assign-form.component').then(m => m.NewUserAssignFormComponent)
+  }
+  ,
+  {
     path: 'inventory',
     loadComponent: () => import('./components/inventory-search/inventory-search.component').then(m => m.InventorySearchComponent)
   }

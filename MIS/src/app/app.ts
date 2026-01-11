@@ -15,11 +15,11 @@ export class App {
     { name: 'Print', id: 'print' },
     { name: 'OS form', id: 'oif' },
     { name: 'AD Tools', id: 'testapi' },
-    { name: 'Test Keyboard', id: 'tkeyboard' },
-    { name: 'Stress Test', id: 'stresstest' },
-    { name: 'Unlock', id: 'unlock' },
+    { name: 'Device Tool', id: 'devicetool' },
+    { name: 'New User', id: 'newuser' },
     { name: 'Inventory', id: 'inventory' },
     { name: 'Network', id: 'network' },
+        { name: 'Unlock', id: 'unlock' }
   ];
 
   // Work timer (7:30 -> 16:30 local time)
@@ -42,29 +42,6 @@ export class App {
     if (id === 'unlock') {
       this.openUnlockDialog();
       evt.preventDefault();
-      return;
-    }
-
-    // Open the archived keyboard tester in a new tab
-    if (id === 'tkeyboard') {
-      evt.preventDefault();
-      window.open('/keyboard/index.html', '_blank');
-      return;
-    }
-
-    // Open Stress Test in a new tab
-    if (id === 'stresstest') {
-      evt.preventDefault();
-      evt.stopPropagation();
-      window.open('/stress-cpu-gpu', '_blank');
-      return;
-    }
-
-    // Open static Keyboard Tester in a new tab
-    if (id === 'demo') {
-      evt.preventDefault();
-      evt.stopPropagation();
-      window.open('/demo', '_blank');
       return;
     }
   }

@@ -1,0 +1,123 @@
+.device-tool-container {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1.5rem;
+  border-radius: 12px;
+  color: #fff;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.device-tool-container h1 {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #111;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin: 0 auto 2rem auto;
+  text-align: center;
+  width: 100%;
+  font-size: 1.5rem;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.tool-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tool-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #4caf50;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
+}
+
+.tool-icon {
+  font-size: 3rem;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 8px;
+}
+
+.tool-info {
+  flex: 1;
+}
+
+.tool-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #4caf50;
+  font-size: 1.2rem;
+}
+
+.tool-info p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tool-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-launch {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: #4caf50;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-launch:hover {
+  background: #45a049;
+  transform: scale(1.05);
+}
+
+.info-section {
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+}
+
+.info-text {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.info-text strong {
+  color: #2196f3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tool-icon {
+    font-size: 2.5rem;
+  }
+}
