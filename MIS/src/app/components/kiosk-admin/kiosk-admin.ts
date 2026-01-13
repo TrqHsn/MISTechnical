@@ -1,0 +1,346 @@
+import { Component, OnInit, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import {
+  KioskApiService,
+  MediaItem,
+  Playlist,
+  Schedule,
+  CreatePlaylistDto,
+  CreateScheduleDto,
+  ScheduleContentType,
+  MediaType,
+} from '../../services/kiosk-api';
+import { ToastService } from '../../services/toast.service';
+
+@Component({
+  selector: 'app-kiosk-admin',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './kiosk-admin.html',
+  styleUrl: './kiosk-admin.css',
+})
+export class KioskAdminComponent implements OnInit {
+  private toast = inject(ToastService);
+  // Tab state
+  activeTab = signal<'media' | 'playlists' | 'schedules' | 'preview'>('media');
+
+  // Data signals
+  mediaList = signal<MediaItem[]>([]);
+  playlists = signal<Playlist[]>([]);
+  schedules = signal<Schedule[]>([]);
+
+  // Upload state
+  selectedFile = signal<File | null>(null);
+  uploadDescription = signal('');
+  uploadProgress = signal(false);
+
+  // Playlist editing
+  editingPlaylist = signal<Playlist | null>(null);
+  playlistName = signal('');
+  playlistDescription = signal('');
+  playlistItems = signal<{ mediaId: number; durationSeconds: number; order: number }[]>([]);
+
+  // Schedule editing
+  editingSchedule = signal<Schedule | null>(null);
+  scheduleName = signal('');
+  scheduleContentType = signal<ScheduleContentType>(ScheduleContentType.Playlist);
+  schedulePlaylistId = signal<number | null>(null);
+  scheduleMediaId = signal<number | null>(null);
+  scheduleStartTime = signal('09:00');
+  scheduleEndTime = signal('17:00');
+  scheduleDayOfWeek = signal<number | null>(null);
+  schedulePriority = signal(0);
+
+  // Enums for templates
+  MediaType = MediaType;
+  ScheduleContentType = ScheduleContentType;
+  DaysOfWeek = [
+    { value: null, label: 'Every Day' },
+    { value: 0, label: 'Sunday' },
+    { value: 1, label: 'Monday' },
+    { value: 2, label: 'Tuesday' },
+    { value: 3, label: 'Wednesday' },
+    { value: 4, label: 'Thursday' },
+    { value: 5, label: 'Friday' },
+    { value: 6, label: 'Saturday' },
+  ];
+
+  constructor(private kioskApi: KioskApiService) {}
+
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.loadMedia();
+    this.loadPlaylists();
+    this.loadSchedules();
+  }
+
+  // Media management
+  loadMedia() {
+    this.kioskApi.getAllMedia().subscribe({
+      next: (media) => this.mediaList.set(media),
+      error: (err) => console.error('Failed to load media:', err),
+    });
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile.set(input.files[0]);
+    }
+  }
+
+  uploadMedia() {
+    const file = this.selectedFile();
+    if (!file) {
+      this.toast.error('Please select a file');
+      return;
+    }
+
+    this.uploadProgress.set(true);
+
+    this.kioskApi.uploadMedia(file, this.uploadDescription()).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toast.success('Media uploaded successfully');
+          this.selectedFile.set(null);
+          this.uploadDescription.set('');
+          this.loadMedia();
+          // Reset file input
+          const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+          if (input) input.value = '';
+        } else {
+          this.toast.error('Upload failed: ' + response.message);
+        }
+        this.uploadProgress.set(false);
+      },
+      error: (err) => {
+        console.error('Upload error:', err);
+        this.toast.error('Upload error: ' + (err.error?.message || 'Unknown error'));
+        this.uploadProgress.set(false);
+      },
+    });
+  }
+
+  deleteMedia(id: number) {
+    if (!confirm('Delete this media? It will be removed from all playlists.')) return;
+
+    this.kioskApi.deleteMedia(id).subscribe({
+      next: () => {
+        this.toast.success('Media deleted');
+        this.loadMedia();
+        this.loadPlaylists(); // Refresh playlists as they may reference this media
+      },
+      error: (err) => {
+        console.error('Delete error:', err);
+        this.toast.error('Failed to delete media');
+      },
+    });
+  }
+
+  activateMedia(id: number) {
+    if (!confirm('Activate this media for immediate display? This will override all schedules until you deactivate it.')) return;
+
+    this.kioskApi.activateMedia(id).subscribe({
+      next: () => {
+        this.toast.success('Media activated! It will now display on all screens.');
+      },
+      error: (err) => {
+        console.error('Activation error:', err);
+        this.toast.error('Failed to activate media');
+      },
+    });
+  }
+
+  getMediaUrl(fileName: string): string {
+    return `http://localhost:5001/displayboard/${fileName}`;
+  }
+
+  // Playlist management
+  loadPlaylists() {
+    this.kioskApi.getAllPlaylists().subscribe({
+      next: (playlists) => this.playlists.set(playlists),
+      error: (err) => console.error('Failed to load playlists:', err),
+    });
+  }
+
+  newPlaylist() {
+    this.editingPlaylist.set(null);
+    this.playlistName.set('');
+    this.playlistDescription.set('');
+    this.playlistItems.set([]);
+  }
+
+  editPlaylist(playlist: Playlist) {
+    this.editingPlaylist.set(playlist);
+    this.playlistName.set(playlist.name);
+    this.playlistDescription.set(playlist.description || '');
+    this.playlistItems.set(
+      playlist.items.map((item) => ({
+        mediaId: item.mediaId,
+        durationSeconds: item.durationSeconds,
+        order: item.order,
+      }))
+    );
+    this.activeTab.set('playlists');
+  }
+
+  addPlaylistItem() {
+    const items = this.playlistItems();
+    items.push({
+      mediaId: this.mediaList()[0]?.id || 0,
+      durationSeconds: 10,
+      order: items.length,
+    });
+    this.playlistItems.set([...items]);
+  }
+
+  removePlaylistItem(index: number) {
+    const items = this.playlistItems();
+    items.splice(index, 1);
+    // Re-order
+    items.forEach((item, i) => (item.order = i));
+    this.playlistItems.set([...items]);
+  }
+
+  savePlaylist() {
+    const dto: CreatePlaylistDto = {
+      name: this.playlistName(),
+      description: this.playlistDescription() || undefined,
+      items: this.playlistItems(),
+    };
+
+    const editing = this.editingPlaylist();
+
+    const request = editing
+      ? this.kioskApi.updatePlaylist(editing.id, dto)
+      : this.kioskApi.createPlaylist(dto);
+
+    request.subscribe({
+      next: () => {
+        this.toast.success(editing ? 'Playlist updated' : 'Playlist created');
+        this.loadPlaylists();
+        this.newPlaylist();
+      },
+      error: (err) => {
+        console.error('Save error:', err);
+        this.toast.error('Failed to save playlist');
+      },
+    });
+  }
+
+  deletePlaylist(id: number) {
+    if (!confirm('Delete this playlist?')) return;
+
+    this.kioskApi.deletePlaylist(id).subscribe({
+      next: () => {
+        this.toast.success('Playlist deleted');
+        this.loadPlaylists();
+      },
+      error: (err) => {
+        console.error('Delete error:', err);
+        this.toast.error('Failed to delete playlist');
+      },
+    });
+  }
+
+  // Schedule management
+  loadSchedules() {
+    this.kioskApi.getAllSchedules().subscribe({
+      next: (schedules) => this.schedules.set(schedules),
+      error: (err) => console.error('Failed to load schedules:', err),
+    });
+  }
+
+  newSchedule() {
+    this.editingSchedule.set(null);
+    this.scheduleName.set('');
+    this.scheduleContentType.set(ScheduleContentType.Playlist);
+    this.schedulePlaylistId.set(this.playlists()[0]?.id || null);
+    this.scheduleMediaId.set(null);
+    this.scheduleStartTime.set('09:00');
+    this.scheduleEndTime.set('17:00');
+    this.scheduleDayOfWeek.set(null);
+    this.schedulePriority.set(0);
+  }
+
+  editSchedule(schedule: Schedule) {
+    this.editingSchedule.set(schedule);
+    this.scheduleName.set(schedule.name);
+    this.scheduleContentType.set(schedule.contentType);
+    this.schedulePlaylistId.set(schedule.playlistId || null);
+    this.scheduleMediaId.set(schedule.mediaId || null);
+    this.scheduleStartTime.set(schedule.startTime);
+    this.scheduleEndTime.set(schedule.endTime);
+    this.scheduleDayOfWeek.set(schedule.dayOfWeek ?? null);
+    this.schedulePriority.set(schedule.priority);
+    this.activeTab.set('schedules');
+  }
+
+  saveSchedule() {
+    const dto: CreateScheduleDto = {
+      name: this.scheduleName(),
+      contentType: this.scheduleContentType(),
+      playlistId: this.scheduleContentType() === ScheduleContentType.Playlist ? (this.schedulePlaylistId() ?? undefined) : undefined,
+      mediaId: this.scheduleContentType() === ScheduleContentType.SingleImage ? (this.scheduleMediaId() ?? undefined) : undefined,
+      startTime: this.scheduleStartTime(),
+      endTime: this.scheduleEndTime(),
+      dayOfWeek: this.scheduleDayOfWeek() ?? undefined,
+      priority: this.schedulePriority(),
+    };
+
+    const editing = this.editingSchedule();
+
+    const request = editing
+      ? this.kioskApi.updateSchedule(editing.id, dto)
+      : this.kioskApi.createSchedule(dto);
+
+    request.subscribe({
+      next: () => {
+        this.toast.success(editing ? 'Schedule updated' : 'Schedule created');
+        this.loadSchedules();
+        this.newSchedule();
+      },
+      error: (err) => {
+        console.error('Save error:', err);
+        this.toast.error('Failed to save schedule: ' + (err.error?.message || 'Unknown error'));
+      },
+    });
+  }
+
+  deleteSchedule(id: number) {
+    if (!confirm('Delete this schedule?')) return;
+
+    this.kioskApi.deleteSchedule(id).subscribe({
+      next: () => {
+        this.toast.success('Schedule deleted');
+        this.loadSchedules();
+      },
+      error: (err) => {
+        console.error('Delete error:', err);
+        this.toast.error('Failed to delete schedule');
+      },
+    });
+  }
+
+  toggleSchedule(schedule: Schedule) {
+    this.kioskApi.toggleSchedule(schedule.id, !schedule.isActive).subscribe({
+      next: () => {
+        schedule.isActive = !schedule.isActive;
+        this.schedules.set([...this.schedules()]);
+      },
+      error: (err) => {
+        console.error('Toggle error:', err);
+        this.toast.error('Failed to toggle schedule');
+      },
+    });
+  }
+
+  // Preview
+  openDisplayPreview() {
+    window.open('/displayboard', '_blank');
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "Id": 1,
+    "FileName": "36c26818-a1f9-403d-ba6d-362fcd5f119b.jpg",
+    "OriginalFileName": "Media (3).jpg",
+    "Type": 0,
+    "FileSizeBytes": 1033445,
+    "UploadedAt": "2026-01-13T13:27:48.8495354Z",
+    "Description": null
+  },
+  {
+    "Id": 2,
+    "FileName": "d72e9779-e625-4b17-bff5-c00e3cb1cfe9.jpg",
+    "OriginalFileName": "300X300.jpg",
+    "Type": 0,
+    "FileSizeBytes": 58089,
+    "UploadedAt": "2026-01-13T14:43:54.6926725Z",
+    "Description": null
+  },
+  {
+    "Id": 3,
+    "FileName": "a76eca98-1b30-46c0-9b4e-bdee8421b409.png",
+    "OriginalFileName": "Sharif-Osman-Hadi-PNG.png",
+    "Type": 0,
+    "FileSizeBytes": 278408,
+    "UploadedAt": "2026-01-13T14:47:41.2875144Z",
+    "Description": null
+  },
+  {
+    "Id": 4,
+    "FileName": "5e7e7626-ef6a-416c-a45a-979ebb66aafc.png",
+    "OriginalFileName": "LeverStyle  welcome slide black (003).png",
+    "Type": 0,
+    "FileSizeBytes": 859698,
+    "UploadedAt": "2026-01-13T15:05:49.3116772Z",
+    "Description": null
+  }
+]

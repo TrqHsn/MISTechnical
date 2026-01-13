@@ -48,6 +48,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/inventory-search/inventory-search.component').then(m => m.InventorySearchComponent)
   }
   ,
+  {
+    path: 'kiosk-admin',
+    loadComponent: () => import('./components/kiosk-admin/kiosk-admin').then(m => m.KioskAdminComponent)
+  }
+  ,
   // Fallback - redirect any unknown path to ad-tools
   { path: '**', redirectTo: 'ad-tools' }
 ];

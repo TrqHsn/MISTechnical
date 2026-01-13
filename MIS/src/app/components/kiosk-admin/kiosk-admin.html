@@ -1,0 +1,306 @@
+<div class="kiosk-admin">
+  <h1>Digital Signage Admin</h1>
+
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'media'"
+      (click)="activeTab.set('media')"
+    >
+      📁 Media Library
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'playlists'"
+      (click)="activeTab.set('playlists')"
+    >
+      🎬 Playlists
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'schedules'"
+      (click)="activeTab.set('schedules')"
+    >
+      📅 Schedules
+    </button>
+    <button class="tab-btn preview-btn" (click)="openDisplayPreview()">
+      🖥️ Open Display
+    </button>
+  </div>
+
+  <!-- MEDIA LIBRARY TAB -->
+  @if (activeTab() === 'media') {
+  <div class="tab-content">
+    <h2>Media Library</h2>
+
+    <!-- Upload Form -->
+    <div class="upload-section">
+      <h3>Upload Media</h3>
+      <div class="upload-form">
+        <input
+          type="file"
+          accept="image/*,video/mp4,video/webm"
+          (change)="onFileSelected($event)"
+        />
+        <input
+          type="text"
+          placeholder="Description (optional)"
+          [value]="uploadDescription()"
+          (input)="uploadDescription.set($any($event.target).value)"
+        />
+        <button
+          (click)="uploadMedia()"
+          [disabled]="!selectedFile() || uploadProgress()"
+        >
+          {{ uploadProgress() ? 'Uploading...' : 'Upload' }}
+        </button>
+      </div>
+      @if (selectedFile()) {
+      <p class="selected-file">Selected: {{ selectedFile()!.name }}</p>
+      }
+    </div>
+
+    <!-- Media List -->
+    <div class="media-grid">
+      @for (media of mediaList(); track media.id) {
+      <div class="media-card">
+        @if (media.type === MediaType.Image) {
+        <img [src]="getMediaUrl(media.fileName)" [alt]="media.originalFileName" />
+        } @else {
+        <video [src]="getMediaUrl(media.fileName)" controls></video>
+        }
+        <div class="media-info">
+          <strong>{{ media.originalFileName }}</strong>
+          <p>{{ media.description || 'No description' }}</p>
+          <small>Uploaded: {{ media.uploadedAt | date: 'short' }}</small>
+          <small>Type: {{ media.type === MediaType.Image ? 'Image' : 'Video' }}</small>
+          <div class="btn-group">
+            <button class="btn-activate" (click)="activateMedia(media.id)">▶ Activate Now</button>
+            <button class="btn-delete" (click)="deleteMedia(media.id)">Delete</button>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- PLAYLISTS TAB -->
+  @if (activeTab() === 'playlists') {
+  <div class="tab-content">
+    <h2>Playlists</h2>
+
+    <button class="btn-new" (click)="newPlaylist()">+ New Playlist</button>
+
+    <!-- Playlist Editor -->
+    <div class="editor-section">
+      <h3>{{ editingPlaylist() ? 'Edit Playlist' : 'Create Playlist' }}</h3>
+      <div class="form-group">
+        <label>Playlist Name</label>
+        <input
+          type="text"
+          [value]="playlistName()"
+          (input)="playlistName.set($any($event.target).value)"
+          placeholder="Enter playlist name"
+        />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input
+          type="text"
+          [value]="playlistDescription()"
+          (input)="playlistDescription.set($any($event.target).value)"
+          placeholder="Enter description (optional)"
+        />
+      </div>
+
+      <h4>Playlist Items</h4>
+      <button class="btn-add" (click)="addPlaylistItem()">+ Add Item</button>
+
+      <div class="playlist-items">
+        @for (item of playlistItems(); track $index) {
+        <div class="playlist-item">
+          <span>{{ $index + 1 }}.</span>
+          <select
+            [value]="item.mediaId"
+            (change)="item.mediaId = +$any($event.target).value"
+          >
+            @for (media of mediaList(); track media.id) {
+            <option [value]="media.id">
+              {{ media.originalFileName }} ({{ media.type === MediaType.Image ? 'Image' : 'Video' }})
+            </option>
+            }
+          </select>
+          <input
+            type="number"
+            [value]="item.durationSeconds"
+            (input)="item.durationSeconds = +$any($event.target).value"
+            placeholder="Duration (sec)"
+            min="1"
+            max="300"
+          />
+          <button class="btn-remove" (click)="removePlaylistItem($index)">Remove</button>
+        </div>
+        }
+      </div>
+
+      <button class="btn-save" (click)="savePlaylist()">
+        {{ editingPlaylist() ? 'Update Playlist' : 'Create Playlist' }}
+      </button>
+    </div>
+
+    <!-- Existing Playlists -->
+    <div class="playlists-list">
+      <h3>Existing Playlists</h3>
+      @for (playlist of playlists(); track playlist.id) {
+      <div class="playlist-card">
+        <h4>{{ playlist.name }}</h4>
+        <p>{{ playlist.description || 'No description' }}</p>
+        <p>Items: {{ playlist.items.length }}</p>
+        <small>Created: {{ playlist.createdAt | date: 'short' }}</small>
+        <div class="card-actions">
+          <button (click)="editPlaylist(playlist)">Edit</button>
+          <button class="btn-delete" (click)="deletePlaylist(playlist.id)">Delete</button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- SCHEDULES TAB -->
+  @if (activeTab() === 'schedules') {
+  <div class="tab-content">
+    <h2>Schedules</h2>
+
+    <button class="btn-new" (click)="newSchedule()">+ New Schedule</button>
+
+    <!-- Schedule Editor -->
+    <div class="editor-section">
+      <h3>{{ editingSchedule() ? 'Edit Schedule' : 'Create Schedule' }}</h3>
+
+      <div class="form-group">
+        <label>Schedule Name</label>
+        <input
+          type="text"
+          [value]="scheduleName()"
+          (input)="scheduleName.set($any($event.target).value)"
+          placeholder="Enter schedule name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Content Type</label>
+        <select
+          [value]="scheduleContentType()"
+          (change)="scheduleContentType.set(+$any($event.target).value)"
+        >
+          <option [value]="ScheduleContentType.Playlist">Playlist</option>
+          <option [value]="ScheduleContentType.SingleImage">Single Image/Video</option>
+        </select>
+      </div>
+
+      @if (scheduleContentType() === ScheduleContentType.Playlist) {
+      <div class="form-group">
+        <label>Select Playlist</label>
+        <select
+          [value]="schedulePlaylistId() || ''"
+          (change)="schedulePlaylistId.set(+$any($event.target).value)"
+        >
+          <option value="">-- Select Playlist --</option>
+          @for (playlist of playlists(); track playlist.id) {
+          <option [value]="playlist.id">{{ playlist.name }}</option>
+          }
+        </select>
+      </div>
+      } @else {
+      <div class="form-group">
+        <label>Select Media</label>
+        <select
+          [value]="scheduleMediaId() || ''"
+          (change)="scheduleMediaId.set(+$any($event.target).value)"
+        >
+          <option value="">-- Select Media --</option>
+          @for (media of mediaList(); track media.id) {
+          <option [value]="media.id">
+            {{ media.originalFileName }} ({{ media.type === MediaType.Image ? 'Image' : 'Video' }})
+          </option>
+          }
+        </select>
+      </div>
+      }
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Time</label>
+          <input
+            type="time"
+            [value]="scheduleStartTime()"
+            (input)="scheduleStartTime.set($any($event.target).value)"
+          />
+        </div>
+        <div class="form-group">
+          <label>End Time</label>
+          <input
+            type="time"
+            [value]="scheduleEndTime()"
+            (input)="scheduleEndTime.set($any($event.target).value)"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Day of Week</label>
+        <select
+          [value]="scheduleDayOfWeek() ?? ''"
+          (change)="scheduleDayOfWeek.set($any($event.target).value === '' ? null : +$any($event.target).value)"
+        >
+          @for (day of DaysOfWeek; track $index) {
+          <option [value]="day.value ?? ''">{{ day.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Priority (higher wins if schedules overlap)</label>
+        <input
+          type="number"
+          [value]="schedulePriority()"
+          (input)="schedulePriority.set(+$any($event.target).value)"
+          min="0"
+          max="100"
+        />
+      </div>
+
+      <button class="btn-save" (click)="saveSchedule()">
+        {{ editingSchedule() ? 'Update Schedule' : 'Create Schedule' }}
+      </button>
+    </div>
+
+    <!-- Existing Schedules -->
+    <div class="schedules-list">
+      <h3>Existing Schedules</h3>
+      @for (schedule of schedules(); track schedule.id) {
+      <div class="schedule-card" [class.inactive]="!schedule.isActive">
+        <h4>{{ schedule.name }}</h4>
+        <p>
+          Type: {{ schedule.contentType === ScheduleContentType.Playlist ? 'Playlist' : 'Single Media' }}
+        </p>
+        <p>Time: {{ schedule.startTime }} - {{ schedule.endTime }}</p>
+        <p>Day: {{ schedule.dayOfWeek !== null && schedule.dayOfWeek !== undefined ? DaysOfWeek[schedule.dayOfWeek + 1].label : 'Every Day' }}</p>
+        <p>Priority: {{ schedule.priority }}</p>
+        <p>Status: {{ schedule.isActive ? 'Active' : 'Inactive' }}</p>
+        <div class="card-actions">
+          <button (click)="toggleSchedule(schedule)">
+            {{ schedule.isActive ? 'Deactivate' : 'Activate' }}
+          </button>
+          <button (click)="editSchedule(schedule)">Edit</button>
+          <button class="btn-delete" (click)="deleteSchedule(schedule.id)">Delete</button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+</div>

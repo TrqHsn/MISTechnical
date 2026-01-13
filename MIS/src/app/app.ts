@@ -1,10 +1,11 @@
 import { Component, signal, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { ApiService } from './services/api';
+import { ToastComponent } from './components/toast/toast.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -18,6 +19,7 @@ export class App {
     { name: 'Device Tool', id: 'devicetool' },
     { name: 'Inventory', id: 'inventory' },
     { name: 'Network', id: 'network' },
+    { name: 'Kiosk Admin', id: 'kiosk' },
     { name: 'Unlock', id: 'unlock' }
   ];
 

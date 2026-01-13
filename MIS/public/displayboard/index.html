@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Signage Display</title>
+    <link rel="stylesheet" href="display.css">
+</head>
+<body>
+    <!-- 
+        KIOSK/DIGITAL SIGNAGE DISPLAY
+        
+        This page is designed for 24/7 display on a TV/kiosk browser.
+        - Fixed URL: never changes
+        - Polls server for content updates
+        - Handles offline gracefully
+        - Minimal JavaScript for KaiOS compatibility
+        - No frameworks, no SPA routing
+    -->
+    
+    <div id="display-container">
+        <!-- Layer 1 (current) -->
+        <div id="layer-1" class="display-layer active">
+            <div class="placeholder">
+                <div class="loading">
+                    <p>Loading content...</p>
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Layer 2 (preload/next) -->
+        <div id="layer-2" class="display-layer"></div>
+    </div>
+
+    <!-- Offline indicator -->
+    <div id="offline-indicator" class="offline-banner" style="display: none;">
+        <span>⚠ Offline - Showing cached content</span>
+    </div>
+
+    <!-- Status overlay (optional, for debugging) -->
+    <div id="status-overlay" class="status-overlay" style="display: none;">
+        <div>Schedule: <span id="status-schedule">-</span></div>
+        <div>Server Time: <span id="status-time">-</span></div>
+        <div>Last Update: <span id="status-last-update">-</span></div>
+    </div>
+
+    <script src="display.js"></script>
+</body>
+</html>

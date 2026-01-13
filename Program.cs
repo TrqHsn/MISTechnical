@@ -16,6 +16,9 @@ builder.Services.AddHttpClient();
 // Register Active Directory service
 builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
 
+// Register Kiosk/Digital Signage service
+builder.Services.AddSingleton<IKioskService, KioskService>();
+
 // Configure CORS for Angular app on port 4200
 builder.Services.AddCors(options =>
 {
@@ -42,6 +45,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Serve static files from wwwroot (for displayboard media)
+app.UseStaticFiles();
 
 // Enable CORS
 app.UseCors("AllowAngularApp");
