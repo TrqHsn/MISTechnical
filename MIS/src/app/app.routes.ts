@@ -14,18 +14,13 @@ export const routes: Routes = [
   }
   ,
   {
-    path: 'label-print',
-    loadComponent: () => import('./components/label-print/label-print').then(m => m.LabelPrint)
+    path: 'forms',
+    loadComponent: () => import('./components/forms/forms').then(m => m.Forms)
   }
   ,
   {
     path: 'os-installation-form',
     loadComponent: () => import('./components/os-installation-form/os-installation-form.component').then(m => m.OsInstallationFormComponent)
-  }
-  ,
-  {
-    path: 'service-tag',
-    loadComponent: () => import('./components/service-tag/service-tag.component').then(m => m.ServiceTag)
   }
   ,
   {

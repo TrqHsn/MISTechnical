@@ -13,13 +13,12 @@ export class App {
 
   buttons = [
     { name: 'Print', id: 'print' },
-    { name: 'OS form', id: 'oif' },
+    { name: 'Forms', id: 'oif' },
     { name: 'AD Tools', id: 'testapi' },
     { name: 'Device Tool', id: 'devicetool' },
-    { name: 'New User', id: 'newuser' },
     { name: 'Inventory', id: 'inventory' },
     { name: 'Network', id: 'network' },
-        { name: 'Unlock', id: 'unlock' }
+    { name: 'Unlock', id: 'unlock' }
   ];
 
   // Work timer (7:30 -> 16:30 local time)

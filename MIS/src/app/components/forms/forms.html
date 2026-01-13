@@ -1,0 +1,27 @@
+<div class="forms-container">
+  <h1>Forms</h1>
+
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'os-form'" (click)="activeTab.set('os-form')">
+      OS Form
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'device-form'" (click)="activeTab.set('device-form')">
+      Device Form
+    </button>
+  </div>
+
+  <!-- OS Form Tab -->
+  @if (activeTab() === 'os-form') {
+    <div class="tab-content">
+      <app-os-installation-form></app-os-installation-form>
+    </div>
+  }
+
+  <!-- Device Form Tab -->
+  @if (activeTab() === 'device-form') {
+    <div class="tab-content">
+      <app-new-user-assign-form></app-new-user-assign-form>
+    </div>
+  }
+</div>

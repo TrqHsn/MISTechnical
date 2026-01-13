@@ -11,6 +11,7 @@
   - AD-related: `UsersController.cs`, `ComputersController.cs`, `DevicesController.cs`
   - Utility: `NetworkController.cs` (SSE ping streaming), `LabelPrintController.cs` (Windows-only thermal printing), `InventoryController.cs` (CSV proxy)
 - Service: `Services/ActiveDirectoryService.cs` and `IActiveDirectoryService.cs` (core AD logic)
+- Helpers: `Helpers/DocxHelper.cs` (DOCX template filling with placeholder replacement), `PrintHelper.cs` (thermal label printing utilities)
 - DTOs: `Models/` (`UserDto.cs`, `ComputerDto.cs`, `UpdateUserDto.cs`, `UnlockDtos.cs`, `UpdateDescriptionDto.cs`)
 - Frontend API client: `MIS/src/app/services/api.ts` (points at `http://localhost:5001/api`)
 - Main app: `MIS/src/app/app.ts` & `app.html` (root component with work timer, unlock modal, button nav)
@@ -21,7 +22,7 @@
 - **Monolith API:** Single-process .NET Web API that communicates directly with AD via LDAP (`System.DirectoryServices`). No database/ORM; domain data is read/written directly to AD.
 - **Angular SPA (SSR):** Angular 21 with standalone components, signals-based reactivity, and Server-Side Rendering (`outputMode: "server"`). Uses `@for` and `@if` control flow syntax (new Angular template syntax).
 - **Service boundary:** Controllers call `IActiveDirectoryService` — mock this interface for unit tests or to simulate AD.
-- **CORS:** `AllowAngularApp` policy allows `http://localhost:4200` and `http://10.140.9.252:4200` (IP for deployed frontend).
+- **CORS:** `AllowAngularApp` policy allows `http://localhost:4200`, `http://10.140.9.252:4200`, and `http://10.140.5.32:4200` (IPs for deployed frontend).
 - **Search behavior:** `SearchComputersByName` searches **both** computer `name` and `description` using a single `GET /api/computers/search?searchTerm=...` endpoint — there is **no** separate `search/description` route in code (README may list an outdated route).
 - **Additional controllers:**
   - `NetworkController`: Streaming ping via Server-Sent Events (SSE). Manages background `ping.exe` processes with `ConcurrentDictionary` for session tracking. POST `/api/network/ping/start` returns continuous output; POST `/api/network/ping/stop` terminates by session ID.
