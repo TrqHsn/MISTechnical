@@ -10,11 +10,20 @@ export interface Computer {
   [key: string]: any;
 }
 
+// Dynamically determine API base URL from current hostname
+const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    return `http://${hostname}:5001/api`;
+  }
+  return 'http://localhost:5001/api';
+};
+
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:5001/api'; // Adjust this to your .NET API URL
+  private apiUrl = getApiBaseUrl();
 
   constructor(private http: HttpClient) { }
 

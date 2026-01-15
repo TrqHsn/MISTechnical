@@ -39,8 +39,8 @@ export const routes: Routes = [
   }
   ,
   {
-    path: 'new-user-assign',
-    loadComponent: () => import('./components/new-user-assign-form/new-user-assign-form.component').then(m => m.NewUserAssignFormComponent)
+    path: 'device-assign',
+    loadComponent: () => import('./components/device-assign-form/device-assign-form.component').then(m => m.DeviceAssignFormComponent)
   }
   ,
   {
@@ -51,6 +51,11 @@ export const routes: Routes = [
   {
     path: 'kiosk-admin',
     loadComponent: () => import('./components/kiosk-admin/kiosk-admin').then(m => m.KioskAdminComponent)
+  }
+  ,
+  {
+    path: 'important-links',
+    loadComponent: () => import('./components/important-links/important-links').then(m => m.ImportantLinksComponent)
   }
   ,
   // Fallback - redirect any unknown path to ad-tools

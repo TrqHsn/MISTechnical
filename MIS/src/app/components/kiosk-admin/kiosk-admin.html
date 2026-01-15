@@ -24,6 +24,13 @@
     >
       📅 Schedules
     </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'settings'"
+      (click)="activeTab.set('settings')"
+    >
+      ⚙️ Display Settings
+    </button>
     <button class="tab-btn preview-btn" (click)="openDisplayPreview()">
       🖥️ Open Display
     </button>
@@ -300,6 +307,51 @@
         </div>
       </div>
       }
+    </div>
+  </div>
+  }
+
+  <!-- DISPLAY SETTINGS TAB -->
+  @if (activeTab() === 'settings') {
+  <div class="tab-content">
+    <h2>⚙️ Display Settings</h2>
+    
+    <div class="settings-section">
+      <h3>Image Display Mode</h3>
+      <p class="settings-description">
+        Choose how images should be displayed on the TV/kiosk screen. This affects all image content.
+      </p>
+
+      <div class="display-mode-grid">
+        @for (mode of displayModes; track mode.value) {
+        <button
+          class="display-mode-card"
+          [class.active]="displayMode() === mode.value"
+          (click)="setDisplayMode(mode.value)"
+        >
+          <div class="mode-label">{{ mode.label }}</div>
+          <div class="mode-description">{{ mode.description }}</div>
+          @if (displayMode() === mode.value) {
+          <div class="mode-active-indicator">✓ Active</div>
+          }
+        </button>
+        }
+      </div>
+
+      <div class="settings-info">
+        <h4>💡 Tips:</h4>
+        <ul>
+          <li><strong>Cover</strong> - Best for most content, fills screen without distortion</li>
+          <li><strong>Contain</strong> - Use when you want to see the entire image without cropping</li>
+          <li><strong>Fullscreen</strong> - Stretches image to fill screen (may distort aspect ratio)</li>
+        </ul>
+        <p class="settings-note">
+          <strong>Current Mode:</strong> {{ getCurrentModeLabel() }}
+        </p>
+        <p class="settings-note">
+          Changes take effect immediately on the display screen. Refresh the display if already open.
+        </p>
+      </div>
     </div>
   </div>
   }

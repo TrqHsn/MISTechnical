@@ -1,78 +1,55 @@
 <div class="form-container">
   <div class="form-header">
-    <h1>New User Assignment Form</h1>
+    <h1>New Device Assignment Form</h1>
   </div>
 
   <form [formGroup]="form" class="assign-form">
-    <div class="form-grid">
-      <!-- First Name -->
-      <div class="form-group">
-        <label for="firstName">First Name <span class="required">*</span></label>
+    <!-- User Search -->
+    <div class="form-group">
+      <label for="userSearch">Search User <span class="required">*</span></label>
+      <div class="search-container">
         <input
           type="text"
-          id="firstName"
+          id="userSearch"
           class="form-input"
-          formControlName="firstName"
-          placeholder="Enter first name"
+          placeholder="Search by name, username, or email..."
+          [value]="userSearchInput()"
+          (input)="onUserSearch($any($event).target.value)"
+          (focus)="userShowDropdown.set(true)"
+          (keydown.enter)="onUserSearchEnter()"
         />
-        @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
-          <div class="error">
-            First name is required
+        @if (userShowDropdown() && (userResults().length > 0 || userLoading())) {
+        <div class="dropdown">
+          @if (userLoading()) {
+          <div class="loading">Loading...</div>
+          }
+          @for (user of userResults(); track $index) {
+          <div class="dropdown-item" (click)="selectUser(user)">
+            <span class="user-display">{{ user['displayName'] || user['sAMAccountName'] }}</span>
+            <span class="user-detail">{{ user['sAMAccountName'] }}</span>
           </div>
-        }
-      </div>
-
-      <!-- Last Name -->
-      <div class="form-group">
-        <label for="lastName">Last Name <span class="required">*</span></label>
-        <input
-          type="text"
-          id="lastName"
-          class="form-input"
-          formControlName="lastName"
-          placeholder="Enter last name"
-        />
-        @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
-          <div class="error">
-            Last name is required
-          </div>
-        }
-      </div>
-
-      <!-- Section -->
-      <div class="form-group">
-        <label for="section">Section <span class="required">*</span></label>
-        <input
-          type="text"
-          id="section"
-          class="form-input"
-          formControlName="section"
-          placeholder="Enter section"
-        />
-        @if (form.get('section')?.invalid && form.get('section')?.touched) {
-          <div class="error">
-            Section is required
-          </div>
-        }
-      </div>
-
-      <!-- Department -->
-      <div class="form-group">
-        <label for="department">Department <span class="required">*</span></label>
-        <input
-          type="text"
-          id="department"
-          class="form-input"
-          formControlName="department"
-          placeholder="Enter department"
-        />
-        @if (form.get('department')?.invalid && form.get('department')?.touched) {
-          <div class="error">
-            Department is required
-          </div>
+          }
+        </div>
         }
       </div>
     </div>
+<br>
+    <!-- User Info Preview Panel -->
+    @if (selectedUser()) {
+    <div class="preview-panel">
+      <div class="preview-compact">
+        <h3>Selected User          </h3>
+        <span class="preview-label">Name:</span>
+        <span class="preview-value">{{ firstName() }} {{ lastName() }}</span>
+        <span class="preview-separator">•</span>
+        <span class="preview-label">Section:</span>
+        <span class="preview-value">{{ section() }}</span>
+        <span class="preview-separator">•</span>
+        <span class="preview-label">Department:</span>
+        <span class="preview-value">{{ department() }}</span>
+      </div>
+    </div>
+    }
 
     <!-- Items Loaned Table -->
     <div class="items-table">

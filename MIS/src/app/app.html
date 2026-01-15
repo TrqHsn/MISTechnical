@@ -21,7 +21,7 @@
       <button 
         class="btn" 
         (click)="onTopButtonClick($event, button.id)"
-        [routerLink]="button.id === 'print' ? '/print' : button.id === 'testapi' ? '/ad-tools' : button.id === 'oif' ? '/forms' : button.id === 'inventory' ? '/inventory' : button.id === 'network' ? '/network' : button.id === 'devicetool' ? '/device-tool' : button.id === 'kiosk' ? '/kiosk-admin' : button.id === 'newuser' ? '/new-user-assign' : null"
+        [routerLink]="button.id === 'print' ? '/print' : button.id === 'testapi' ? '/ad-tools' : button.id === 'oif' ? '/forms' : button.id === 'inventory' ? '/inventory' : button.id === 'network' ? '/network' : button.id === 'devicetool' ? '/device-tool' : button.id === 'kiosk' ? '/kiosk-admin' : button.id === 'newuser' ? '/device-assign' : button.id === 'links' ? '/important-links' : null"
         routerLinkActive="btn-active"
         [attr.data-id]="button.id">
         {{ button.name }}

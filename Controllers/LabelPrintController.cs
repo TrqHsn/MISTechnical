@@ -139,7 +139,27 @@ public class LabelPrintController : ControllerBase
                 { "{{con2}}", request.Con2 ?? "" },
                 { "{{con3}}", request.Con3 ?? "" },
                 { "{{con4}}", request.Con4 ?? "" },
-                { "{{con5}}", request.Con5 ?? "" }
+                { "{{con5}}", request.Con5 ?? "" },
+                { "{{r1}}", request.R1 ?? "" },
+                { "{{r2}}", request.R2 ?? "" },
+                { "{{r3}}", request.R3 ?? "" },
+                { "{{r4}}", request.R4 ?? "" },
+                { "{{r5}}", request.R5 ?? "" },
+                { "{{rpro1}}", request.RPro1 ?? "" },
+                { "{{rpro2}}", request.RPro2 ?? "" },
+                { "{{rpro3}}", request.RPro3 ?? "" },
+                { "{{rpro4}}", request.RPro4 ?? "" },
+                { "{{rpro5}}", request.RPro5 ?? "" },
+                { "{{rcon1}}", request.RCon1 ?? "" },
+                { "{{rcon2}}", request.RCon2 ?? "" },
+                { "{{rcon3}}", request.RCon3 ?? "" },
+                { "{{rcon4}}", request.RCon4 ?? "" },
+                { "{{rcon5}}", request.RCon5 ?? "" },
+                { "{{rr1}}", request.RR1 ?? "" },
+                { "{{rr2}}", request.RR2 ?? "" },
+                { "{{rr3}}", request.RR3 ?? "" },
+                { "{{rr4}}", request.RR4 ?? "" },
+                { "{{rr5}}", request.RR5 ?? "" }
             };
 
             var docxBytes = DocxHelper.FillTemplate(templatePath, placeholders);
@@ -188,7 +208,27 @@ public class LabelPrintController : ControllerBase
                 { "{{con2}}", request.Con2 ?? "" },
                 { "{{con3}}", request.Con3 ?? "" },
                 { "{{con4}}", request.Con4 ?? "" },
-                { "{{con5}}", request.Con5 ?? "" }
+                { "{{con5}}", request.Con5 ?? "" },
+                { "{{r1}}", request.R1 ?? "" },
+                { "{{r2}}", request.R2 ?? "" },
+                { "{{r3}}", request.R3 ?? "" },
+                { "{{r4}}", request.R4 ?? "" },
+                { "{{r5}}", request.R5 ?? "" },
+                { "{{rpro1}}", request.RPro1 ?? "" },
+                { "{{rpro2}}", request.RPro2 ?? "" },
+                { "{{rpro3}}", request.RPro3 ?? "" },
+                { "{{rpro4}}", request.RPro4 ?? "" },
+                { "{{rpro5}}", request.RPro5 ?? "" },
+                { "{{rcon1}}", request.RCon1 ?? "" },
+                { "{{rcon2}}", request.RCon2 ?? "" },
+                { "{{rcon3}}", request.RCon3 ?? "" },
+                { "{{rcon4}}", request.RCon4 ?? "" },
+                { "{{rcon5}}", request.RCon5 ?? "" },
+                { "{{rr1}}", request.RR1 ?? "" },
+                { "{{rr2}}", request.RR2 ?? "" },
+                { "{{rr3}}", request.RR3 ?? "" },
+                { "{{rr4}}", request.RR4 ?? "" },
+                { "{{rr5}}", request.RR5 ?? "" }
             };
 
             var docxBytes = DocxHelper.FillTemplate(templatePath, placeholders);
@@ -235,4 +275,24 @@ public class NewUserAssignRequest
     public string? Con3 { get; set; }
     public string? Con4 { get; set; }
     public string? Con5 { get; set; }
+    public string? R1 { get; set; }
+    public string? R2 { get; set; }
+    public string? R3 { get; set; }
+    public string? R4 { get; set; }
+    public string? R5 { get; set; }
+    public string? RPro1 { get; set; }
+    public string? RPro2 { get; set; }
+    public string? RPro3 { get; set; }
+    public string? RPro4 { get; set; }
+    public string? RPro5 { get; set; }
+    public string? RCon1 { get; set; }
+    public string? RCon2 { get; set; }
+    public string? RCon3 { get; set; }
+    public string? RCon4 { get; set; }
+    public string? RCon5 { get; set; }
+    public string? RR1 { get; set; }
+    public string? RR2 { get; set; }
+    public string? RR3 { get; set; }
+    public string? RR4 { get; set; }
+    public string? RR5 { get; set; }
 }

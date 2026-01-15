@@ -19,7 +19,8 @@ export class App {
     { name: 'Device Tool', id: 'devicetool' },
     { name: 'Inventory', id: 'inventory' },
     { name: 'Network', id: 'network' },
-    { name: 'Kiosk Admin', id: 'kiosk' },
+    { name: 'Display', id: 'kiosk' },
+    { name: 'Links', id: 'links' },
     { name: 'Unlock', id: 'unlock' }
   ];
 

@@ -1,0 +1,194 @@
+<div class="form-container">
+  <div class="form-header">
+    <h1>Device Assignment Form</h1>
+  </div>
+
+  <form [formGroup]="form" class="assign-form">
+    <!-- User Search -->
+    <div class="form-group">
+      <label for="userSearch">Search User <span class="required">*</span></label>
+      <div class="search-container">
+        <input
+          type="text"
+          id="userSearch"
+          class="form-input"
+          placeholder="Search by name, username, or email..."
+          [value]="userSearchInput()"
+          (input)="onUserSearch($any($event).target.value)"
+          (focus)="userShowDropdown.set(true)"
+          (keydown.enter)="onUserSearchEnter()"
+        />
+        @if (userShowDropdown() && (userResults().length > 0 || userLoading())) {
+        <div class="dropdown">
+          @if (userLoading()) {
+          <div class="loading">Loading...</div>
+          }
+          @for (user of userResults(); track $index) {
+          <div class="dropdown-item" (click)="selectUser(user)">
+            <span class="user-display">{{ user['displayName'] || user['sAMAccountName'] }}</span>
+            <span class="user-detail">{{ user['sAMAccountName'] }}</span>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+<br>
+    <!-- User Info Preview Panel -->
+    @if (selectedUser()) {
+    <div class="preview-panel">
+      <div class="preview-compact">
+        <h3>Selected User          </h3>
+        <span class="preview-label">Name:</span>
+        <span class="preview-value">{{ firstName() }} {{ lastName() }}</span>
+        <span class="preview-separator">•</span>
+        <span class="preview-label">Section:</span>
+        <span class="preview-value">{{ section() }}</span>
+        <span class="preview-separator">•</span>
+        <span class="preview-label">Department:</span>
+        <span class="preview-value">{{ department() }}</span>
+      </div>
+    </div>
+    }
+
+    <!-- Items Tables Side by Side -->
+    <div class="tables-container">
+      <!-- Items Loaned Table -->
+      <div class="items-table">
+        <h3>Items Loaned</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Item Loaned</th>
+              <th>Provided?</th>
+              <th>Condition</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items; track item.name; let i = $index) {
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>
+                  <label class="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      [formControlName]="'provided' + (i + 1)"
+                    />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      [formControlName]="'condition' + (i + 1)"
+                    />
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">
+                      {{ form.get('condition' + (i + 1))?.value ? 'New' : 'Used' }}
+                    </span>
+                  </label>
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    class="remark-input"
+                    [formControlName]="'remark' + (i + 1)"
+                    placeholder="Enter remark"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Items Returned Table -->
+      <div class="items-table">
+        <h3>Items Returned</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Item Returned</th>
+              <th>Returned?</th>
+              <th>Condition</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items; track item.name; let i = $index) {
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>
+                  <label class="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      [formControlName]="'rpro' + (i + 1)"
+                    />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      [formControlName]="'rcon' + (i + 1)"
+                    />
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">
+                      {{ form.get('rcon' + (i + 1))?.value ? 'New' : 'Used' }}
+                    </span>
+                  </label>
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    class="remark-input"
+                    [formControlName]="'rr' + (i + 1)"
+                    placeholder="Enter remark"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Status Message -->
+    @if (message) {
+      <div class="message">
+        {{ message }}
+      </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="clearForm()"
+        [disabled]="isProcessing"
+      >
+        Clear
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="generateDocx()"
+        [disabled]="form.invalid || isProcessing"
+      >
+        📄 Generate DOCX
+      </button>
+      <button
+        type="button"
+        class="btn btn-success"
+        (click)="silentPrint()"
+        [disabled]="form.invalid || isProcessing"
+      >
+        ⚡ Silent Print
+      </button>
+    </div>
+  </form>
+</div>

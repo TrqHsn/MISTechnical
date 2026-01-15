@@ -93,11 +93,20 @@ export interface ActiveContentResponse {
   scheduleName?: string;
 }
 
+// Dynamically determine API base URL from current hostname
+const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    return `http://${hostname}:5001/api/kiosk`;
+  }
+  return 'http://localhost:5001/api/kiosk';
+};
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class KioskApiService {
-  private apiUrl = 'http://localhost:5001/api/kiosk';
+  private apiUrl = getApiBaseUrl();
 
   constructor(private http: HttpClient) {}
 

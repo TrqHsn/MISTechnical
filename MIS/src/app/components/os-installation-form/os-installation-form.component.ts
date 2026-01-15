@@ -114,7 +114,7 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
   }
 
   private setupFormValueChanges(): void {
-    // When oldComputerName changes, auto-detect device type and uppercase
+    // When oldComputerName changes, just uppercase it (no auto-copy)
     this.form.get('oldComputerName')?.valueChanges.subscribe(value => {
       if (value && typeof value === 'string') {
         const upperValue = value.toUpperCase();
@@ -122,12 +122,9 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
           this.form.patchValue({ oldComputerName: upperValue }, { emitEvent: false });
         }
       }
-      if (!this.form.get('newComputerName')?.value) {
-        this.form.patchValue({ newComputerName: value }, { emitEvent: false });
-      }
     });
 
-    // When newComputerName changes, detect device type and uppercase
+    // When newComputerName changes, uppercase and auto-copy to old if Rebuild
     this.form.get('newComputerName')?.valueChanges.subscribe(value => {
       if (value && typeof value === 'string') {
         const upperValue = value.toUpperCase();
@@ -135,6 +132,11 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
           this.form.patchValue({ newComputerName: upperValue }, { emitEvent: false });
         }
       }
+      // TEMPORARILY DISABLED: Auto-copy to old computer name for testing
+      // const actionType = this.form.get('actionType')?.value;
+      // if (actionType === 'RB' && !this.form.get('oldComputerName')?.value) {
+      //   this.form.patchValue({ oldComputerName: value }, { emitEvent: false });
+      // }
     });
 
     // Device type changes - update preview signal
@@ -155,11 +157,19 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
       if (actionType === 'N') {
         // New - disable Old Computer Name and clear it
         this.form.get('oldComputerName')?.setValue('', { emitEvent: false });
+        this.oldComputerSearchInput.set('');
+        this.oldComputerResults.set([]);
+        this.oldComputerDescription.set('');
+        this.oldComputerOS.set('');
         this.form.get('oldComputerName')?.disable();
         this.form.get('newComputerName')?.enable();
       } else if (actionType === 'R') {
         // Removal - disable New Computer Name and clear it
         this.form.get('newComputerName')?.setValue('', { emitEvent: false });
+        this.newComputerSearchInput.set('');
+        this.newComputerResults.set([]);
+        this.newComputerDescription.set('');
+        this.newComputerOS.set('');
         this.form.get('oldComputerName')?.enable();
         this.form.get('newComputerName')?.disable();
       } else {
@@ -266,15 +276,25 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
     // Auto-detect device type from 4th character
     const deviceType = this.detectDeviceType(computerName);
     
-    this.form.patchValue({
+    // Get current action type
+    const actionType = this.form.get('actionType')?.value;
+    
+    // Build patch data
+    const patchData: any = {
       oldComputerName: computerName,
       description: oldDesc,
       operatingSystem: osValue,
-      newComputerName: computerName,
       deviceType: deviceType,
-    });
+    };
+    
+    // Only copy to new computer name if action type is Rebuild
+    if (actionType === 'RB') {
+      patchData.newComputerName = computerName;
+    }
+    
+    this.form.patchValue(patchData);
+    
     // Update preview based on current actionType
-    const actionType = this.form.get('actionType')?.value;
     this.updateOperatingSystemPreview(actionType);
     this.oldComputerShowDropdown.set(false);
     this.oldComputerResults.set([]);

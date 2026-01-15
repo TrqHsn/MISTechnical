@@ -23,12 +23,22 @@ import { ToastService } from '../../services/toast.service';
 export class KioskAdminComponent implements OnInit {
   private toast = inject(ToastService);
   // Tab state
-  activeTab = signal<'media' | 'playlists' | 'schedules' | 'preview'>('media');
+  activeTab = signal<'media' | 'playlists' | 'schedules' | 'settings' | 'preview'>('media');
 
   // Data signals
   mediaList = signal<MediaItem[]>([]);
   playlists = signal<Playlist[]>([]);
   schedules = signal<Schedule[]>([]);
+
+  // Display settings
+  displayMode = signal<string>('cover');
+  displayModes = [
+    { value: 'fill', label: 'Fullscreen', description: 'Image fills entire screen (stretches)' },
+    { value: 'contain', label: 'Fit to Screen', description: 'Entire image visible, may have black bars' },
+    { value: 'cover', label: 'Cover', description: 'Fills screen, maintains aspect ratio (may crop)' },
+    { value: 'scale-down', label: 'Scale Down', description: 'Fits inside screen, never enlarges' },
+    { value: 'none', label: 'Original Size', description: 'Image at original dimensions' },
+  ];
 
   // Upload state
   selectedFile = signal<File | null>(null);
@@ -70,6 +80,28 @@ export class KioskAdminComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.loadDisplayMode();
+  }
+
+  loadDisplayMode() {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('kiosk-display-mode');
+      if (saved) {
+        this.displayMode.set(saved);
+      }
+    }
+  }
+
+  setDisplayMode(mode: string) {
+    this.displayMode.set(mode);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('kiosk-display-mode', mode);
+    }
+    this.toast.success(`Display mode set to: ${this.displayModes.find(m => m.value === mode)?.label}`);
+  }
+
+  getCurrentModeLabel(): string {
+    return this.displayModes.find(m => m.value === this.displayMode())?.label || 'Cover';
   }
 
   loadData() {

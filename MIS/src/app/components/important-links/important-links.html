@@ -1,0 +1,20 @@
+<div class="links-container">
+  <h1>Important Links</h1>
+  <p class="subtitle">Quick access to frequently used IT resources and tools</p>
+
+  <div class="links-grid">
+    @for (link of links(); track link.name) {
+      <button 
+        class="link-card"
+        (click)="openLink(link.url)"
+        type="button"
+        [title]="link.description || link.name">
+        <div class="link-icon">🔗</div>
+        <div class="link-name">{{ link.name }}</div>
+        @if (link.description) {
+          <div class="link-description">{{ link.description }}</div>
+        }
+      </button>
+    }
+  </div>
+</div>

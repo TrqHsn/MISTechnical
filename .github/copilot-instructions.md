@@ -19,7 +19,7 @@
 - Kiosk API client: `MIS/src/app/services/kiosk-api.ts` (kiosk endpoints)
 - Main app: `MIS/src/app/app.ts` & `app.html` (root component with work timer, unlock modal, button nav)
 - Routes: `MIS/src/app/app.routes.ts` (lazy-loaded components via `loadComponent`)
-- Components: `MIS/src/app/components/` (ad-tools, label-print, network, inventory-search, service-tag, stress-cpu-gpu, os-installation-form, job-sheet, kiosk-admin)
+- Components: `MIS/src/app/components/` (ad-tools, print, network, inventory-search, stress-cpu-gpu, os-installation-form, kiosk-admin, important-links)
 - Kiosk Display: `MIS/public/displayboard/index.html` (fixed URL TV display - plain HTML/JS, NO Angular)
 
 ## Big-picture & architecture 💡

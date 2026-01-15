@@ -24,33 +24,27 @@ public static class DocxHelper
             // Process all paragraphs (including those in tables)
             foreach (var paragraph in body.Descendants<Paragraph>())
             {
-                // Get all text from the paragraph
-                var fullText = string.Join("", paragraph.Descendants<Text>().Select(t => t.Text));
+                var textElements = paragraph.Descendants<Text>().ToList();
+                if (!textElements.Any()) continue;
+
+                // Combine all text in the paragraph
+                var fullText = string.Join("", textElements.Select(t => t.Text));
                 
-                // Check if any placeholder exists in this paragraph
+                // Replace all placeholders
+                var originalText = fullText;
                 foreach (var placeholder in placeholders)
                 {
-                    if (fullText.Contains(placeholder.Key))
+                    fullText = fullText.Replace(placeholder.Key, placeholder.Value);
+                }
+
+                // If text changed, update the paragraph
+                if (fullText != originalText)
+                {
+                    // Clear all text elements except the first
+                    textElements[0].Text = fullText;
+                    for (int i = 1; i < textElements.Count; i++)
                     {
-                        // Replace the placeholder
-                        var updatedText = fullText.Replace(placeholder.Key, placeholder.Value);
-                        
-                        // Clear all existing text elements
-                        var textElements = paragraph.Descendants<Text>().ToList();
-                        if (textElements.Any())
-                        {
-                            // Set the first text element to the full updated text
-                            textElements[0].Text = updatedText;
-                            
-                            // Remove all other text elements
-                            for (int i = 1; i < textElements.Count; i++)
-                            {
-                                textElements[i].Text = "";
-                            }
-                        }
-                        
-                        // Update fullText for next placeholder
-                        fullText = updatedText;
+                        textElements[i].Text = "";
                     }
                 }
             }

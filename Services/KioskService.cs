@@ -336,7 +336,7 @@ public class KioskService : IKioskService
                 SingleMedia = new ActiveMediaItem
                 {
                     MediaId = activeMedia.Id,
-                    Url = $"http://localhost:5001/displayboard/{activeMedia.FileName}",
+                    Url = $"/displayboard/{activeMedia.FileName}",
                     Type = activeMedia.Type,
                     DurationSeconds = 0,
                     FileName = activeMedia.FileName
@@ -379,7 +379,7 @@ public class KioskService : IKioskService
                             .Select(item => new ActiveMediaItem
                             {
                                 MediaId = item.MediaId,
-                                Url = $"http://localhost:5001/displayboard/{item.Media?.FileName}",
+                                Url = $"/displayboard/{item.Media?.FileName}",
                                 Type = item.Media?.Type ?? MediaType.Image,
                                 DurationSeconds = item.DurationSeconds,
                                 FileName = item.Media?.FileName ?? ""
@@ -400,7 +400,7 @@ public class KioskService : IKioskService
                         SingleMedia = new ActiveMediaItem
                         {
                             MediaId = media.Id,
-                            Url = $"http://localhost:5001/displayboard/{media.FileName}",
+                            Url = $"/displayboard/{media.FileName}",
                             Type = media.Type,
                             DurationSeconds = 0, // Display indefinitely
                             FileName = media.FileName
@@ -430,7 +430,7 @@ public class KioskService : IKioskService
                         .Select(item => new ActiveMediaItem
                         {
                             MediaId = item.MediaId,
-                            Url = $"http://localhost:5001/displayboard/{item.Media?.FileName}",
+                            Url = $"/displayboard/{item.Media?.FileName}",
                             Type = item.Media?.Type ?? MediaType.Image,
                             DurationSeconds = item.DurationSeconds,
                             FileName = item.Media?.FileName ?? ""
@@ -451,7 +451,7 @@ public class KioskService : IKioskService
                 SingleMedia = new ActiveMediaItem
                 {
                     MediaId = fallbackMedia.Id,
-                    Url = $"http://localhost:5001/displayboard/{fallbackMedia.FileName}",
+                    Url = $"/displayboard/{fallbackMedia.FileName}",
                     Type = fallbackMedia.Type,
                     DurationSeconds = 0,
                     FileName = fallbackMedia.FileName

@@ -12,9 +12,16 @@
 (function() {
     'use strict';
 
+    // Dynamically determine base URL from current hostname
+    function getBaseUrl() {
+        const hostname = window.location.hostname;
+        const port = window.location.port || '5001';
+        return 'http://' + hostname + ':5001';
+    }
+
     // Configuration
     const CONFIG = {
-        API_BASE: 'http://localhost:5001/api',
+        API_BASE: getBaseUrl() + '/api',
         POLL_INTERVAL: 10000,        // Poll server every 10 seconds
         HEARTBEAT_INTERVAL: 60000,   // Send heartbeat every 60 seconds
         OFFLINE_RETRY_INTERVAL: 30000, // Retry connection every 30 seconds when offline
@@ -36,6 +43,20 @@
     const container = document.getElementById('display-container');
     const offlineIndicator = document.getElementById('offline-indicator');
     const statusOverlay = document.getElementById('status-overlay');
+
+    /**
+     * Convert relative URL to absolute URL using current hostname
+     */
+    function toAbsoluteUrl(url) {
+        if (!url) return '';
+        // If already absolute, return as-is
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        // Convert relative to absolute
+        const baseUrl = getBaseUrl();
+        return baseUrl + (url.startsWith('/') ? url : '/' + url);
+    }
 
     /**
      * Initialize the display
@@ -182,6 +203,9 @@
     function displayMediaItem(item) {
         console.log('[Kiosk Display] Displaying:', item);
 
+        // Get display mode from localStorage
+        const displayMode = localStorage.getItem('kiosk-display-mode') || 'cover';
+
         // Determine which layer to use (swap between layer-1 and layer-2)
         const currentLayer = document.querySelector('.display-layer.active');
         const nextLayer = currentLayer.id === 'layer-1' 
@@ -191,8 +215,8 @@
         // Preload media in hidden layer
         if (item.type === 1) { // Video
             const video = document.createElement('video');
-            video.className = 'media-item media-video';
-            video.src = item.url + '?t=' + Date.now();
+            video.className = 'media-item media-video mode-' + displayMode;
+            video.src = toAbsoluteUrl(item.url) + '?t=' + Date.now();
             video.autoplay = true;
             video.loop = item.durationSeconds === 0;
             video.muted = true;
@@ -213,8 +237,8 @@
             nextLayer.appendChild(video);
         } else { // Image (type 0)
             const img = document.createElement('img');
-            img.className = 'media-item media-image';
-            img.src = item.url + '?t=' + Date.now();
+            img.className = 'media-item media-image mode-' + displayMode;
+            img.src = toAbsoluteUrl(item.url) + '?t=' + Date.now();
             img.alt = item.fileName;
             
             img.onerror = function() {

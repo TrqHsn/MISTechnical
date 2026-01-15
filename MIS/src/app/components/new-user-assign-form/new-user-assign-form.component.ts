@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { debounceTime, Subject } from 'rxjs';
+import { ApiService, User } from '../../services/api';
 
 @Component({
   selector: 'app-new-user-assign-form',
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './new-user-assign-form.component.html',
   styleUrl: './new-user-assign-form.component.css',
   standalone: true,
@@ -13,6 +16,20 @@ export class NewUserAssignFormComponent {
   form: FormGroup;
   isProcessing = false;
   message = '';
+
+  // User search
+  userSearchInput = signal('');
+  userResults = signal<User[]>([]);
+  selectedUser = signal<User | null>(null);
+  userLoading = signal(false);
+  userShowDropdown = signal(false);
+  private userSearchSubject = new Subject<string>();
+
+  // Parsed user info for preview
+  firstName = signal('');
+  lastName = signal('');
+  section = signal('');
+  department = signal('');
 
   items = [
     { name: 'Laptop', providedKey: 'pro1', conditionKey: 'con1' },
@@ -24,7 +41,31 @@ export class NewUserAssignFormComponent {
 
   private apiUrl = 'http://localhost:5001/api/print';
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private apiService: ApiService) {
+    // Setup user search with debounce
+    this.userSearchSubject.pipe(
+      debounceTime(300)
+    ).subscribe(searchTerm => {
+      if (searchTerm.trim()) {
+        this.userLoading.set(true);
+        this.userShowDropdown.set(true);
+        this.apiService.searchUsers(searchTerm).subscribe(
+          (results) => {
+            this.userResults.set(results.slice(0, 5));
+            this.userLoading.set(false);
+          },
+          (error) => {
+            console.error('Error searching users:', error);
+            this.userResults.set([]);
+            this.userLoading.set(false);
+          }
+        );
+      } else {
+        this.userResults.set([]);
+        this.userShowDropdown.set(false);
+      }
+    });
+
     this.form = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
@@ -147,5 +188,55 @@ export class NewUserAssignFormComponent {
   clearForm() {
     this.form.reset();
     this.message = '';
+    this.selectedUser.set(null);
+    this.firstName.set('');
+    this.lastName.set('');
+    this.section.set('');
+    this.department.set('');
+    this.userSearchInput.set('');
+    this.userResults.set([]);
+  }
+
+  onUserSearch(value: string): void {
+    this.userSearchInput.set(value);
+    this.userSearchSubject.next(value);
+  }
+
+  selectUser(user: User): void {
+    this.selectedUser.set(user);
+    
+    // Parse displayName: "LastName, FirstName"
+    const displayName = user['displayName'] || '';
+    const parts = displayName.split(',').map((p: string) => p.trim());
+    const lastNameParsed = parts[0] || '';
+    const firstNameParsed = parts[1] || '';
+    
+    // company -> section, department as is
+    const sectionValue = user['company'] || '';
+    const departmentValue = user['department'] || '';
+    
+    // Update signals for preview
+    this.firstName.set(firstNameParsed);
+    this.lastName.set(lastNameParsed);
+    this.section.set(sectionValue);
+    this.department.set(departmentValue);
+    
+    // Update form values
+    this.form.patchValue({
+      firstName: firstNameParsed,
+      lastName: lastNameParsed,
+      section: sectionValue,
+      department: departmentValue
+    });
+    
+    this.userShowDropdown.set(false);
+    this.userResults.set([]);
+  }
+
+  onUserSearchEnter(): void {
+    const results = this.userResults();
+    if (results && results.length > 0) {
+      this.selectUser(results[0]);
+    }
   }
 }
