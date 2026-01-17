@@ -33,7 +33,17 @@ public interface IKioskService
     Task<bool> DeactivateMediaAsync();
     
     // Content resolution for TV display
-    Task<ActiveContentResponse> GetActiveContentAsync();
+    Task<ActiveContentResponse> GetActiveContentAsync(string? displayId = null);
+    
+    // Display settings management
+    Task<DisplaySettingsDto> GetDisplaySettingsAsync();
+    Task SetDisplaySettingsAsync(DisplaySettingsDto settings);
+    
+    // Broadcast control
+    Task StopBroadcastAsync();
+    Task ResumeBroadcastAsync();
+    Task<bool> IsBroadcastStoppedAsync();
+    Task TriggerReloadAsync();
     
     // Heartbeat tracking (optional, for monitoring)
     Task RecordHeartbeatAsync(DisplayHeartbeatDto heartbeat);

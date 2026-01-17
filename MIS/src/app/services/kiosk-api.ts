@@ -14,7 +14,8 @@ export interface MediaItem {
 
 export enum MediaType {
   Image = 0,
-  Video = 1
+  Video = 1,
+  PDF = 2
 }
 
 export interface Playlist {
@@ -91,6 +92,13 @@ export interface ActiveContentResponse {
   singleMedia?: any;
   serverTime: string;
   scheduleName?: string;
+  displayMode: string;
+  shouldReload: boolean;
+  reloadTimestamp?: string;
+}
+
+export interface DisplaySettingsDto {
+  displayMode: string;
 }
 
 // Dynamically determine API base URL from current hostname
@@ -189,5 +197,26 @@ export class KioskApiService {
   // Display content endpoint (for preview)
   getActiveContent(): Observable<ActiveContentResponse> {
     return this.http.get<ActiveContentResponse>(`${this.apiUrl}/display/content`);
+  }
+
+  // Display settings endpoints
+  getDisplaySettings(): Observable<DisplaySettingsDto> {
+    return this.http.get<DisplaySettingsDto>(`${this.apiUrl}/display/settings`);
+  }
+
+  updateDisplaySettings(settings: DisplaySettingsDto): Observable<any> {
+    return this.http.put(`${this.apiUrl}/display/settings`, settings);
+  }
+
+  triggerDisplayReload(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/display/reload`, {});
+  }
+
+  stopBroadcast(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/broadcast/stop`, {});
+  }
+
+  resumeBroadcast(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/broadcast/resume`, {});
   }
 }

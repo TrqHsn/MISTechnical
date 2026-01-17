@@ -97,7 +97,17 @@
   <!-- Selected Row Display -->
   @if (selectedRow()) {
     <div class="row-display">
-      <h2>Full Row Data</h2>
+      <div class="row-header">
+        <h2>Full Row Data</h2>
+        <a 
+          [href]="'http://sdlportal.dewhirst.grp/inventory/inventory_edit2.php?id=' + selectedRow()!['A']"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="edit-button"
+        >
+          ✏️ Edit
+        </a>
+      </div>
       <div class="data-grid">
         @for (key of getSearchableRowKeys(); track key) {
           <div class="grid-item">

@@ -24,6 +24,7 @@ public class KioskController : ControllerBase
     /// </summary>
     [HttpPost("media/upload")]
     [Consumes("multipart/form-data")]
+    [RequestSizeLimit(5L * 1024 * 1024 * 1024)] // 5 GB limit
     public async Task<ActionResult<UploadMediaResponse>> UploadMedia(IFormFile file, string? description = null)
     {
         try
@@ -394,6 +395,104 @@ public class KioskController : ControllerBase
 
     #endregion
 
+    #region Display Settings
+
+    /// <summary>
+    /// Get global display settings
+    /// </summary>
+    [HttpGet("display/settings")]
+    public async Task<ActionResult<DisplaySettingsDto>> GetDisplaySettings()
+    {
+        try
+        {
+            var settings = await _kioskService.GetDisplaySettingsAsync();
+            return Ok(settings);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving display settings");
+            return StatusCode(500, new { error = "Failed to retrieve display settings" });
+        }
+    }
+
+    /// <summary>
+    /// Update global display settings
+    /// </summary>
+    [HttpPut("display/settings")]
+    public async Task<ActionResult> UpdateDisplaySettings([FromBody] DisplaySettingsDto settings)
+    {
+        try
+        {
+            await _kioskService.SetDisplaySettingsAsync(settings);
+            return Ok(new { message = "Display settings updated successfully", settings });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating display settings");
+            return StatusCode(500, new { error = "Failed to update display settings" });
+        }
+    }
+
+    /// <summary>
+    /// Trigger all TV displays to reload/refresh
+    /// </summary>
+    [HttpPost("display/reload")]
+    public async Task<ActionResult> TriggerDisplayReload()
+    {
+        try
+        {
+            await _kioskService.TriggerReloadAsync();
+            return Ok(new { message = "Reload command sent to all displays", timestamp = DateTime.UtcNow });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error triggering display reload");
+            return StatusCode(500, new { error = "Failed to trigger display reload" });
+        }
+    }
+
+    /// <summary>
+    /// Stop broadcast to all displays (shows 404 page)
+    /// </summary>
+    [HttpPost("broadcast/stop")]
+    public async Task<ActionResult> StopBroadcast()
+    {
+        try
+        {
+            await _kioskService.StopBroadcastAsync();
+            return Ok(new { message = "Broadcast stopped", timestamp = DateTime.UtcNow });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping broadcast");
+            return StatusCode(500, new { error = "Failed to stop broadcast" });
+        }
+    }
+
+    /// <summary>
+    /// Resume broadcast to all displays
+    /// </summary>
+    [HttpPost("broadcast/resume")]
+    public async Task<ActionResult> ResumeBroadcast()
+    {
+        try
+        {
+            await _kioskService.ResumeBroadcastAsync();
+            return Ok(new { message = "Broadcast resumed", timestamp = DateTime.UtcNow });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resuming broadcast");
+            return StatusCode(500, new { error = "Failed to resume broadcast" });
+        }
+    }
+
+    #endregion
+
     #region Display Content Endpoint
 
     /// <summary>
@@ -401,11 +500,11 @@ public class KioskController : ControllerBase
     /// This is the critical endpoint that the TV polls
     /// </summary>
     [HttpGet("display/content")]
-    public async Task<ActionResult<ActiveContentResponse>> GetActiveContent()
+    public async Task<ActionResult<ActiveContentResponse>> GetActiveContent([FromQuery] string? displayId = null)
     {
         try
         {
-            var content = await _kioskService.GetActiveContentAsync();
+            var content = await _kioskService.GetActiveContentAsync(displayId);
             return Ok(content);
         }
         catch (Exception ex)

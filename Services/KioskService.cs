@@ -21,10 +21,14 @@ public class KioskService : IKioskService
     private static int _nextPlaylistId = 1;
     private static int _nextScheduleId = 1;
     private static int? _activeMediaId = null; // For direct activation
+    private static string _displayMode = "cover"; // Global display mode setting
+    private static DateTime? _reloadTimestamp = null; // Last reload command timestamp
+    private static bool _broadcastStopped = false; // Flag to stop all broadcasts
     private static readonly ConcurrentDictionary<int, MediaItem> _media = new();
     private static readonly ConcurrentDictionary<int, Playlist> _playlists = new();
     private static readonly ConcurrentDictionary<int, Schedule> _schedules = new();
     private static readonly ConcurrentDictionary<string, DateTime> _heartbeats = new();
+    private static readonly ConcurrentDictionary<string, DateTime> _displayLastSeen = new(); // Track last reload time per display
     private static bool _dataLoaded = false;
 
     public KioskService(IWebHostEnvironment environment, ILogger<KioskService> logger)
@@ -56,11 +60,31 @@ public class KioskService : IKioskService
                 return null;
 
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".webm" };
+            var allowedExtensions = new[] { 
+                // Images
+                ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg",
+                // Videos
+                ".mp4", ".webm", ".ogg", ".ogv", ".mov", ".avi", ".mkv", ".m4v", ".3gp",
+                // Documents
+                ".pdf"
+            };
             
             if (!allowedExtensions.Contains(extension))
             {
                 _logger.LogWarning("Invalid file extension: {Extension}", extension);
+                return null;
+            }
+
+            // Check file size (5GB limit for videos/PDFs, 100MB for images)
+            var videoExtensions = new[] { ".mp4", ".webm", ".ogg", ".ogv", ".mov", ".avi", ".mkv", ".m4v", ".3gp" };
+            var maxSize = (videoExtensions.Contains(extension) || extension == ".pdf") 
+                ? 5L * 1024 * 1024 * 1024  // 5 GB for videos and PDFs
+                : 100L * 1024 * 1024;       // 100 MB for images
+            
+            if (file.Length > maxSize)
+            {
+                var sizeMB = maxSize / (1024 * 1024);
+                _logger.LogWarning("File too large: {FileName} ({Size} bytes, max: {MaxSize} MB)", file.FileName, file.Length, sizeMB);
                 return null;
             }
 
@@ -72,7 +96,10 @@ public class KioskService : IKioskService
                 await file.CopyToAsync(stream);
             }
 
-            var mediaType = extension == ".mp4" || extension == ".webm" ? MediaType.Video : MediaType.Image;
+            // Determine media type (reuse videoExtensions from file size validation above)
+            var mediaType = extension == ".pdf" ? MediaType.PDF : 
+                           videoExtensions.Contains(extension) ? MediaType.Video : 
+                           MediaType.Image;
             
             var mediaItem = new MediaItem
             {
@@ -325,8 +352,32 @@ public class KioskService : IKioskService
 
     #region Content Resolution
 
-    public async Task<ActiveContentResponse> GetActiveContentAsync()
+    public async Task<ActiveContentResponse> GetActiveContentAsync(string? displayId = null)
     {
+        // Check if broadcast is stopped
+        if (_broadcastStopped)
+        {
+            return new ActiveContentResponse
+            {
+                ContentType = "stopped",
+                ServerTime = DateTime.UtcNow,
+                ScheduleName = "Broadcast Stopped",
+                DisplayMode = _displayMode,
+                ShouldReload = false
+            };
+        }
+
+        // Check if this display should reload
+        var shouldReload = !string.IsNullOrEmpty(displayId) && ShouldDisplayReload(displayId);
+        var reloadTimestamp = _reloadTimestamp;
+        
+        // Mark reload as seen immediately to prevent reload loops
+        if (shouldReload && !string.IsNullOrEmpty(displayId))
+        {
+            MarkReloadSeen(displayId);
+            _logger.LogInformation("Marking display {DisplayId} as having seen reload at {Timestamp}", displayId, reloadTimestamp);
+        }
+        
         // PRIORITY 1: Check for directly activated media (bypasses all schedules)
         if (_activeMediaId.HasValue && _media.TryGetValue(_activeMediaId.Value, out var activeMedia))
         {
@@ -342,7 +393,10 @@ public class KioskService : IKioskService
                     FileName = activeMedia.FileName
                 },
                 ServerTime = DateTime.UtcNow,
-                ScheduleName = "Direct Activation"
+                ScheduleName = "Direct Activation",
+                DisplayMode = _displayMode,
+                ShouldReload = shouldReload,
+                ReloadTimestamp = reloadTimestamp
             };
         }
 
@@ -385,7 +439,10 @@ public class KioskService : IKioskService
                                 FileName = item.Media?.FileName ?? ""
                             }).ToList(),
                         ServerTime = DateTime.UtcNow,
-                        ScheduleName = activeSchedule.Name
+                        ScheduleName = activeSchedule.Name,
+                        DisplayMode = _displayMode,
+                        ShouldReload = shouldReload,
+                        ReloadTimestamp = reloadTimestamp
                     };
                 }
             }
@@ -406,7 +463,10 @@ public class KioskService : IKioskService
                             FileName = media.FileName
                         },
                         ServerTime = DateTime.UtcNow,
-                        ScheduleName = activeSchedule.Name
+                        ScheduleName = activeSchedule.Name,
+                        DisplayMode = _displayMode,
+                        ShouldReload = shouldReload,
+                        ReloadTimestamp = reloadTimestamp
                     };
                 }
             }
@@ -436,7 +496,10 @@ public class KioskService : IKioskService
                             FileName = item.Media?.FileName ?? ""
                         }).ToList(),
                     ServerTime = DateTime.UtcNow,
-                    ScheduleName = "Fallback Playlist"
+                    ScheduleName = "Fallback Playlist",
+                    DisplayMode = _displayMode,
+                    ShouldReload = shouldReload,
+                    ReloadTimestamp = reloadTimestamp
                 };
             }
         }
@@ -457,7 +520,10 @@ public class KioskService : IKioskService
                     FileName = fallbackMedia.FileName
                 },
                 ServerTime = DateTime.UtcNow,
-                ScheduleName = "Fallback Image"
+                ScheduleName = "Fallback Image",
+                DisplayMode = _displayMode,
+                ShouldReload = shouldReload,
+                ReloadTimestamp = reloadTimestamp
             };
         }
 
@@ -465,7 +531,10 @@ public class KioskService : IKioskService
         return new ActiveContentResponse
         {
             ContentType = "none",
-            ServerTime = DateTime.UtcNow
+            ServerTime = DateTime.UtcNow,
+            DisplayMode = _displayMode,
+            ShouldReload = shouldReload,
+            ReloadTimestamp = reloadTimestamp
         };
     }
 
@@ -490,7 +559,89 @@ public class KioskService : IKioskService
     {
         _heartbeats[heartbeat.DisplayId] = DateTime.UtcNow;
         _logger.LogDebug("Heartbeat from display: {DisplayId}", heartbeat.DisplayId);
+        
+        // Check if reload needed for this display
+        var shouldReload = ShouldDisplayReload(heartbeat.DisplayId);
+        if (shouldReload)
+        {
+            _logger.LogDebug("Display {DisplayId} needs reload", heartbeat.DisplayId);
+        }
+        
         return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region Display Settings
+
+    public Task<DisplaySettingsDto> GetDisplaySettingsAsync()
+    {
+        return Task.FromResult(new DisplaySettingsDto
+        {
+            DisplayMode = _displayMode
+        });
+    }
+
+    public Task SetDisplaySettingsAsync(DisplaySettingsDto settings)
+    {
+        var validModes = new[] { "fill", "contain", "cover", "scale-down", "none", "test-512", "hd", "fullhd", "2k", "qhd", "4k" };
+        if (!validModes.Contains(settings.DisplayMode))
+        {
+            throw new ArgumentException($"Invalid display mode: {settings.DisplayMode}. Valid modes: {string.Join(", ", validModes)}");
+        }
+
+        _displayMode = settings.DisplayMode;
+        SaveData();
+        _logger.LogInformation("Display mode updated to: {DisplayMode}", _displayMode);
+        return Task.CompletedTask;
+    }
+
+    public Task TriggerReloadAsync()
+    {
+        _reloadTimestamp = DateTime.UtcNow;
+        _logger.LogInformation("Display reload triggered at: {ReloadTimestamp}", _reloadTimestamp);
+        return Task.CompletedTask;
+    }
+
+    public Task StopBroadcastAsync()
+    {
+        _broadcastStopped = true;
+        _logger.LogInformation("Broadcast stopped at {Time}", DateTime.UtcNow);
+        return Task.CompletedTask;
+    }
+
+    public Task ResumeBroadcastAsync()
+    {
+        _broadcastStopped = false;
+        _logger.LogInformation("Broadcast resumed at {Time}", DateTime.UtcNow);
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> IsBroadcastStoppedAsync()
+    {
+        return Task.FromResult(_broadcastStopped);
+    }
+
+    private bool ShouldDisplayReload(string displayId)
+    {
+        if (!_reloadTimestamp.HasValue) return false;
+        
+        // Check if this display has seen this reload command
+        if (_displayLastSeen.TryGetValue(displayId, out var lastSeen))
+        {
+            return _reloadTimestamp.Value > lastSeen;
+        }
+        
+        // First time seeing reload command
+        return true;
+    }
+
+    private void MarkReloadSeen(string displayId)
+    {
+        if (_reloadTimestamp.HasValue)
+        {
+            _displayLastSeen[displayId] = _reloadTimestamp.Value;
+        }
     }
 
     #endregion
@@ -503,8 +654,9 @@ public class KioskService : IKioskService
             return Task.FromResult(false);
 
         _activeMediaId = mediaId;
+        _broadcastStopped = false; // Auto-resume broadcast when activating content
         SaveData();
-        _logger.LogInformation("Media {MediaId} activated for immediate display", mediaId);
+        _logger.LogInformation("Media {MediaId} activated for immediate display (broadcast resumed)", mediaId);
         return Task.FromResult(true);
     }
 

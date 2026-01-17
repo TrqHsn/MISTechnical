@@ -70,25 +70,33 @@
               <tr>
                 <td>{{ item.name }}</td>
                 <td>
-                  <label class="toggle-switch">
+                  <label class="container">
                     <input 
                       type="checkbox" 
                       [formControlName]="'provided' + (i + 1)"
                     />
-                    <span class="toggle-slider"></span>
+                    <div class="checkbox-wrapper">
+                      <div class="checkmark"></div>
+                      <div class="nebula-glow"></div>
+                      <div class="sparkle-container"></div>
+                    </div>
                   </label>
                 </td>
                 <td>
-                  <label class="toggle-switch">
+                  <label class="container">
                     <input 
                       type="checkbox" 
                       [formControlName]="'condition' + (i + 1)"
                     />
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">
-                      {{ form.get('condition' + (i + 1))?.value ? 'New' : 'Used' }}
-                    </span>
+                    <div class="checkbox-wrapper">
+                      <div class="checkmark"></div>
+                      <div class="nebula-glow"></div>
+                      <div class="sparkle-container"></div>
+                    </div>
                   </label>
+                  <span class="toggle-label">
+                    {{ form.get('condition' + (i + 1))?.value ? 'New' : 'Used' }}
+                  </span>
                 </td>
                 <td>
                   <input 
@@ -121,25 +129,33 @@
               <tr>
                 <td>{{ item.name }}</td>
                 <td>
-                  <label class="toggle-switch">
+                  <label class="container">
                     <input 
                       type="checkbox" 
                       [formControlName]="'rpro' + (i + 1)"
                     />
-                    <span class="toggle-slider"></span>
+                    <div class="checkbox-wrapper">
+                      <div class="checkmark"></div>
+                      <div class="nebula-glow"></div>
+                      <div class="sparkle-container"></div>
+                    </div>
                   </label>
                 </td>
                 <td>
-                  <label class="toggle-switch">
+                  <label class="container">
                     <input 
                       type="checkbox" 
                       [formControlName]="'rcon' + (i + 1)"
                     />
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">
-                      {{ form.get('rcon' + (i + 1))?.value ? 'New' : 'Used' }}
-                    </span>
+                    <div class="checkbox-wrapper">
+                      <div class="checkmark"></div>
+                      <div class="nebula-glow"></div>
+                      <div class="sparkle-container"></div>
+                    </div>
                   </label>
+                  <span class="toggle-label">
+                    {{ form.get('rcon' + (i + 1))?.value ? 'New' : 'Used' }}
+                  </span>
                 </td>
                 <td>
                   <input 

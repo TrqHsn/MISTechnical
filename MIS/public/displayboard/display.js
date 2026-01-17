@@ -19,13 +19,36 @@
         return 'http://' + hostname + ':5001';
     }
 
+    // Get or create persistent display ID
+    function getDisplayId() {
+        try {
+            var storedId = localStorage.getItem('kiosk-display-id');
+            if (storedId) {
+                return storedId;
+            }
+        } catch (e) {
+            console.warn('[Kiosk Display] localStorage not available');
+        }
+        
+        // Generate new ID
+        var newId = 'TV-' + Math.random().toString(36).substr(2, 9);
+        
+        try {
+            localStorage.setItem('kiosk-display-id', newId);
+        } catch (e) {
+            console.warn('[Kiosk Display] Could not save display ID');
+        }
+        
+        return newId;
+    }
+
     // Configuration
     const CONFIG = {
         API_BASE: getBaseUrl() + '/api',
         POLL_INTERVAL: 10000,        // Poll server every 10 seconds
         HEARTBEAT_INTERVAL: 60000,   // Send heartbeat every 60 seconds
         OFFLINE_RETRY_INTERVAL: 30000, // Retry connection every 30 seconds when offline
-        DISPLAY_ID: 'TV-' + Math.random().toString(36).substr(2, 9), // Unique ID for this display
+        DISPLAY_ID: getDisplayId(), // Persistent unique ID for this display
         CACHE_KEY: 'kiosk_last_content',
         ENABLE_STATUS_OVERLAY: false // Set to true for debugging
     };
@@ -87,7 +110,7 @@
      */
     function pollContent() {
         const cacheBuster = '?t=' + Date.now();
-        const url = CONFIG.API_BASE + '/kiosk/display/content' + cacheBuster;
+        const url = CONFIG.API_BASE + '/kiosk/display/content?displayId=' + encodeURIComponent(CONFIG.DISPLAY_ID) + '&' + cacheBuster.substring(1);
 
         fetch(url, {
             method: 'GET',
@@ -102,6 +125,14 @@
         })
         .then(data => {
             handleOnline();
+            
+            // Check if server sent reload command
+            if (data.shouldReload) {
+                console.log('[Kiosk Display] Reload command received, reloading page...');
+                window.location.reload();
+                return;
+            }
+            
             processContent(data);
         })
         .catch(error => {
@@ -154,7 +185,10 @@
 
         clearRotationTimer();
 
-        if (currentContent.contentType === 'playlist' && currentContent.playlistItems) {
+        if (currentContent.contentType === 'stopped') {
+            // Show 404 page inline without navigation
+            show404Page();
+        } else if (currentContent.contentType === 'playlist' && currentContent.playlistItems) {
             displayPlaylist();
         } else if (currentContent.contentType === 'image' && currentContent.singleMedia) {
             displaySingleMedia(currentContent.singleMedia);
@@ -203,8 +237,8 @@
     function displayMediaItem(item) {
         console.log('[Kiosk Display] Displaying:', item);
 
-        // Get display mode from localStorage
-        const displayMode = localStorage.getItem('kiosk-display-mode') || 'cover';
+        // Get display mode from server response (included in currentContent)
+        const displayMode = currentContent?.displayMode || 'cover';
 
         // Determine which layer to use (swap between layer-1 and layer-2)
         const currentLayer = document.querySelector('.display-layer.active');
@@ -235,6 +269,25 @@
 
             nextLayer.innerHTML = '';
             nextLayer.appendChild(video);
+        } else if (item.type === 2) { // PDF
+            const iframe = document.createElement('iframe');
+            iframe.className = 'media-item media-pdf mode-' + displayMode;
+            iframe.src = toAbsoluteUrl(item.url) + '?t=' + Date.now();
+            iframe.frameBorder = '0';
+            
+            iframe.onerror = function() {
+                console.error('[Kiosk Display] PDF failed to load:', item.url);
+                nextLayer.innerHTML = '<div class="placeholder"><div class="placeholder-message">PDF unavailable: ' + item.fileName + '</div></div>';
+                swapLayers(currentLayer, nextLayer);
+            };
+
+            // Wait for PDF to load before swapping
+            iframe.onload = function() {
+                swapLayers(currentLayer, nextLayer);
+            };
+
+            nextLayer.innerHTML = '';
+            nextLayer.appendChild(iframe);
         } else { // Image (type 0)
             const img = document.createElement('img');
             img.className = 'media-item media-image mode-' + displayMode;
@@ -288,6 +341,78 @@
             '</div>';
         
         swapLayers(currentLayer, nextLayer);
+    }
+
+    /**
+     * Show 404 page inline (broadcast stopped)
+     */
+    function show404Page() {
+        const currentLayer = document.querySelector('.display-layer.active');
+        const nextLayer = currentLayer.id === 'layer-1' 
+            ? document.getElementById('layer-2') 
+            : document.getElementById('layer-1');
+        
+        nextLayer.innerHTML = 
+            '<div class="error-404-page">' +
+            '  <div class="about-404">' +
+            '    <a class="bg_links social portfolio" href="https://www.rafaelalucas.com" target="_blank">' +
+            '      <span class="icon"></span>' +
+            '    </a>' +
+            '    <a class="bg_links social dribbble" href="https://dribbble.com/rafaelalucas" target="_blank">' +
+            '      <span class="icon"></span>' +
+            '    </a>' +
+            '    <a class="bg_links social linkedin" href="https://www.linkedin.com/in/rafaelalucas/" target="_blank">' +
+            '      <span class="icon"></span>' +
+            '    </a>' +
+            '    <a class="bg_links logo"></a>' +
+            '  </div>' +
+            '  <section class="wrapper-404">' +
+            '    <div class="container-404">' +
+            '      <div id="scene" class="scene" data-hover-only="false">' +
+            '        <div class="circle" data-depth="1.2"></div>' +
+            '        <div class="one" data-depth="0.9">' +
+            '          <div class="content">' +
+            '            <span class="piece"></span>' +
+            '            <span class="piece"></span>' +
+            '            <span class="piece"></span>' +
+            '          </div>' +
+            '        </div>' +
+            '        <div class="two" data-depth="0.60">' +
+            '          <div class="content">' +
+            '            <span class="piece"></span>' +
+            '            <span class="piece"></span>' +
+            '            <span class="piece"></span>' +
+            '          </div>' +
+            '        </div>' +
+            '        <div class="three" data-depth="0.40">' +
+            '          <div class="content">' +
+            '            <span class="piece"></span>' +
+            '            <span class="piece"></span>' +
+            '            <span class="piece"></span>' +
+            '          </div>' +
+            '        </div>' +
+            '        <p class="p404" data-depth="0.50">404</p>' +
+            '        <p class="p404" data-depth="0.10">404</p>' +
+            '      </div>' +
+            '      <div class="text-404">' +
+            '        <article>' +
+            '          <p>Broadcasting is off</p>' +
+            '          <button>Home 🏠</button>' +
+            '        </article>' +
+            '      </div>' +
+            '    </div>' +
+            '  </section>' +
+            '</div>';
+        
+        swapLayers(currentLayer, nextLayer);
+        
+        // Initialize Parallax after DOM is ready
+        setTimeout(function() {
+            var scene = nextLayer.querySelector('#scene');
+            if (scene && typeof Parallax !== 'undefined') {
+                new Parallax(scene);
+            }
+        }, 100);
     }
 
     /**

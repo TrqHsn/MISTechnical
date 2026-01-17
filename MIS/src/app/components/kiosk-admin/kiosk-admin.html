@@ -44,10 +44,11 @@
     <!-- Upload Form -->
     <div class="upload-section">
       <h3>Upload Media</h3>
+      <p class="upload-info">Max size: 5GB for videos/PDFs, 100MB for images</p>
       <div class="upload-form">
         <input
           type="file"
-          accept="image/*,video/mp4,video/webm"
+          accept="image/*,video/*,application/pdf"
           (change)="onFileSelected($event)"
         />
         <input
@@ -74,14 +75,16 @@
       <div class="media-card">
         @if (media.type === MediaType.Image) {
         <img [src]="getMediaUrl(media.fileName)" [alt]="media.originalFileName" />
-        } @else {
+        } @else if (media.type === MediaType.Video) {
         <video [src]="getMediaUrl(media.fileName)" controls></video>
+        } @else if (media.type === MediaType.PDF) {
+        <iframe [src]="getMediaUrl(media.fileName)" style="width: 100%; height: 200px; border: none;"></iframe>
         }
         <div class="media-info">
           <strong>{{ media.originalFileName }}</strong>
           <p>{{ media.description || 'No description' }}</p>
           <small>Uploaded: {{ media.uploadedAt | date: 'short' }}</small>
-          <small>Type: {{ media.type === MediaType.Image ? 'Image' : 'Video' }}</small>
+          <small>Type: {{ media.type === MediaType.Image ? 'Image' : media.type === MediaType.Video ? 'Video' : 'PDF' }}</small>
           <div class="btn-group">
             <button class="btn-activate" (click)="activateMedia(media.id)">▶ Activate Now</button>
             <button class="btn-delete" (click)="deleteMedia(media.id)">Delete</button>
@@ -317,7 +320,18 @@
     <h2>⚙️ Display Settings</h2>
     
     <div class="settings-section">
-      <h3>Image Display Mode</h3>
+      <div class="settings-header">
+        <h3>Image Display Mode</h3>
+        <div class="control-buttons">
+          <button class="btn-stop" (click)="stopBroadcast()">
+            ⏹️ Stop Broadcast
+          </button>
+          <button class="btn-reload" (click)="triggerReload()">
+            🔄 Reload
+          </button>
+        </div>
+      </div>
+      
       <p class="settings-description">
         Choose how images should be displayed on the TV/kiosk screen. This affects all image content.
       </p>

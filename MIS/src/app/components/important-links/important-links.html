@@ -9,7 +9,45 @@
         (click)="openLink(link.url)"
         type="button"
         [title]="link.description || link.name">
-        <div class="link-icon">🔗</div>
+        @if (link.name === 'Tickets') {
+          <div class="link-icon">
+            <img src="logo/ticket-logo.png" alt="Tickets" class="link-logo">
+          </div>
+        } @else if (link.name === 'Dameware') {
+          <div class="link-icon">
+            <img src="logo/damware-logo.png" alt="Dameware" class="link-logo">
+          </div>
+        } @else if (link.name === 'Inventory') {
+          <div class="link-icon">
+            <img src="logo/inventory-logo.jpg" alt="Inventory" class="link-logo">
+          </div>
+        } @else if (link.name === 'Cisco') {
+          <div class="link-icon">
+            <img src="logo/cisco-logo.png" alt="Cisco" class="link-logo">
+          </div>
+        } @else if (link.name === 'MFA') {
+          <div class="link-icon">
+            <img src="logo/mfa.webp" alt="MFA" class="link-logo">
+          </div>
+        } @else if (link.name === 'Xerox') {
+          <div class="link-icon">
+            <img src="logo/xerox-logo.png" alt="Xerox" class="link-logo">
+          </div>
+        } @else if (link.name === 'Outlook') {
+          <div class="link-icon">
+            <img src="logo/outlook.png" alt="Outlook" class="link-logo">
+          </div>
+        } @else if (link.name === 'IT Forms') {
+          <div class="link-icon">
+            <img src="logo/forms-logo.png" alt="IT Forms" class="link-logo">
+          </div>
+        } @else if (link.name === 'Full Instructions') {
+          <div class="link-icon">
+            <img src="logo/i-logo.png" alt="Full Instructions" class="link-logo">
+          </div>
+        } @else {
+          <div class="link-icon">🔗</div>
+        }
         <div class="link-name">{{ link.name }}</div>
         @if (link.description) {
           <div class="link-description">{{ link.description }}</div>

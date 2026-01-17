@@ -11,7 +11,15 @@ import { HttpClient } from '@angular/common/http';
 })
 export class Print {
   // Tab management
-  activeTab = signal<'label' | 'service-tag'>('label');
+  activeTab = signal<'label' | 'service-tag' | 'forms'>('label');
+
+  // Forms Tab - PDF list
+  pdfForms = [
+    { name: 'Asset Transfer Form', file: 'Asset Transfar Form.pdf' },
+    { name: 'Desktop User Policy', file: 'Desktop User Policy.pdf' },
+    { name: 'Laptop User Policy', file: 'Laptop User Policy.pdf' },
+    { name: 'Mobile WiFi Access', file: 'Mobile WiFi Access.pdf' }
+  ];
 
   // Label Print Tab - properties
   text1 = signal('');
@@ -254,5 +262,26 @@ export class Print {
     document.body.innerHTML = originalContent;
 
     window.location.reload();
+  }
+
+  // Forms Tab - Print PDF method
+  printPdf(filename: string) {
+    if (typeof window === 'undefined') return;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.print();
+        } catch (e) {
+          console.error('Print failed:', e);
+        }
+      }, 250);
+    };
+
+    iframe.src = `PDF/${filename}`;
   }
 }

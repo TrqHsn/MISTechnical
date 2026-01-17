@@ -38,6 +38,12 @@ export class KioskAdminComponent implements OnInit {
     { value: 'cover', label: 'Cover', description: 'Fills screen, maintains aspect ratio (may crop)' },
     { value: 'scale-down', label: 'Scale Down', description: 'Fits inside screen, never enlarges' },
     { value: 'none', label: 'Original Size', description: 'Image at original dimensions' },
+    { value: 'test-512', label: '512x512 Test', description: 'Fixed 512x512 size for testing' },
+    { value: 'hd', label: 'HD', description: '1280x720 resolution' },
+    { value: 'fullhd', label: 'Full HD', description: '1920x1080 resolution' },
+    { value: '2k', label: '2K', description: '2048x1080 resolution' },
+    { value: 'qhd', label: 'QHD', description: '2560x1440 resolution' },
+    { value: '4k', label: '4K', description: '3840x2160 resolution' },
   ];
 
   // Upload state
@@ -84,20 +90,54 @@ export class KioskAdminComponent implements OnInit {
   }
 
   loadDisplayMode() {
-    if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem('kiosk-display-mode');
-      if (saved) {
-        this.displayMode.set(saved);
+    this.kioskApi.getDisplaySettings().subscribe({
+      next: (settings) => {
+        this.displayMode.set(settings.displayMode);
+      },
+      error: (err) => {
+        console.error('Failed to load display settings:', err);
+        // Fallback to 'cover' if server request fails
+        this.displayMode.set('cover');
       }
-    }
+    });
   }
 
   setDisplayMode(mode: string) {
     this.displayMode.set(mode);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('kiosk-display-mode', mode);
-    }
-    this.toast.success(`Display mode set to: ${this.displayModes.find(m => m.value === mode)?.label}`);
+    
+    this.kioskApi.updateDisplaySettings({ displayMode: mode }).subscribe({
+      next: () => {
+        this.toast.success(`Display mode set to: ${this.displayModes.find(m => m.value === mode)?.label}`);
+      },
+      error: (err) => {
+        console.error('Failed to update display settings:', err);
+        this.toast.error('Failed to update display settings');
+      }
+    });
+  }
+
+  triggerReload() {
+    this.kioskApi.triggerDisplayReload().subscribe({
+      next: () => {
+        this.toast.success('🔄 Reload command sent to all displays!');
+      },
+      error: (err) => {
+        console.error('Failed to trigger reload:', err);
+        this.toast.error('Failed to send reload command');
+      }
+    });
+  }
+
+  stopBroadcast() {
+    this.kioskApi.stopBroadcast().subscribe({
+      next: () => {
+        this.toast.success('⏹️ Broadcast stopped - Displays showing 404');
+      },
+      error: (err) => {
+        console.error('Failed to stop broadcast:', err);
+        this.toast.error('Failed to stop broadcast');
+      }
+    });
   }
 
   getCurrentModeLabel(): string {
@@ -174,8 +214,6 @@ export class KioskAdminComponent implements OnInit {
   }
 
   activateMedia(id: number) {
-    if (!confirm('Activate this media for immediate display? This will override all schedules until you deactivate it.')) return;
-
     this.kioskApi.activateMedia(id).subscribe({
       next: () => {
         this.toast.success('Media activated! It will now display on all screens.');

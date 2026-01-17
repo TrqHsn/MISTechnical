@@ -20,7 +20,8 @@ public class MediaItem
 public enum MediaType
 {
     Image,
-    Video
+    Video,
+    PDF
 }
 
 /// <summary>
@@ -124,6 +125,9 @@ public class ActiveContentResponse
     public ActiveMediaItem? SingleMedia { get; set; }
     public DateTime ServerTime { get; set; }
     public string? ScheduleName { get; set; }
+    public string DisplayMode { get; set; } = "cover"; // Global display mode setting (fill, contain, cover, scale-down, none)
+    public bool ShouldReload { get; set; } = false; // Signal TV displays to reload
+    public DateTime? ReloadTimestamp { get; set; } // Timestamp of last reload command
 }
 
 /// <summary>
@@ -156,4 +160,12 @@ public class DisplayHeartbeatDto
     public string DisplayId { get; set; } = string.Empty;
     public DateTime ClientTime { get; set; }
     public string? CurrentContent { get; set; }
+}
+
+/// <summary>
+/// DTO for global display settings
+/// </summary>
+public class DisplaySettingsDto
+{
+    public string DisplayMode { get; set; } = "cover"; // fill, contain, cover, scale-down, none
 }

@@ -9,6 +9,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'service-tag'" (click)="activeTab.set('service-tag')">
       Service Tag
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'forms'" (click)="activeTab.set('forms')">
+      Forms
+    </button>
   </div>
 
   <!-- Label Tab -->
@@ -189,6 +192,24 @@
       <div class="btn-row">
         <button class="btn-clear" (click)="clearAll()">Clear All</button>
         <button class="btn-print" (click)="printServiceTag()">Print</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Forms Tab -->
+  @if (activeTab() === 'forms') {
+  <div class="tab-content">
+    <div class="forms-container">
+      <h2>Print Forms</h2>
+      <p class="forms-description">Click any form to open the print dialog</p>
+      
+      <div class="forms-list">
+        @for (form of pdfForms; track form.file) {
+          <button class="form-btn" (click)="printPdf(form.file)">
+            {{ form.name }}
+          </button>
+        }
       </div>
     </div>
   </div>

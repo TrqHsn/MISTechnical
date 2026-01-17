@@ -15,17 +15,33 @@
   @if (activeTab() === 'ping') {
     <div class="tab-content">
       <div class="ping-section">
-        <div class="input-group">
-          <label for="pingAddress">IP Address or Hostname</label>
-          <input 
-            type="text" 
-            id="pingAddress"
-            class="text-input" 
-            placeholder="e.g., 192.168.1.1 or google.com"
-            [(ngModel)]="pingAddress"
-            (ngModelChange)="pingAddress.set($event)"
-            (keydown.enter)="executePing()"
-          />
+        <div class="input-row">
+          <div class="input-group half-width">
+            <label for="pingAddress">IP Address or Hostname</label>
+            <input 
+              type="text" 
+              id="pingAddress"
+              class="text-input" 
+              placeholder="e.g., 192.168.1.1 or google.com"
+              [(ngModel)]="pingAddress"
+              (ngModelChange)="pingAddress.set($event)"
+              (keydown.enter)="executePing()"
+            />
+          </div>
+
+          <div class="sound-toggle-container">
+            <label class="toggle-switch sound-toggle">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="soundOnFailure"
+                (ngModelChange)="soundOnFailure.set($event)"
+              />
+              <span class="toggle-slider"></span>
+              <span class="toggle-label-text">
+                {{ soundOnFailure() ? '🔊 Sound on Failure' : '🔊 Sound on Success' }}
+              </span>
+            </label>
+          </div>
         </div>
 
         <div class="button-row">
@@ -60,7 +76,7 @@
               <div class="status-light" [class.active]="deviceStatus() === 'offline'" [class.offline]="deviceStatus() === 'offline'" title="Offline"></div>
             </div>
           </div>
-          <pre class="ping-result cmd-style" #pingResultElement>{{ pingResult() || '' }}</pre>
+          <pre class="ping-result cmd-style" #pingResultElement [innerHTML]="pingResultHtml()"></pre>
         </div>
       </div>
     </div>

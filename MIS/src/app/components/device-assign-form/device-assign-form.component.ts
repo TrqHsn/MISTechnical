@@ -84,11 +84,11 @@ export class DeviceAssignFormComponent {
       provided3: [false],
       provided4: [false],
       provided5: [false],
-      condition1: [false],
-      condition2: [false],
-      condition3: [false],
-      condition4: [false],
-      condition5: [false],
+      condition1: [true],
+      condition2: [true],
+      condition3: [true],
+      condition4: [true],
+      condition5: [true],
       remark1: [''],
       remark2: [''],
       remark3: [''],
@@ -122,7 +122,7 @@ export class DeviceAssignFormComponent {
           conditionControl?.enable();
         } else {
           conditionControl?.disable();
-          conditionControl?.setValue(false);
+          conditionControl?.setValue(true); // Reset to New (default)
         }
       });
 

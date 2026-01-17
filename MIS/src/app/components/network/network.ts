@@ -21,6 +21,15 @@ export class NetworkComponent implements OnDestroy {
   private eventSource: EventSource | null = null;
   private sessionId: string = '';
 
+  // Computed signal for colorized ping result HTML
+  pingResultHtml = signal('');
+
+  // Sound toggle (true = sound on failure, false = sound on success)
+  soundOnFailure = signal(true);
+  private audio = new Audio('/ping-beep.mp3');
+  private consecutiveCount = 0;
+  private lastResultType: 'success' | 'failure' | null = null;
+
   @ViewChild('pingResultElement') pingResultElement?: ElementRef<HTMLPreElement>;
 
   constructor(private http: HttpClient) {
@@ -46,7 +55,10 @@ export class NetworkComponent implements OnDestroy {
 
     this.isPinging.set(true);
     this.pingResult.set('🔄 Starting ping...\n');
+    this.pingResultHtml.set('<span>🔄 Starting ping...</span>\n');
     this.deviceStatus.set('unknown');
+    this.consecutiveCount = 0;
+    this.lastResultType = null;
 
     // Close any existing connection
     if (this.eventSource) {
@@ -88,14 +100,43 @@ export class NetworkComponent implements OnDestroy {
               }
 
               // Detect online/offline status (check errors first!)
+              let isFailure = false;
+              let isSuccess = false;
+
               if (data.includes('Request timed out') || data.includes('Destination host unreachable') || data.includes('could not find host')) {
                 this.deviceStatus.set('offline');
+                isFailure = true;
               } else if (data.includes('Reply from') && data.includes('bytes=') && data.includes('time=')) {
                 this.deviceStatus.set('online');
+                isSuccess = true;
               }
 
-              // Append to result with newline (since split removed it)
+              // Handle sound logic: beep every 2 consecutive results
+              if (isFailure || isSuccess) {
+                const currentType: 'success' | 'failure' = isSuccess ? 'success' : 'failure';
+                
+                // Check if same type as last result
+                if (this.lastResultType === currentType) {
+                  this.consecutiveCount++;
+                } else {
+                  // Type changed, reset counter
+                  this.consecutiveCount = 1;
+                  this.lastResultType = currentType;
+                }
+
+                // Play sound every 2 consecutive results of the same type
+                if (this.consecutiveCount === 2) {
+                  if ((this.soundOnFailure() && isFailure) || (!this.soundOnFailure() && isSuccess)) {
+                    this.playSound();
+                  }
+                  this.consecutiveCount = 0; // Reset for next pair
+                }
+              }
+
+              // Append to result with color coding
+              const newLine = this.colorizeLineHtml(data);
               this.pingResult.set(this.pingResult() + data + '\n');
+              this.pingResultHtml.set(this.pingResultHtml() + newLine);
             }
           });
 
@@ -126,6 +167,7 @@ export class NetworkComponent implements OnDestroy {
         .subscribe({
           next: () => {
             this.pingResult.set(this.pingResult() + '\n\n🛑 Ping stopped by user');
+            this.pingResultHtml.set(this.pingResultHtml() + '<span>\n\n🛑 Ping stopped by user</span>');
             this.isPinging.set(false);
             this.deviceStatus.set('unknown');
             this.sessionId = '';
@@ -147,7 +189,10 @@ export class NetworkComponent implements OnDestroy {
     this.stopPing();
     this.pingAddress.set('');
     this.pingResult.set('');
+    this.pingResultHtml.set('');
     this.deviceStatus.set('unknown');
+    this.consecutiveCount = 0;
+    this.lastResultType = null;
   }
 
   // ActiveIP Scanner tab
@@ -273,5 +318,32 @@ export class NetworkComponent implements OnDestroy {
     if (this.pingResultElement?.nativeElement) {
       this.pingResultElement.nativeElement.scrollTop = this.pingResultElement.nativeElement.scrollHeight;
     }
+  }
+
+  private playSound() {
+    this.audio.currentTime = 0;
+    this.audio.play().catch(err => console.warn('Sound playback failed:', err));
+  }
+
+  private colorizeLineHtml(line: string): string {
+    // Escape HTML entities
+    const escaped = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    
+    // Check for successful ping (Reply from...)
+    if (line.includes('Reply from') && line.includes('bytes=') && line.includes('time=')) {
+      return `<span class="ping-success">${escaped}</span>\n`;
+    }
+    
+    // Check for failed ping
+    if (line.includes('Request timed out') || 
+        line.includes('Destination host unreachable') || 
+        line.includes('could not find host') ||
+        line.includes('100% loss') ||
+        line.includes('0 received')) {
+      return `<span class="ping-fail">${escaped}</span>\n`;
+    }
+    
+    // Default color (green)
+    return `<span>${escaped}</span>\n`;
   }
 }
