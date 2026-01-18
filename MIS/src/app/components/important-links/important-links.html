@@ -15,7 +15,7 @@
           </div>
         } @else if (link.name === 'Dameware') {
           <div class="link-icon">
-            <img src="logo/damware-logo.png" alt="Dameware" class="link-logo">
+            <img src="logo/dameware-logo.webp" alt="Dameware" class="link-logo">
           </div>
         } @else if (link.name === 'Inventory') {
           <div class="link-icon">
@@ -45,8 +45,10 @@
           <div class="link-icon">
             <img src="logo/i-logo.png" alt="Full Instructions" class="link-logo">
           </div>
-        } @else {
-          <div class="link-icon">🔗</div>
+        } @else if (link.name === 'Raise PR') {
+          <div class="link-icon">
+            <img src="logo/pr-logo.png" alt="Raise PR" class="link-logo">
+          </div>
         }
         <div class="link-name">{{ link.name }}</div>
         @if (link.description) {

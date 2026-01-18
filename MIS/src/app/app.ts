@@ -13,9 +13,9 @@ export class App {
   protected readonly title = signal('MIS');
 
   buttons = [
+    { name: 'AD Tools', id: 'testapi' },
     { name: 'Print', id: 'print' },
     { name: 'Forms', id: 'oif' },
-    { name: 'AD Tools', id: 'testapi' },
     { name: 'Device Tool', id: 'devicetool' },
     { name: 'Inventory', id: 'inventory' },
     { name: 'Network', id: 'network' },
@@ -30,6 +30,14 @@ export class App {
   timerState = signal('inactive'); // 'inactive'|'running'|'next'
   private _timerInterval: any;
 
+  // Digital clock
+  clockHours = signal<string[]>(['0', '0']);
+  clockMinutes = signal<string[]>(['0', '0']);
+  clockSeconds = signal<string[]>(['0', '0']);
+  clockAmPm = signal('AM');
+  clockWeekday = signal(0);
+  private _clockInterval: any;
+
   // Unlock modal state
   unlockDialogVisible = signal(false);
   isUnlocking = signal(false);
@@ -38,6 +46,7 @@ export class App {
 
   constructor(private apiService: ApiService) {
     this.startWorkTimer();
+    this.startClock();
   }
 
   onTopButtonClick(evt: Event, id: string) {
@@ -79,6 +88,9 @@ export class App {
   ngOnDestroy(): void {
     if (this._timerInterval) {
       clearInterval(this._timerInterval);
+    }
+    if (this._clockInterval) {
+      clearInterval(this._clockInterval);
     }
   }
 
@@ -125,5 +137,41 @@ export class App {
     const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
     const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
     return `${hours}:${minutes}:${seconds}`;
+  }
+
+  private startClock() {
+    const digitNames = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+
+    const updateClock = () => {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      const isAM = hours < 12;
+
+      // Convert to 12-hour format
+      if (hours === 0) hours = 12;
+      else if (hours > 12) hours -= 12;
+
+      const h1 = digitNames[Math.floor(hours / 10)];
+      const h2 = digitNames[hours % 10];
+      const m1 = digitNames[Math.floor(minutes / 10)];
+      const m2 = digitNames[minutes % 10];
+      const s1 = digitNames[Math.floor(seconds / 10)];
+      const s2 = digitNames[seconds % 10];
+
+      this.clockHours.set([h1, h2]);
+      this.clockMinutes.set([m1, m2]);
+      this.clockSeconds.set([s1, s2]);
+      this.clockAmPm.set(isAM ? 'AM' : 'PM');
+
+      // Weekday: SAT=0, SUN=1, MON=2, TUE=3, WED=4, THU=5, FRI=6
+      // JavaScript getDay(): Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6
+      const dow = (now.getDay() + 1) % 7;
+      this.clockWeekday.set(dow);
+    };
+
+    updateClock();
+    this._clockInterval = setInterval(updateClock, 1000);
   }
 }

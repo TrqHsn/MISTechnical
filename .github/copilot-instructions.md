@@ -19,8 +19,13 @@
 - Kiosk API client: `MIS/src/app/services/kiosk-api.ts` (kiosk endpoints)
 - Main app: `MIS/src/app/app.ts` & `app.html` (root component with work timer, unlock modal, button nav)
 - Routes: `MIS/src/app/app.routes.ts` (lazy-loaded components via `loadComponent`)
-- Components: `MIS/src/app/components/` (ad-tools, print, network, inventory-search, stress-cpu-gpu, os-installation-form, kiosk-admin, important-links)
+- Components: `MIS/src/app/components/` (ad-tools, print, network, inventory-search, stress-cpu-gpu, os-installation-form, kiosk-admin, important-links, toast)
 - Kiosk Display: `MIS/public/displayboard/index.html` (fixed URL TV display - plain HTML/JS, NO Angular)
+- **Documentation:** Root `*.md` files contain detailed implementation notes:
+  - `KIOSK_SYSTEM_README.md` - Digital signage architecture
+  - `TOAST_NOTIFICATION_SYSTEM.md` - Toast notification usage
+  - `LAST_DEVICE_IMPLEMENTATION.md` - Device numbering logic
+  - `NEW_USER_TEMPLATE_README.md` - New user DOCX template system
 
 ## Big-picture & architecture 💡
 - **Monolith API:** Single-process .NET Web API that communicates directly with AD via LDAP (`System.DirectoryServices`). No database/ORM; domain data is read/written directly to AD.
@@ -37,9 +42,10 @@
 
 ## Runtime & important runtime notes ⚠️
 - **Windows + domain join required:** `ActiveDirectoryService` calls `Domain.GetCurrentDomain()` and creates `LDAP://{domain}`; it will fail on non-domain or Linux environments.
-- **Ports:** `Program.cs` uses `builder.WebHost.UseUrls("http://localhost:5001")`. (Note: `README.md` still references port `5000` — prefer the value in `Program.cs`.)
+- **Ports:** `Program.cs` binds to `http://0.0.0.0:5001` (listens on all network interfaces). Frontend on `http://localhost:4200`.
 - **Swagger:** Available in Development at `/swagger`.
 - **Angular:** SSR-enabled (`outputMode: "server"`), uses Vitest for tests, and npm@11.6.2 as package manager.
+- **Toast notifications:** Frontend includes a toast notification system (see `MIS/src/app/services/toast.service.ts` and `MIS/src/app/components/toast/`). Use `toastService.show()` for user feedback. Docs in `TOAST_NOTIFICATION_SYSTEM.md`.
 - **Key dependencies:**
   - Backend: `System.DirectoryServices` (AD), `DocumentFormat.OpenXml` (DOCX templates), `System.Drawing.Common` (thermal printing)
   - Frontend: `xlsx`/`exceljs` (Excel parsing for bulk user updates), `three` (3D stress testing), RxJS (reactive patterns)

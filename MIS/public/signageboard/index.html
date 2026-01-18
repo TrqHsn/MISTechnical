@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Board - Digital Signage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background: #ffffff;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* LEFT SIDE - 60% */
+        .left-side {
+            width: 60%;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .image-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            border: 8px solid #4a9eff;
+            overflow: hidden;
+            animation: borderPulse 4s ease-in-out infinite;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        @keyframes borderPulse {
+            0%, 100% {
+                border-color: #4a9eff;
+            }
+            25% {
+                border-color: #2ecc71;
+            }
+            50% {
+                border-color: #e74c3c;
+            }
+            75% {
+                border-color: #f39c12;
+            }
+        }
+
+        /* RIGHT SIDE - 40% */
+        .right-side {
+            width: 40%;
+            background: #f8f9fa;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .welcome-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .welcome-title {
+            font-size: 72px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 60px;
+            letter-spacing: 8px;
+            animation: welcomeSlide 2s ease-out;
+        }
+
+        @keyframes welcomeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .visitors-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .visitor-card {
+            background: #ffffff;
+            padding: 25px 30px;
+            border-radius: 12px;
+            border-left: 6px solid #4a9eff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeInCard 0.8s ease-out backwards;
+        }
+
+        .visitor-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .visitor-card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .visitor-card:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .visitor-card:nth-child(4) {
+            animation-delay: 0.8s;
+        }
+
+        .visitor-card:nth-child(5) {
+            animation-delay: 1s;
+        }
+
+        @keyframes fadeInCard {
+            0% {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .visitor-name {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2c3e50;
+            letter-spacing: 1px;
+        }
+
+        .visitor-company {
+            font-size: 24px;
+            color: #7f8c8d;
+            margin-top: 8px;
+        }
+
+        /* LOGOS SECTION */
+        .logos-section {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .logo-box {
+            flex: 1;
+            height: 140px;
+            border: 4px solid #dee2e6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            padding: 20px;
+        }
+
+        .logo-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-placeholder {
+            font-size: 18px;
+            color: #adb5bd;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LEFT SIDE: Image -->
+        <div class="left-side">
+            <div class="image-container">
+                <img src="welcome-image.jpg" alt="Welcome" id="welcomeImage">
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: Welcome & Visitors -->
+        <div class="right-side">
+            <div class="welcome-section">
+                <div class="welcome-title">WELCOME</div>
+                
+                <div class="visitors-list" id="visitorsList">
+                    <!-- Visitor cards will be dynamically inserted here -->
+                    <div class="visitor-card">
+                        <div class="visitor-name">John Smith</div>
+                        <div class="visitor-company">Tech Corporation</div>
+                    </div>
+                    <div class="visitor-card">
+                        <div class="visitor-name">Sarah Johnson</div>
+                        <div class="visitor-company">Global Industries</div>
+                    </div>
+                    <div class="visitor-card">
+                        <div class="visitor-name">Michael Chen</div>
+                        <div class="visitor-company">Innovation Labs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOGOS -->
+            <div class="logos-section">
+                <div class="logo-box">
+                    <img src="logo1.png" alt="Company Logo 1" id="logo1">
+                    <!-- Fallback if no image -->
+                    <!-- <div class="logo-placeholder">LOGO 1</div> -->
+                </div>
+                <div class="logo-box">
+                    <img src="logo2.png" alt="Company Logo 2" id="logo2">
+                    <!-- Fallback if no image -->
+                    <!-- <div class="logo-placeholder">LOGO 2</div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple configuration object for easy customization
+        const config = {
+            visitors: [
+                { name: "John Smith", company: "Tech Corporation" },
+                { name: "Sarah Johnson", company: "Global Industries" },
+                { name: "Michael Chen", company: "Innovation Labs" }
+            ],
+            welcomeImage: "welcome-image.jpg",
+            logo1: "logo1.png",
+            logo2: "logo2.png"
+        };
+
+        // Function to render visitor cards
+        function renderVisitors(visitors) {
+            const visitorsList = document.getElementById('visitorsList');
+            visitorsList.innerHTML = '';
+            
+            visitors.forEach((visitor, index) => {
+                const card = document.createElement('div');
+                card.className = 'visitor-card';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'visitor-name';
+                nameDiv.textContent = visitor.name;
+                
+                const companyDiv = document.createElement('div');
+                companyDiv.className = 'visitor-company';
+                companyDiv.textContent = visitor.company;
+                
+                card.appendChild(nameDiv);
+                card.appendChild(companyDiv);
+                visitorsList.appendChild(card);
+            });
+        }
+
+        // Initialize with config
+        renderVisitors(config.visitors);
+        document.getElementById('welcomeImage').src = config.welcomeImage;
+        document.getElementById('logo1').src = config.logo1;
+        document.getElementById('logo2').src = config.logo2;
+
+        // Handle image loading errors
+        document.getElementById('welcomeImage').onerror = function() {
+            this.style.display = 'none';
+            this.parentElement.style.background = '#2a2a2a';
+        };
+
+        document.getElementById('logo1').onerror = function() {
+            this.style.display = 'none';
+            this.parentElement.innerHTML = '<div class="logo-placeholder">LOGO 1</div>';
+        };
+
+        document.getElementById('logo2').onerror = function() {
+            this.style.display = 'none';
+            this.parentElement.innerHTML = '<div class="logo-placeholder">LOGO 2</div>';
+        };
+    </script>
+</body>
+</html>

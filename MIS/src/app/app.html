@@ -14,6 +14,76 @@
     <img src="/SohidUsman.jpg" alt="Sohid Usman" />
   </div>
 
+  <!-- Digital Clock (top-right) -->
+  <div id="clock" class="light">
+    <div class="display">
+      <div class="weekdays">
+        @for (day of ['SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI']; track $index) {
+          <span [class.active]="clockWeekday() === $index">{{ day }}</span>
+        }
+      </div>
+      <div class="ampm">{{ clockAmPm() }}</div>
+      <div class="digits">
+        <div [class]="clockHours()[0]">
+          <span class="d1"></span>
+          <span class="d2"></span>
+          <span class="d3"></span>
+          <span class="d4"></span>
+          <span class="d5"></span>
+          <span class="d6"></span>
+          <span class="d7"></span>
+        </div>
+        <div [class]="clockHours()[1]">
+          <span class="d1"></span>
+          <span class="d2"></span>
+          <span class="d3"></span>
+          <span class="d4"></span>
+          <span class="d5"></span>
+          <span class="d6"></span>
+          <span class="d7"></span>
+        </div>
+        <div class="dots"></div>
+        <div [class]="clockMinutes()[0]">
+          <span class="d1"></span>
+          <span class="d2"></span>
+          <span class="d3"></span>
+          <span class="d4"></span>
+          <span class="d5"></span>
+          <span class="d6"></span>
+          <span class="d7"></span>
+        </div>
+        <div [class]="clockMinutes()[1]">
+          <span class="d1"></span>
+          <span class="d2"></span>
+          <span class="d3"></span>
+          <span class="d4"></span>
+          <span class="d5"></span>
+          <span class="d6"></span>
+          <span class="d7"></span>
+        </div>
+        <div class="dots"></div>
+        <div [class]="clockSeconds()[0]">
+          <span class="d1"></span>
+          <span class="d2"></span>
+          <span class="d3"></span>
+          <span class="d4"></span>
+          <span class="d5"></span>
+          <span class="d6"></span>
+          <span class="d7"></span>
+        </div>
+        <div [class]="clockSeconds()[1]">
+          <span class="d1"></span>
+          <span class="d2"></span>
+          <span class="d3"></span>
+          <span class="d4"></span>
+          <span class="d5"></span>
+          <span class="d6"></span>
+          <span class="d7"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Buttons Row (single-line) -->
   <div class="buttons-row">
 
