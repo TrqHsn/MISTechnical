@@ -1,7 +1,7 @@
 # Copilot / Agent instructions for ADApi
 
 ## Quick summary ✅
-- **Project:** .NET 9 Web API (`net9.0`) that queries Active Directory (AD) + Angular 21 frontend (SSR-enabled) in `MIS/`.
+- **Project:** .NET 10 Web API (`net10.0`) that queries Active Directory (AD) + Angular 21 frontend (SSR-enabled) in `MIS/`.
 - **Platform:** Windows/domain-joined machine required for AD access (uses `System.DirectoryServices`).
 - **Run:** API via `dotnet run` (listens on `http://localhost:5001`). Frontend with `ng serve` in `MIS/` (listens on `http://localhost:4200`).
 
@@ -19,13 +19,19 @@
 - Kiosk API client: `MIS/src/app/services/kiosk-api.ts` (kiosk endpoints)
 - Main app: `MIS/src/app/app.ts` & `app.html` (root component with work timer, unlock modal, button nav)
 - Routes: `MIS/src/app/app.routes.ts` (lazy-loaded components via `loadComponent`)
-- Components: `MIS/src/app/components/` (ad-tools, print, network, inventory-search, stress-cpu-gpu, os-installation-form, kiosk-admin, important-links, toast)
+- Components: `MIS/src/app/components/`
+  - Core tools: `ad-tools` (AD user/computer search & updates), `device-tool` (hardware testing utilities launcher), `network` (ping/IP scanner/attendance devices)
+  - Forms: `device-assign-form` (laptop assignment form), `os-installation-form` (OS installation tracking)
+  - Utilities: `print` (thermal label printing), `inventory-search` (CSV inventory lookup), `stress-cpu-gpu` (hardware stress testing), `kiosk-admin` (digital signage management)
+  - UI: `universal-search` (Ctrl+K search), `important-links` (quick links), `toast` (notifications)
 - Kiosk Display: `MIS/public/displayboard/index.html` (fixed URL TV display - plain HTML/JS, NO Angular)
+- Universal Search: `MIS/src/app/components/universal-search/` (Ctrl+K/Cmd+K global search - see `UNIVERSAL_SEARCH_README.md`)
 - **Documentation:** Root `*.md` files contain detailed implementation notes:
   - `KIOSK_SYSTEM_README.md` - Digital signage architecture
   - `TOAST_NOTIFICATION_SYSTEM.md` - Toast notification usage
   - `LAST_DEVICE_IMPLEMENTATION.md` - Device numbering logic
   - `NEW_USER_TEMPLATE_README.md` - New user DOCX template system
+  - `UNIVERSAL_SEARCH_README.md` - Universal search (Ctrl+K) implementation
 
 ## Big-picture & architecture 💡
 - **Monolith API:** Single-process .NET Web API that communicates directly with AD via LDAP (`System.DirectoryServices`). No database/ORM; domain data is read/written directly to AD.
@@ -63,7 +69,9 @@
 - **Lazy loading:** Routes use `loadComponent: () => import('...')` for code-splitting.
 - **Debounced search:** Search inputs use RxJS Subject + `debounceTime(300)` to throttle API calls (see `ad-tools.ts`).
 - **Work timer:** Main app component (`app.ts`) includes a work timer that counts time left/until work hours (7:30-16:30).
-- **Tabbed interfaces:** Component composition pattern using signals for active tab state (see `forms.ts` for example: `activeTab = signal<'os-form' | 'device-form'>('os-form')` with `@if` conditionals).
+- **Tabbed interfaces:** Component composition pattern using signals for active tab state (see `forms.ts` for example: `activeTab = signal<'os-form' | 'device-form'>('os-form')` with `@if` conditionals). Use `ActivatedRoute.queryParams` to listen for `?tab=` param for deep linking.
+- **Universal search (Ctrl+K):** Global keyboard shortcut (Ctrl+K/Cmd+K) opens `UniversalSearchComponent`. Service-driven search across pages, tabs, and actions with quick access grid and keyboard navigation. See `UNIVERSAL_SEARCH_README.md`.
+- **Device testing tools:** `DeviceToolComponent` is a launcher for hardware testing utilities (keyboard test, stress test, display test). Uses `DeviceToolsService` with signal-based tool registry. Tools open in new tabs via `window.open()` to static HTML files in `MIS/public/`.
 
 ## Important implementation details & gotchas 🧠
 - **Title <-> Description mirroring:** When updating user attributes, **Title** is mirrored into **Description** if provided. Both backend and frontend implement this behavior; keep them in sync when changing update logic.
@@ -98,6 +106,15 @@
 ## Testing & safety notes 🧪
 - There are no AD integration tests in the repo. For unit tests, **mock `IActiveDirectoryService`** rather than testing with real AD unless you have a dedicated test AD environment.
 - If adding integration tests that touch AD, isolate/recreate a dedicated test environment (domain-joined VM) and never run destructive operations against production AD.
+
+## Common pain points & tribal knowledge 🔧
+- **SSE cleanup:** `NetworkController` tracks background processes in `ConcurrentDictionary`. When adding SSE endpoints, **always** provide cleanup on client disconnect or you'll leak processes. Check `Response.HttpContext.RequestAborted` token.
+- **DirectoryEntry disposal:** AD operations use `DirectoryEntry` and `DirectorySearcher` — **always** wrap in `using` statements or you'll leak LDAP connections. The service wraps everything in `Task.Run(...)` so exceptions in mapping won't crash the host.
+- **Frontend SSR gotchas:** `window` and browser APIs are undefined during SSR. Always check `typeof window !== 'undefined'` before accessing `window.location`, `localStorage`, or browser-only APIs. See `device-assign-form.component.ts` `getApiUrl()` for pattern.
+- **CORS issues:** If frontend can't reach API, check that your IP is in the `AllowAngularApp` CORS policy in `Program.cs`. The policy allows `localhost:4200`, `10.140.9.252:4200`, and `10.140.5.32:4200`.
+- **Angular routing:** Routes use `loadComponent` for lazy loading. **Never** import components directly in `app.routes.ts` or you'll break code-splitting.
+- **Thermal printing:** `LabelPrintController` is Windows-only and hardcoded to "SEWOO Label Printer". Will throw on non-Windows or if printer not installed. Use `[SupportedOSPlatform("windows")]` attribute when adding Windows-specific code.
+- **Kiosk media uploads:** Files go to `wwwroot/displayboard/` and are served at `/displayboard/{filename}`. Deleting a media item via API **does not** delete the physical file — manual cleanup required or you'll accumulate orphaned files.
 
 ## How an AI agent should contribute 🤖
 - Small, focused PRs with a short description and a single area of change (e.g., "Refactor AD mapping for manager string parsing").

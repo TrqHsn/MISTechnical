@@ -1,0 +1,252 @@
+<div class="display-test-container" [attr.data-step]="steps[currentStep()].name">
+  
+  <!-- Step 0: Start Screen -->
+  @if (currentStep() === 0) {
+    <div class="start-screen">
+      <h1>Display Test</h1>
+      <div class="instructions">
+        <h2>Before you begin:</h2>
+        <ul>
+          <li>Clean your screen with a microfiber cloth</li>
+          <li>Sit at your normal viewing distance and angle</li>
+          <li>Dim room lights for black screen tests</li>
+          <li>Use keyboard arrows or click to navigate</li>
+        </ul>
+      </div>
+      <button class="btn-start" (click)="startTest()">Start Test</button>
+      <p class="tip">Press <kbd>Esc</kbd> anytime to exit fullscreen</p>
+    </div>
+  }
+
+  <!-- Step 1: Dead & Stuck Pixel Test -->
+  @if (currentStep() === 1) {
+    <div class="pixel-test-screen" [style.background-color]="getCurrentColor().color">
+      @if (showControls()) {
+        <div class="test-controls pixel-controls">
+          <div class="control-header">
+            <h2>{{ steps[1].title }}</h2>
+            <p class="instruction">Look for dots that do not change color</p>
+          </div>
+          <div class="color-indicator">
+            <span class="color-name">{{ getCurrentColor().name }}</span>
+            <span class="color-progress">{{ currentPixelTestColor() + 1 }} / {{ pixelTestColors.length }}</span>
+          </div>
+          <div class="control-buttons">
+            <button class="btn-control" (click)="previousPixelColor()">← Previous Color</button>
+            <button class="btn-control" (click)="toggleAutoRotate()">
+              {{ autoRotateEnabled() ? '⏸ Stop Auto' : '▶ Auto Rotate' }}
+            </button>
+            <button class="btn-control" (click)="nextPixelColor()">Next Color →</button>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 2: Backlight Bleeding Test -->
+  @if (currentStep() === 2) {
+    <div class="backlight-test-screen">
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[2].title }}</h2>
+            <p class="instruction">Check for bright patches near edges or corners</p>
+            <p class="tip">Best viewed in a dark room</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 3: IPS Glow Test -->
+  @if (currentStep() === 3) {
+    <div class="ips-glow-test-screen">
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[3].title }}</h2>
+            <p class="instruction">Move your head slightly and observe changes</p>
+            <p class="tip">Glow that changes with viewing angle is normal for IPS panels</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 4: Brightness Uniformity Test -->
+  @if (currentStep() === 4) {
+    <div class="brightness-test-screen">
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[4].title }}</h2>
+            <p class="instruction">Check if any area is darker or brighter</p>
+            <p class="tip">Mid-gray background for uniformity testing</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 5: Color Uniformity Test -->
+  @if (currentStep() === 5) {
+    <div class="color-uniformity-test-screen">
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[5].title }}</h2>
+            <p class="instruction">Look for color tint differences across the screen</p>
+            <p class="tip">Light gray background to detect color shifts</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 6: Gradient / Banding Test -->
+  @if (currentStep() === 6) {
+    <div class="gradient-test-screen">
+      <div class="gradient-box"></div>
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[6].title }}</h2>
+            <p class="instruction">Gradient should appear smooth, not stepped</p>
+            <p class="tip">Look for visible bands or color steps</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 7: Contrast & Black Detail Test -->
+  @if (currentStep() === 7) {
+    <div class="contrast-test-screen">
+      <div class="contrast-pattern">
+        <div class="shade-box" style="background: #000000;"></div>
+        <div class="shade-box" style="background: #0a0a0a;"></div>
+        <div class="shade-box" style="background: #141414;"></div>
+        <div class="shade-box" style="background: #1e1e1e;"></div>
+        <div class="shade-box" style="background: #282828;"></div>
+        <div class="shade-box" style="background: #323232;"></div>
+      </div>
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[7].title }}</h2>
+            <p class="instruction">You should distinguish dark gray details from pure black</p>
+            <p class="tip">All 6 boxes should be visible</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 8: Sharpness & Text Clarity Test -->
+  @if (currentStep() === 8) {
+    <div class="sharpness-test-screen">
+      <div class="text-samples">
+        <div class="text-block">
+          <h3>Black text on white</h3>
+          <p class="sample-text large">The quick brown fox jumps</p>
+          <p class="sample-text medium">ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
+          <p class="sample-text small">abcdefghijklmnopqrstuvwxyz 0123456789</p>
+        </div>
+        <div class="text-block colored">
+          <h3>Colored text samples</h3>
+          <p class="sample-text medium red">Red text sample</p>
+          <p class="sample-text medium green">Green text sample</p>
+          <p class="sample-text medium blue">Blue text sample</p>
+        </div>
+      </div>
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[8].title }}</h2>
+            <p class="instruction">Check for blur or color fringing around letters</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 9: Viewing Angle Test -->
+  @if (currentStep() === 9) {
+    <div class="viewing-angle-test-screen">
+      @if (showControls()) {
+        <div class="test-controls">
+          <div class="control-header">
+            <h2>{{ steps[9].title }}</h2>
+            <p class="instruction">Move sideways or tilt the screen</p>
+            <p class="tip">Observe color or contrast changes at different angles</p>
+          </div>
+          <div class="navigation-buttons">
+            <button class="btn-nav" (click)="previousStep()">← Back</button>
+            <button class="btn-nav btn-next" (click)="nextStep()">Next Test →</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 10: Summary / Checklist -->
+  @if (currentStep() === 10) {
+    <div class="summary-screen">
+      <h1>Test Summary</h1>
+      <div class="checklist">
+        @for (item of checklist(); track $index) {
+          <div class="checklist-item">
+            <label>{{ item.label }}</label>
+            <div class="checklist-options">
+              @for (option of item.options; track option) {
+                <button 
+                  class="option-btn"
+                  [class.selected]="item.value === option"
+                  (click)="updateChecklist($index, option)"
+                >
+                  {{ option }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="summary-actions">
+        <button class="btn-restart" (click)="restartTest()">↻ Restart Test</button>
+      </div>
+    </div>
+  }
+
+</div>

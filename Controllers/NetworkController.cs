@@ -435,7 +435,7 @@ namespace ADApi.Controllers
                     return Ok(new { results = "No devices to check", devicesNeedReboot = new List<string>(), allResponding = true });
                 }
 
-                var ports = new[] { 4370, 5000, 6000 };
+                var ports = new[] { 23, 4370 };
                 var resultBuilder = new StringBuilder();
                 var devicesNeedReboot = new List<string>();
 

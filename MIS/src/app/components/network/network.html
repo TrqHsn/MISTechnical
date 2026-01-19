@@ -178,10 +178,16 @@
                     formControlName="lastOctet"
                     class="text-input ip-octet-input"
                     maxlength="3"
+                    (input)="validateOctetInput($event)"
+                    placeholder="0-255"
                   />
                 </div>
                 @if (attendanceForm.get('lastOctet')?.invalid && attendanceForm.get('lastOctet')?.touched) {
-                  <span class="error-text">Enter a valid number (0-255)</span>
+                  @if (attendanceForm.get('lastOctet')?.hasError('duplicate')) {
+                    <span class="error-text">⚠️ This IP address already exists in the list</span>
+                  } @else {
+                    <span class="error-text">Enter a valid number (0-255)</span>
+                  }
                 }
               </div>
 
@@ -225,15 +231,16 @@
                 <thead>
                   <tr>
                     <th>IP Address</th>
-                    <th>Location</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (device of attendanceDevices(); track device.ip) {
                     <tr>
-                      <td class="ip-cell">{{ device.ip }}</td>
-                      <td>{{ device.location }}</td>
+                      <td class="ip-cell">
+                        <div class="ip-address">{{ device.ip }}</div>
+                        <div class="ip-location">{{ device.location }}</div>
+                      </td>
                       <td>
                         <button 
                           class="btn danger btn-small" 

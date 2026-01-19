@@ -34,9 +34,9 @@ export class DeviceToolsService {
       id: 'displaytest',
       name: 'Display Test',
       description: 'Test display quality and dead pixels',
-      url: '/DisplayTest/DisplayTest.html',
+      url: '/display-test',
       icon: '🖥️',
-      keywords: ['display', 'screen', 'monitor', 'pixel', 'test']
+      keywords: ['display', 'screen', 'monitor', 'pixel', 'test', 'dead pixel', 'backlight']
     }
   ]);
 

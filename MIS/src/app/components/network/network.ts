@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+import { ToastService } from '../../services/toast.service';
 
 interface AttendanceDevice {
   ip: string;
@@ -55,7 +56,12 @@ export class NetworkComponent implements OnDestroy {
   lastOctet = signal('');
   location = signal('');
 
-  constructor(private http: HttpClient, private fb: FormBuilder, private route: ActivatedRoute) {
+  constructor(
+    private http: HttpClient, 
+    private fb: FormBuilder, 
+    private route: ActivatedRoute,
+    private toastService: ToastService
+  ) {
     // Initialize Audio only in browser
     if (this.isBrowser) {
       this.audio = new Audio('/ping-beep.mp3');
@@ -77,10 +83,7 @@ export class NetworkComponent implements OnDestroy {
       }
     });
 
-    // Load attendance devices on init
-    this.loadAttendanceDevices();
-
-    // Reload attendance devices when tab becomes active
+    // Load attendance devices only when tab becomes active
     effect(() => {
       if (this.activeTab() === 'attendance') {
         this.loadAttendanceDevices();
@@ -432,12 +435,23 @@ export class NetworkComponent implements OnDestroy {
       Object.keys(this.attendanceForm.controls).forEach(key => {
         this.attendanceForm.get(key)?.markAsTouched();
       });
+      this.toastService.error('Please fill in all required fields');
       return;
     }
 
-    const lastOctet = this.attendanceForm.value.lastOctet;
+    // Normalize last octet (remove leading zeros)
+    const lastOctetInput = this.attendanceForm.value.lastOctet;
+    const normalizedOctet = parseInt(lastOctetInput, 10).toString();
     const location = this.attendanceForm.value.location;
-    const ip = `10.140.8.${lastOctet}`;
+    const ip = `10.140.8.${normalizedOctet}`;
+
+    // Check for duplicate IP
+    const existingDevice = this.attendanceDevices().find(device => device.ip === ip);
+    if (existingDevice) {
+      this.toastService.error(`IP ${ip} already exists in the list`);
+      this.attendanceForm.get('lastOctet')?.setErrors({ duplicate: true });
+      return;
+    }
 
     console.log('Adding device:', { ip, location });
 
@@ -451,6 +465,8 @@ export class NetworkComponent implements OnDestroy {
 
       if (response?.success) {
         console.log('Device added successfully, reloading list...');
+        this.toastService.success(`Device ${ip} added successfully`);
+        
         // Reload the list
         await this.loadAttendanceDevices();
         
@@ -464,12 +480,18 @@ export class NetworkComponent implements OnDestroy {
       }
     } catch (error: any) {
       console.error('Error adding device:', error);
-      alert(error?.error?.error || 'Failed to add device');
+      this.toastService.error(error?.error?.error || 'Failed to add device');
     }
   }
 
   async removeAttendanceDevice(ip: string) {
-    if (!confirm(`Remove device ${ip}?`)) {
+    // Find device to show location in confirmation
+    const device = this.attendanceDevices().find(d => d.ip === ip);
+    const confirmMessage = device 
+      ? `Are you sure you want to remove this device?\n\nIP: ${ip}\nLocation: ${device.location}`
+      : `Are you sure you want to remove device ${ip}?`;
+    
+    if (!confirm(confirmMessage)) {
       return;
     }
 
@@ -479,6 +501,8 @@ export class NetworkComponent implements OnDestroy {
       ).toPromise();
 
       if (response?.success) {
+        this.toastService.success(`Device ${ip} removed successfully`);
+        
         // Reload the list
         await this.loadAttendanceDevices();
         
@@ -487,7 +511,7 @@ export class NetworkComponent implements OnDestroy {
       }
     } catch (error: any) {
       console.error('Error removing device:', error);
-      alert(error?.error?.error || 'Failed to remove device');
+      this.toastService.error(error?.error?.error || 'Failed to remove device');
     }
   }
 
@@ -513,5 +537,29 @@ export class NetworkComponent implements OnDestroy {
 
   async refreshPortCheck() {
     await this.checkPorts();
+  }
+
+  // Validate IP octet input in real-time
+  validateOctetInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Remove non-numeric characters
+    value = value.replace(/[^0-9]/g, '');
+
+    // Convert to number and check range
+    if (value !== '') {
+      const numValue = parseInt(value, 10);
+      
+      // If value exceeds 255, cap it at 255
+      if (numValue > 255) {
+        value = '255';
+        this.toastService.error('IP octet must be between 0 and 255');
+      }
+    }
+
+    // Update the form control value
+    this.attendanceForm.patchValue({ lastOctet: value });
+    input.value = value;
   }
 }

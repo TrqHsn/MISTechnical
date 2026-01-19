@@ -58,6 +58,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/important-links/important-links').then(m => m.ImportantLinksComponent)
   }
   ,
+  {
+    path: 'display-test',
+    loadComponent: () => import('./components/display-test/display-test.component').then(m => m.DisplayTestComponent)
+  }
+  ,
   // Fallback - redirect any unknown path to ad-tools
   { path: '**', redirectTo: 'ad-tools' }
 ];

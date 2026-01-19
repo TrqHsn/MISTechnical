@@ -61,19 +61,22 @@
 }
 
 .work-timer[data-state="running"] {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  box-shadow: 0 8px 20px rgba(56, 239, 125, 0.5);
+  background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+  box-shadow: 0 8px 20px rgba(0, 255, 136, 0.6), 0 0 30px rgba(0, 212, 255, 0.4);
   animation: pulse 2s ease-in-out infinite;
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .work-timer[data-state="inactive"] {
-  background: linear-gradient(135deg, #42e73c 0%, #55c02b 100%);
-  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.5);
+  background: linear-gradient(135deg, #667eea 0%, #a855f7 100%);
+  box-shadow: 0 8px 20px rgba(168, 85, 247, 0.6), 0 0 30px rgba(102, 126, 234, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .work-timer[data-state="next"] {
-  background: linear-gradient(135deg, #19f312 0%, #29e622 100%);
-  box-shadow: 0 8px 20px rgba(37, 243, 18, 0.5);
+  background: linear-gradient(135deg, #ff6b35 0%, #ffb347 100%);
+  box-shadow: 0 8px 20px rgba(255, 179, 71, 0.6), 0 0 30px rgba(255, 107, 53, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 @keyframes pulse {
@@ -357,7 +360,7 @@
   width: 330px;
   padding: 30px;
   background-color: #000000;
-  color: #ffffff;
+  color: #21b903;
   border-radius: 20px;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
   animation: float 3s ease-in-out infinite;

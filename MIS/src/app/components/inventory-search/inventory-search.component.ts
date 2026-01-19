@@ -44,7 +44,7 @@ export class InventorySearchComponent {
 
     return [
       ...this.SEARCHABLE_COLUMNS.map(col => ({ value: col, label: labelFor(col) })),
-      { value: 'All', label: `All (${this.SEARCHABLE_COLUMNS.join(', ')})` }
+      { value: 'All', label: `All ` } //(${this.SEARCHABLE_COLUMNS.join(', ')}) put this label: 'All(${this.SEARCHABLE_COLUMNS.join(', ')})'
     ];
   });
 
