@@ -1,7 +1,7 @@
 # Copilot / Agent instructions for ADApi
 
 ## Quick summary ✅
-- **Project:** .NET 10 Web API (`net10.0`) that queries Active Directory (AD) + Angular 21 frontend (SSR-enabled) in `MIS/`.
+- **Project:** .NET 9 Web API (`net9.0`) that queries Active Directory (AD) + Angular 21 frontend (SSR-enabled) in `MIS/`.
 - **Platform:** Windows/domain-joined machine required for AD access (uses `System.DirectoryServices`).
 - **Run:** API via `dotnet run` (listens on `http://localhost:5001`). Frontend with `ng serve` in `MIS/` (listens on `http://localhost:4200`).
 

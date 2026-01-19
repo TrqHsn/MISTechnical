@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DeviceToolsService } from '../../services/device-tools.service';
 
 @Component({
   selector: 'app-device-tool',
@@ -8,22 +9,13 @@ import { CommonModule } from '@angular/common';
   styleUrl: './device-tool.css',
 })
 export class DeviceToolComponent {
-  tools = [
-    {
-      id: 'keyboard',
-      name: '⌨️ Test Keyboard',
-      description: 'Test all keyboard keys functionality',
-      url: '/keyboard/index.html'
-    },
-    {
-      id: 'stress',
-      name: '🔥 Stress Test',
-      description: 'CPU and GPU stress testing tool',
-      url: '/stress-cpu-gpu'
-    }
-  ];
+  tools;
+
+  constructor(private deviceToolsService: DeviceToolsService) {
+    this.tools = this.deviceToolsService.getToolsSignal();
+  }
 
   openTool(url: string) {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    this.deviceToolsService.openTool(url);
   }
 }

@@ -5,6 +5,7 @@ import { debounceTime, Subject } from 'rxjs';
 import { ApiService, User, Computer } from '../../services/api';
 import { lastValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-ad-tools',
@@ -86,7 +87,17 @@ export class AdToolsComponent {
   readonly MAX_ROWS = 1000;
 
 
-  constructor(private apiService: ApiService) {
+  constructor(private apiService: ApiService, private route: ActivatedRoute) {
+    // Listen for tab query parameter
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        const tab = params['tab'] as 'users' | 'computers' | 'update-description' | 'last-device' | 'update-user';
+        if (tab === 'users' || tab === 'computers' || tab === 'update-description' || tab === 'last-device' || tab === 'update-user') {
+          this.activeTab.set(tab);
+        }
+      }
+    });
+
     // Setup users live search
     this.usersSearchSubject.pipe(
       debounceTime(300)

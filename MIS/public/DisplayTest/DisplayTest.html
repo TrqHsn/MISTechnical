@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)https://backlightbleedtest.org/check-backlight-bleed -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+        <link rel="stylesheet" type="text/css" href="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/style.css">
+        <link rel="icon" type="image/png" href="https://backlightbleedtest.org/medias/2023/02/icon.png">
+
+        <title>Check Backlight Bleed - BacklightBleedTest.org | BacklightBleedTest.org</title>
+        <meta name="description" content="This page lets you run a backlight bleed test. Use different colors and adjust RGB values to check for backlight bleeding on your monitor or display.">
+
+        <!-- Facebook !-->
+        <meta property="og:title" content="Check Backlight Bleed - BacklightBleedTest.org | BacklightBleedTest.org">
+        <meta property="og:url" content="https://backlightbleedtest.org/check-backlight-bleed">
+        <meta property="og:image" content="https://backlightbleedtest.org">
+
+        <!-- Twitter !-->
+        <meta name="twitter:title" content="Check Backlight Bleed - BacklightBleedTest.org | BacklightBleedTest.org">
+        <meta name="twitter:description" content="This page lets you run a backlight bleed test. Use different colors and adjust RGB values to check for backlight bleeding on your monitor or display.">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:image" content="https://backlightbleedtest.org">
+
+        
+        <script async="" src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/matomo.js.download"></script><script type="text/javascript" charset="utf-8" src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/custom-scripts.js.download"></script>
+
+        <style id="custom-css">html {
+    background-color:#010101;
+}
+
+body, .ck.ck-editor__main>.ck-editor__editable, .modal-content {
+        color: #eeeeee!important;
+        background-color: #18191a!important;
+        font-family:Helvetica, sans-serif;
+        font-weight:300;
+}
+h1,h2,h3,h4,h5,h6 {
+    font-family:Arial, Helvetica, sans-serif;
+    font-weight:700;
+}
+
+select, .input, textarea {
+        display: block;
+        padding: 8px 28px 8px 6px;
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #eeeeee;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        appearance: none;
+        border-radius: 10px;
+        background-color: #dadada;
+        border: 1px solid rgb(165, 60, 60);
+}
+
+.bonjour a {
+    display:inline-block!important;
+}
+
+
+/* MENU & FOOTER */
+#content-wrapper {min-height:80vh;}
+
+.menu-bar, .footer-bar {
+    background-color:#010101;
+}
+#main-navigation {
+    transition:0.6s;
+    box-shadow: 0 0 0 #000;
+}
+#main-navigation.shadow-bottom {
+    box-shadow: 0 0 8px #000;
+}
+.menu-link, .footer-link {
+    text-decoration:none;
+    margin:4px 16px;
+}
+.menu-link:hover, .menu-flag:hover, .menu-logo:hover, .footer-link:hover, .footer-flag:hover, .footer-logo:hover {
+    opacity:0.6;
+    transition:0.6s;
+}
+.menu-flag, .footer-flag {
+    padding:4px;
+}
+
+.menu-flag img, .footer-flag img {
+    height:20px;
+    width:20px;
+}
+.menu-toggle {
+    height:48px;
+    width:auto;
+}
+.menu-logo img {
+    max-height:30px;
+}
+.footer-logo img {
+    max-height:20px;
+}
+
+.call-to-action {
+    padding: 8px 20px;
+    margin: 4px;
+    background-color: #dadada!important;
+    color:black!important;
+    border: none;
+    color: black;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+    border: 1px solid rgb(165, 60, 60);
+}
+
+
+/** SQUARES **/
+#squares {
+    width: 100%;
+    text-align: center
+}
+
+#squares a, .squares a {
+    text-decoration: none;
+}
+
+#squares div {
+    box-shadow: 0 0 5px transparent;
+}
+
+#squares div:hover, .squares div:hover {
+    box-shadow: 0 0 5px #ccc;
+    transition: .6s;
+}
+
+#squares .normal, .squares .square {
+    height: 50px;
+    width: 50px;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 10px;
+    margin:2px!important;
+    border:1px solid #ccc;
+}
+
+#square-white, .square.white {
+    background-color: #fff!important
+}
+
+#square-black, .square.black {
+    background-color: #000!important
+}
+
+#square-red, .square.red {
+    background-color: #ff0000!important
+}
+
+#square-blue, .square.blue {
+    background-color: #0000ff!important
+}
+
+#square-green, .square.green {
+    background-color: #00ff00!important
+}
+
+#square-yellow, .square.yellow {
+    background-color: #ffff00!important
+}
+
+#square-light-blue, .square.light-blue {
+    background-color: #00ffff!important
+}
+
+#square-pink, .square.pink {
+    background-color: #ff00ff!important
+}
+
+#pixel {
+    display: inline-block;
+    height: 100px;
+    width: 100px;
+    background-color: black;
+}
+input[type="range"] {
+    padding:0;
+}
+
+
+/* Stats table */
+.table.stats {
+    color: #18191a!important;
+}
+
+.table.stats .first-column, .table.stats .last-column, .table.stats .first-row td, .table.stats .last-row td  {
+    font-weight:bold;
+}
+
+.table.stats .first-row td, .table.stats .last-row td  {
+    font-weight:bold;
+    background-color:#18191a!important;
+    color:#eeeeee!important;
+}
+
+/* Ads */
+.before-h2 iframe {
+    width:auto;
+}</style><script>var _paq = window._paq = window._paq || [];
+_paq.push(["disableCookies"]);
+_paq.push(['trackPageView']);
+_paq.push(['enableLinkTracking']);
+(function() {
+var u="//backlightbleedtest.org/analytics/";
+_paq.push(['setTrackerUrl', u+'matomo.php']);
+_paq.push(['setSiteId', '1']);
+var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+})();</script>
+    </head>
+
+    <body>
+
+    <div id="content-wrapper">
+    
+    <div id="test-container" style="background-color: rgb(255, 255, 255); height: 924px;">
+
+        <div id="frame-container" onclick="toggleControls()">
+        </div>
+
+                    <!-- Information Popup !-->
+            
+        
+        <div onclick="returnToHome(this)" id="close" class="toappear hide">
+            <img class="image" src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/close.svg">
+        </div>
+
+        <!-- Color Control Panel -->
+        <div id="color-controls" class="toappear hide">
+            <div class="control-panel">
+                <h3>Adjust Screen Color</h3>
+
+                <div class="slider-container">
+                    <label for="red-slider">Red: <span id="red-value">255</span></label>
+                    <input type="range" id="red-slider" min="0" max="255" value="0" class="color-slider">
+                </div>
+
+                <div class="slider-container">
+                    <label for="green-slider">Green: <span id="green-value">255</span></label>
+                    <input type="range" id="green-slider" min="0" max="255" value="0" class="color-slider">
+                </div>
+
+                <div class="slider-container">
+                    <label for="blue-slider">Blue: <span id="blue-value">255</span></label>
+                    <input type="range" id="blue-slider" min="0" max="255" value="0" class="color-slider">
+                </div>
+
+                <div class="slider-container">
+                    <label for="opacity-slider">Opacity: <span id="opacity-value">1.00</span></label>
+                    <input type="range" id="opacity-slider" min="0" max="1" step="0.01" value="1" class="color-slider">
+                </div>
+
+                <div class="preset-buttons">
+                    <div class="preset-btn" style="background-color: rgb(0,0,0);" onclick="setPresetColor(0, 0, 0)" title="Black"></div>
+                    <div class="preset-btn" style="background-color: rgb(255,255,255); border: 2px solid #333;" onclick="setPresetColor(255, 255, 255)" title="White"></div>
+                    <div class="preset-btn" style="background-color: rgb(255,0,0);" onclick="setPresetColor(255, 0, 0)" title="Red"></div>
+                    <div class="preset-btn" style="background-color: rgb(0,255,0);" onclick="setPresetColor(0, 255, 0)" title="Green"></div>
+                    <div class="preset-btn" style="background-color: rgb(0,0,255);" onclick="setPresetColor(0, 0, 255)" title="Blue"></div>
+                    <div class="preset-btn" style="background-color: rgb(128,128,128);" onclick="setPresetColor(128, 128, 128)" title="Gray"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
+<div id="popup2" class="animate-opacity hide display-container smart-margins">
+    <div id="popup2-content" class="bonjour center">
+            <div id="closepopup2" onclick="myModal(&#39;popup2&#39;);">
+                ✕
+            </div>
+                </div>
+</div>
+    <script type="text/javascript" defer="">
+        let currentRed = 0;
+        let currentGreen = 0;
+        let currentBlue = 0;
+        let currentOpacity = 1.0;
+
+        window.addEventListener('load', function() {
+            document.getElementById('test-container').style.height = window.innerHeight + 'px';
+            updateBackgroundColor();
+        });
+
+        window.addEventListener('resize', function() {
+            document.getElementById('test-container').style.height = window.innerHeight + 'px';
+        });
+
+        // Mousemove logic for showing/hiding controls
+        var timeout;
+        var mouse = false;
+        var isHidden = true;
+        var keepUI = false;
+
+        // Check whether or not to keep UI
+        var elementsToAppear = document.getElementsByClassName('toappear');
+
+        for (var i = 0; i < elementsToAppear.length; i++) {
+            elementsToAppear[i].addEventListener('mouseover', function() {
+                keepUI = true;
+            });
+            elementsToAppear[i].addEventListener('mouseout', function() {
+                keepUI = false;
+            });
+        }
+
+        function mouseStatus(n) {
+            mouse = n;
+
+            if (mouse == false && keepUI != true) {
+                timeout = setTimeout(function() {
+                    if (mouse == false) {
+                        var elementsToAppear = document.getElementsByClassName('toappear');
+                        var clss;
+
+                        if (keepUI != true) {
+                            for (var v = 0; v < elementsToAppear.length; v++) {
+                                clss = elementsToAppear[v].className;
+                                if (clss.indexOf('show') > -1) {
+                                    elementsToAppear[v].className = clss.replace('show', 'hide');
+                                }
+                            }
+                            isHidden = true;
+                        }
+                    }
+                }, 1500); // Slightly longer delay for better UX
+            } else {
+                clearTimeout(timeout);
+            }
+        }
+
+        document.addEventListener('mousemove', e => {
+            if (document.getElementById('popup') === null && isHidden === true) {
+                var elementsToAppear = document.getElementsByClassName('toappear');
+                var clss;
+
+                for (var v = 0; v < elementsToAppear.length; v++) {
+                    clss = elementsToAppear[v].className;
+                    if (clss.indexOf('hide') > -1) {
+                        elementsToAppear[v].className = clss.replace('hide', 'show');
+                    }
+                }
+                isHidden = false;
+            }
+            clearTimeout(timeout);
+            mouseStatus(mouse);
+        });
+
+        // Color slider event listeners
+        document.getElementById('red-slider').addEventListener('input', function() {
+            currentRed = this.value;
+            document.getElementById('red-value').textContent = this.value;
+            updateBackgroundColor();
+        });
+
+        document.getElementById('green-slider').addEventListener('input', function() {
+            currentGreen = this.value;
+            document.getElementById('green-value').textContent = this.value;
+            updateBackgroundColor();
+        });
+
+        document.getElementById('blue-slider').addEventListener('input', function() {
+            currentBlue = this.value;
+            document.getElementById('blue-value').textContent = this.value;
+            updateBackgroundColor();
+        });
+
+        document.getElementById('opacity-slider').addEventListener('input', function() {
+            currentOpacity = this.value;
+            document.getElementById('opacity-value').textContent = parseFloat(this.value).toFixed(2);
+            updateBackgroundColor();
+        });
+
+        function updateBackgroundColor() {
+            const color = `rgba(${currentRed}, ${currentGreen}, ${currentBlue}, ${currentOpacity})`;
+            document.getElementById('test-container').style.backgroundColor = color;
+        }
+
+        function setPresetColor(r, g, b, opacity = 1.0) {
+            currentRed = r;
+            currentGreen = g;
+            currentBlue = b;
+            currentOpacity = opacity;
+
+            document.getElementById('red-slider').value = r;
+            document.getElementById('green-slider').value = g;
+            document.getElementById('blue-slider').value = b;
+            document.getElementById('opacity-slider').value = opacity;
+
+            document.getElementById('red-value').textContent = r;
+            document.getElementById('green-value').textContent = g;
+            document.getElementById('blue-value').textContent = b;
+            document.getElementById('opacity-value').textContent = opacity.toFixed(2);
+
+            updateBackgroundColor();
+        }
+
+        function toggleControls() {
+            if (document.getElementById('popup') === null) {
+                var elementsToAppear = document.getElementsByClassName('toappear');
+                var clss;
+
+                for (var v = 0; v < elementsToAppear.length; v++) {
+                    clss = elementsToAppear[v].className;
+                    if (clss.indexOf('hide') > -1) {
+                        elementsToAppear[v].className = clss.replace('hide', 'show');
+                    } else if (clss.indexOf('show') > -1) {
+                        elementsToAppear[v].className = clss.replace('show', 'hide');
+                    }
+                }
+                isHidden = !isHidden;
+            }
+        }
+
+        function closePopup() {
+            document.getElementById('popup').remove();
+            toggleFullScreen();
+            event.stopPropagation();
+            event.cancelBubble = true;
+        }
+
+        document.onkeydown = function(e) {
+            if (e.keyCode == 27) {
+                returnToHome(e);
+            }
+        }
+
+        function returnToHome(e) {
+            toggleFullScreen(true);
+                        window.location.href = "https://backlightbleedtest.org/thank-you/";
+        }
+
+        async function toggleFullScreen(x = false) {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) {
+                    try {
+                        await requestFullScreen.call(docEl);
+                    } catch (err) {
+                        // Silence any error during fullscreen request
+                    }
+                }
+            } else {
+                if (cancelFullScreen) {
+                    try {
+                        await cancelFullScreen.call(doc);
+                    } catch (err) {
+                        // Silence any error during fullscreen exit
+                    }
+                }
+            }
+
+            if (x === true) {
+                toggleFullScreen(false);
+                        window.location.href = "https://backlightbleedtest.org/thank-you/"
+            }
+        }
+    </script>
+
+</div>
+        <style></style><footer><div id="main-footer" class="hide-medium hide-small"><div class="row smart-margins padding-16 footer-bar center"><a href="https://backlightbleedtest.org/" class="padding-large show-inline-block footer-logo footer-link"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/backlight-bleed-test-logo.png" height="20" width="227" alt="Logo of Dead Pixel Test" class="image"></a><div class="row padding-small center"><a href="https://backlightbleedtest.org/" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/en.png" height="20" width="20" alt="English version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/back-office" class="show-inline-block menu-logo"></a><a href="https://backlightbleedtest.org/es" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/es.png" height="20" width="20" alt="Spanish version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/pt" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/pt.png" height="20" width="20" alt="Portuguese version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/fr" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/fr.png" height="20" width="20" alt="French version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/ru" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/ru.png" height="20" width="20" alt="Russian version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/de" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/de.png" height="20" width="20" alt="German version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/zh" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/zh.png" height="20" width="20" alt="Chinese version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/ko" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/ko.png" height="20" width="20" alt="Korean version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/ja" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/ja.png" height="20" width="20" alt="Japan version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/tr" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/tr.png" height="20" width="20" alt="Turkish version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/it" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/it.png" height="20" width="20" alt="Italian version of Dead Pixel Test" class="image"></a></div><p>© BacklightBleedTest.org, 2025</p><hr><p><a href="https://backlightbleedtest.org/check-backlight-bleed" class="footer-link">Check Backlight Bleed</a>&nbsp;| <a href="https://backlightbleedtest.org/guides/what-is-backlight-bleed" class="footer-link">What is backlight bleed?</a>|<a href="https://backlightbleedtest.org/guides" class="footer-link">Guides on backlight bleed</a></p><p><a href="https://backlightbleedtest.org/privacy-policy" class="footer-link">Privacy Policy</a> | 
+    <a href="https://backlightbleedtest.org/cookie-policy" class="footer-link">Cookie Policy</a>&nbsp;| <a href="javascript:googlefc.callbackQueue.push(googlefc.showRevocationMessage)" class="footer-link manage-cookies personalize-cookies">Manage Cookies</a></p><p class="small no-margin">Discover our other tools:</p><p class="small no-margin"><a href="https://deadpixeltest.org/">DeadPixelTest.org</a>&nbsp;| <a href="https://frameratetest.org/">FrameRateTest.org</a> | <a href="https://microphone-test.org/">Microphone-Test.org</a> | <a href="https://onlinevoicerecorder.org/">OnlineVoiceRecorder.org</a>&nbsp;| <a href="https://checkreactiontime.org/">CheckReactionTime.org</a> | <a href="https://onlinetuner.org/">OnlineTuner.org</a>&nbsp;| <a href="https://conversionfrom.com/">ConversionFrom.com</a></p></div></div><div id="mobile-footer" class="hide-large"><div class="row smart-margins padding-16 footer-bar center"><a href="https://backlightbleedtest.org/" class="padding-large show-inline-block footer-logo footer-link"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/backlight-bleed-test-logo.png" height="20" width="227" alt="Logo of Dead Pixel Test" class="image"></a><div class="row padding-small center"><a href="https://backlightbleedtest.org/" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/en.png" height="20" width="20" alt="English version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/back-office" class="show-inline-block menu-logo"></a><a href="https://backlightbleedtest.org/es" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/es.png" height="20" width="20" alt="Spanish version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/pt" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/pt.png" height="20" width="20" alt="Portuguese version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/fr" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/fr.png" height="20" width="20" alt="French version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/ru" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/ru.png" height="20" width="20" alt="Russian version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/de" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/de.png" height="20" width="20" alt="German version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/zh" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/zh.png" height="20" width="20" alt="Chinese version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/ko" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/ko.png" height="20" width="20" alt="Korean version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/ja" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/ja.png" height="20" width="20" alt="Japan version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/tr" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/tr.png" height="20" width="20" alt="Turkish version of Dead Pixel Test" class="image"></a><a href="https://backlightbleedtest.org/it" class="show-inline-block footer-flag"><img src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/it.png" height="20" width="20" alt="Italian version of Dead Pixel Test" class="image"></a></div><p>© BacklightBleedTest.org, 2025</p><hr><p><a href="https://backlightbleedtest.org/check-backlight-bleed" class="footer-link">Check Backlight Bleed</a>&nbsp;| <a href="https://backlightbleedtest.org/guides/what-is-backlight-bleed" class="footer-link">What is backlight bleed?</a>|<a href="https://backlightbleedtest.org/guides" class="footer-link">Guides on backlight bleed</a></p><p><a href="https://backlightbleedtest.org/privacy-policy" class="footer-link">Privacy Policy</a> | 
+    <a href="https://backlightbleedtest.org/cookie-policy" class="footer-link">Cookie Policy</a>&nbsp;| <a href="javascript:googlefc.callbackQueue.push(googlefc.showRevocationMessage)" class="footer-link manage-cookies personalize-cookies">Manage Cookies</a></p><p class="small no-margin">Discover our other tools:</p><p class="small no-margin"><a href="https://deadpixeltest.org/">DeadPixelTest.org</a>&nbsp;| <a href="https://frameratetest.org/">FrameRateTest.org</a> | <a href="https://microphone-test.org/">Microphone-Test.org</a> | <a href="https://onlinevoicerecorder.org/">OnlineVoiceRecorder.org</a>&nbsp;| <a href="https://checkreactiontime.org/">CheckReactionTime.org</a> | <a href="https://onlinetuner.org/">OnlineTuner.org</a>&nbsp;| <a href="https://conversionfrom.com/">ConversionFrom.com</a></p></div></div></footer>
+<script type="text/plain" onload="">
+async function loadBonjourSequentially() {
+
+    function loadScript(src, container, options) {
+    
+        return new Promise((resolve, reject) => {
+            window.atOptions = options;
+            
+            const observer = new MutationObserver((mutations) => {
+                for (let mutation of mutations) {
+                    if (mutation.type === "childList") {
+                        // Check if an iframe was added
+                        const addedNodes = Array.from(mutation.addedNodes);
+                        const hasIframe = addedNodes.some(node => 
+                            node.tagName === "IFRAME" || 
+                            (node.querySelector && node.querySelector("iframe"))
+                        );
+                        
+                        if (hasIframe) {
+                            observer.disconnect();
+                            resolve();
+                            return;
+                        }
+                    }
+                }
+            });
+            
+            // Start observing
+            observer.observe(container, {
+                childList: true,
+                subtree: true
+            });
+            
+            // Create and load the script
+            const script = document.createElement("script");
+            script.src = src;
+            script.onerror = () => {
+                observer.disconnect();
+                reject(new Error("Failed to load script: " + src));
+            };
+            
+            // Fallback timeout
+            const timeout = setTimeout(() => {
+                observer.disconnect();
+                resolve();
+            }, 1000);
+            
+            // Clear timeout if observer triggers
+            const originalResolve = resolve;
+            resolve = () => {
+                clearTimeout(timeout);
+                originalResolve();
+            };
+            
+            container.appendChild(script);
+        });
+    }
+
+    // Helper function to safely extract atOptions
+    function extractAtOptions(scriptContent) {
+        try {
+            const tempFunc = new Function(scriptContent + "; return atOptions;");
+            return tempFunc();
+        } catch (error) {
+            return null;
+        }
+    }
+
+    try {
+        const bonjourElements = document.querySelectorAll(".bonjour");
+
+        for (let i = 0; i < bonjourElements.length; i++) {
+            const element = bonjourElements[i];
+            const scripts = element.querySelectorAll("script");
+            
+            let options = null;
+            let scriptSrc = null;
+            
+            scripts.forEach(script => {
+                if (script.src) {
+                    scriptSrc = script.src;
+                } else {
+                    const content = script.textContent || script.innerHTML;
+                    if (content.includes("atOptions")) {
+                        options = extractAtOptions(content);
+                    }
+                }
+            });
+            
+            if (options && scriptSrc) {
+
+                scripts.forEach(script => script.remove());
+                
+                await loadScript(scriptSrc, element, options);
+            }
+        }
+
+    } catch (error) {
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadBonjourSequentially);
+</script>
+
+        <script type="text/javascript" charset="utf-8" src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/scripts.js.download"></script>
+        <script>
+            // Animations
+            window.addEventListener("scroll", reveal);
+            window.addEventListener("load", reveal);
+
+            function reveal() {
+                var reveals = document.querySelectorAll(".reveal");
+                for (var i = 0; i < reveals.length; i++) {
+                    var windowHeight = window.innerHeight;
+                    var elementTop = reveals[i].getBoundingClientRect().top;
+                    var elementVisible = 150;
+                    if (elementTop < windowHeight - elementVisible) {
+                        reveals[i].classList.add("active");
+                    } else {
+                        reveals[i].classList.remove("active");
+                    }
+                }
+            }
+        </script>
+
+    
+
+
+
+<iframe frameborder="0" scrolling="no" style="background-color: transparent; border: 0px; display: none;" src="./Check Backlight Bleed - BacklightBleedTest.org _ BacklightBleedTest.org_files/saved_resource.html"></iframe><div id="GOOGLE_INPUT_CHEXT_FLAG" input="" input_stat="{&quot;tlang&quot;:true,&quot;tsbc&quot;:true,&quot;pun&quot;:true,&quot;mk&quot;:true,&quot;ss&quot;:true}" style="display: none;"></div></body></html>

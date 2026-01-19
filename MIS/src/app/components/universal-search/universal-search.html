@@ -1,0 +1,84 @@
+@if (isOpen()) {
+<div class="universal-search-overlay" (click)="close()">
+  <div class="universal-search-modal" (click)="$event.stopPropagation()">
+    <!-- Search Input -->
+    <div class="search-header">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="universal-search-input"
+          class="search-input" 
+          placeholder="Type to search... (Ctrl+Space)"
+          [value]="searchQuery()"
+          (input)="onSearchInput($any($event).target.value)"
+          (keydown)="onKeyDown($event)"
+          autocomplete="off"
+        />
+        <span class="shortcut-hint">ESC to close</span>
+      </div>
+    </div>
+
+    <!-- Quick Access Buttons (4 columns x 3 rows) -->
+    @if (searchQuery() === '') {
+    <div class="quick-access-section">
+      <h3 class="section-title">Quick Access</h3>
+      <div class="quick-access-grid">
+        @for (item of quickAccessItems(); track item.id) {
+        <button class="quick-access-btn" (click)="navigateToItem(item)">
+          <span class="btn-icon">{{ item.icon }}</span>
+          <span class="btn-label">{{ item.title }}</span>
+        </button>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Search Results by Category -->
+    @if (searchQuery() !== '' && flatResults().length > 0) {
+    <div class="search-results">
+      @for (category of getCategoryKeys(); track category) {
+      <div class="result-category">
+        <h3 class="category-title">{{ category }}</h3>
+        <div class="category-items">
+          @for (item of getItemsForCategory(category); track item.id) {
+          <div 
+            class="search-result-item" 
+            [class.selected]="isItemSelected(item)"
+            (click)="navigateToItem(item)"
+            (mouseenter)="selectedIndex.set(flatResults().indexOf(item))"
+          >
+            <span class="result-icon">{{ item.icon }}</span>
+            <div class="result-content">
+              <div class="result-title">{{ item.title }}</div>
+              <div class="result-description">{{ item.description }}</div>
+            </div>
+            <span class="result-arrow">→</span>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- No Results -->
+    @if (searchQuery() !== '' && flatResults().length === 0) {
+    <div class="no-results">
+      <span class="no-results-icon">🔍</span>
+      <p>No results found for "{{ searchQuery() }}"</p>
+    </div>
+    }
+
+    <!-- Footer -->
+    <div class="search-footer">
+      <div class="footer-hints">
+        <span><kbd>Ctrl</kbd>+<kbd>Space</kbd> Open</span>
+        <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+        <span><kbd>Enter</kbd> Select</span>
+        <span><kbd>Esc</kbd> Close</span>
+      </div>
+    </div>
+  </div>
+</div>
+}

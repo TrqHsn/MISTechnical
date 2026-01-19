@@ -67,7 +67,7 @@
 }
 
 .work-timer[data-state="inactive"] {
-  background: linear-gradient(135deg, #42e73c 0%, #c0392b 100%);
+  background: linear-gradient(135deg, #42e73c 0%, #55c02b 100%);
   box-shadow: 0 8px 20px rgba(231, 76, 60, 0.5);
 }
 
@@ -89,7 +89,7 @@
 
 /* Logo (top-left) */
 .global-logo {
-  position: fixed;
+  position: absolute;
   top: 1rem;
   left: 1rem;
   z-index: 10000;
@@ -350,7 +350,7 @@
 
 /* Digital Clock Styles */
 #clock {
-  position: fixed;
+  position: absolute;
   top: calc(1.4 rem);
   right: 1rem;
   z-index: 10000;

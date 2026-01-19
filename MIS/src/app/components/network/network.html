@@ -9,6 +9,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'activeip'" (click)="activeTab.set('activeip')">
       ActiveIP Scanner
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'attendance'" (click)="activeTab.set('attendance')">
+      Attendance Device
+    </button>
   </div>
 
   <!-- Ping Tab -->
@@ -150,6 +153,122 @@
             </ul>
           </div>
         }
+      </div>
+    </div>
+  }
+
+  <!-- Attendance Device Tab -->
+  @if (activeTab() === 'attendance') {
+    <div class="tab-content">
+      <div class="attendance-section">
+        <h2>Attendance Device Management</h2>
+        
+        <!-- Add Device Form -->
+        <div class="attendance-form-section">
+          <h3>Add New Device</h3>
+          <form [formGroup]="attendanceForm" (ngSubmit)="addAttendanceDevice()" class="attendance-form">
+            <div class="form-row">
+              <div class="input-group">
+                <label for="ipPrefix">IP Address</label>
+                <div class="ip-input-group">
+                  <span class="ip-prefix">10.140.8.</span>
+                  <input 
+                    type="text" 
+                    id="lastOctet"
+                    formControlName="lastOctet"
+                    class="text-input ip-octet-input"
+                    maxlength="3"
+                  />
+                </div>
+                @if (attendanceForm.get('lastOctet')?.invalid && attendanceForm.get('lastOctet')?.touched) {
+                  <span class="error-text">Enter a valid number (0-255)</span>
+                }
+              </div>
+
+              <div class="input-group">
+                <label for="location">Location</label>
+                <input 
+                  type="text" 
+                  id="location"
+                  formControlName="location"
+                  class="text-input" 
+                  placeholder="e.g., Main Entrance"
+                />
+                @if (attendanceForm.get('location')?.invalid && attendanceForm.get('location')?.touched) {
+                  <span class="error-text">Location is required</span>
+                }
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              class="btn primary add-btn"
+              [disabled]="attendanceForm.invalid"
+            >
+              ➕ Add Device
+            </button>
+          </form>
+        </div>
+
+        <!-- Device List and Port Check Results -->
+        <div class="attendance-content">
+          <!-- Device List -->
+          <div class="device-list-section">
+            <div class="section-header">
+              <h3>Registered Devices ({{ attendanceDevices().length }})</h3>
+            </div>
+            
+            @if (attendanceDevices().length === 0) {
+              <p class="no-devices">No devices registered yet</p>
+            } @else {
+              <table class="device-table">
+                <thead>
+                  <tr>
+                    <th>IP Address</th>
+                    <th>Location</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (device of attendanceDevices(); track device.ip) {
+                    <tr>
+                      <td class="ip-cell">{{ device.ip }}</td>
+                      <td>{{ device.location }}</td>
+                      <td>
+                        <button 
+                          class="btn danger btn-small" 
+                          (click)="removeAttendanceDevice(device.ip)"
+                        >
+                          🗑️ Remove
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+
+          <!-- Port Check Results -->
+          <div class="port-check-section">
+            <div class="section-header">
+              <h3>TCP Port Check Results</h3>
+              <button 
+                class="btn secondary refresh-btn" 
+                (click)="refreshPortCheck()"
+                [disabled]="isCheckingPorts() || attendanceDevices().length === 0"
+              >
+                {{ isCheckingPorts() ? '🔄 Checking...' : '🔄 Refresh' }}
+              </button>
+            </div>
+            
+            @if (attendanceDevices().length === 0) {
+              <p class="no-results">Add devices to check ports</p>
+            } @else {
+              <pre class="port-check-results cmd-style">{{ portCheckResults() || 'Click Refresh to check ports' }}</pre>
+            }
+          </div>
+        </div>
       </div>
     </div>
   }

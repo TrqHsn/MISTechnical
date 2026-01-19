@@ -1,17 +1,32 @@
-import { Component, signal, OnDestroy, ViewChild, ElementRef, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, signal, OnDestroy, ViewChild, ElementRef, effect, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+
+interface AttendanceDevice {
+  ip: string;
+  location: string;
+}
+
+interface PortCheckResponse {
+  results: string;
+  devicesNeedReboot: string[];
+  allResponding: boolean;
+}
 
 @Component({
   selector: 'app-network',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './network.html',
   styleUrl: './network.css',
 })
 export class NetworkComponent implements OnDestroy {
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
   // Tab management
-  activeTab = signal<'ping' | 'activeip'>('ping');
+  activeTab = signal<'ping' | 'activeip' | 'attendance'>('ping');
 
   // Ping tab
   pingAddress = signal('10.140.');
@@ -26,13 +41,52 @@ export class NetworkComponent implements OnDestroy {
 
   // Sound toggle (true = sound on failure, false = sound on success)
   soundOnFailure = signal(true);
-  private audio = new Audio('/ping-beep.mp3');
+  private audio: HTMLAudioElement | null = null;
   private consecutiveCount = 0;
   private lastResultType: 'success' | 'failure' | null = null;
 
   @ViewChild('pingResultElement') pingResultElement?: ElementRef<HTMLPreElement>;
 
-  constructor(private http: HttpClient) {
+  // Attendance Device tab
+  attendanceForm: FormGroup;
+  attendanceDevices = signal<AttendanceDevice[]>([]);
+  portCheckResults = signal('');
+  isCheckingPorts = signal(false);
+  lastOctet = signal('');
+  location = signal('');
+
+  constructor(private http: HttpClient, private fb: FormBuilder, private route: ActivatedRoute) {
+    // Initialize Audio only in browser
+    if (this.isBrowser) {
+      this.audio = new Audio('/ping-beep.mp3');
+    }
+
+    // Initialize attendance device form
+    this.attendanceForm = this.fb.group({
+      lastOctet: ['', [Validators.required, Validators.pattern(/^\d{1,3}$/), Validators.min(0), Validators.max(255)]],
+      location: ['', Validators.required]
+    });
+
+    // Listen for tab query parameter
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        const tab = params['tab'] as 'ping' | 'activeip' | 'attendance';
+        if (tab === 'ping' || tab === 'activeip' || tab === 'attendance') {
+          this.activeTab.set(tab);
+        }
+      }
+    });
+
+    // Load attendance devices on init
+    this.loadAttendanceDevices();
+
+    // Reload attendance devices when tab becomes active
+    effect(() => {
+      if (this.activeTab() === 'attendance') {
+        this.loadAttendanceDevices();
+      }
+    });
+
     // Auto-scroll to bottom whenever pingResult changes
     effect(() => {
       // Read the signal to trigger the effect
@@ -321,8 +375,10 @@ export class NetworkComponent implements OnDestroy {
   }
 
   private playSound() {
-    this.audio.currentTime = 0;
-    this.audio.play().catch(err => console.warn('Sound playback failed:', err));
+    if (this.audio) {
+      this.audio.currentTime = 0;
+      this.audio.play().catch(err => console.warn('Sound playback failed:', err));
+    }
   }
 
   private colorizeLineHtml(line: string): string {
@@ -345,5 +401,117 @@ export class NetworkComponent implements OnDestroy {
     
     // Default color (green)
     return `<span>${escaped}</span>\n`;
+  }
+
+  // ============= ATTENDANCE DEVICE METHODS =============
+
+  async loadAttendanceDevices() {
+    try {
+      console.log('Loading attendance devices...');
+      const response = await this.http.get<{ devices: AttendanceDevice[] }>(
+        'http://localhost:5001/api/network/attendance-devices'
+      ).toPromise();
+      
+      console.log('Received response:', response);
+      if (response?.devices) {
+        console.log('Setting devices:', response.devices);
+        this.attendanceDevices.set(response.devices);
+      } else {
+        console.log('No devices in response');
+        this.attendanceDevices.set([]);
+      }
+    } catch (error) {
+      console.error('Error loading attendance devices:', error);
+      this.attendanceDevices.set([]);
+    }
+  }
+
+  async addAttendanceDevice() {
+    if (this.attendanceForm.invalid) {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.attendanceForm.controls).forEach(key => {
+        this.attendanceForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    const lastOctet = this.attendanceForm.value.lastOctet;
+    const location = this.attendanceForm.value.location;
+    const ip = `10.140.8.${lastOctet}`;
+
+    console.log('Adding device:', { ip, location });
+
+    try {
+      const response = await this.http.post<{ success: boolean; device: AttendanceDevice }>(
+        'http://localhost:5001/api/network/attendance-devices',
+        { ip, location }
+      ).toPromise();
+
+      console.log('Add device response:', response);
+
+      if (response?.success) {
+        console.log('Device added successfully, reloading list...');
+        // Reload the list
+        await this.loadAttendanceDevices();
+        
+        // Reset form
+        this.attendanceForm.reset();
+        this.lastOctet.set('');
+        this.location.set('');
+
+        // Refresh port check
+        await this.checkPorts();
+      }
+    } catch (error: any) {
+      console.error('Error adding device:', error);
+      alert(error?.error?.error || 'Failed to add device');
+    }
+  }
+
+  async removeAttendanceDevice(ip: string) {
+    if (!confirm(`Remove device ${ip}?`)) {
+      return;
+    }
+
+    try {
+      const response = await this.http.delete<{ success: boolean }>(
+        `http://localhost:5001/api/network/attendance-devices/${encodeURIComponent(ip)}`
+      ).toPromise();
+
+      if (response?.success) {
+        // Reload the list
+        await this.loadAttendanceDevices();
+        
+        // Refresh port check
+        await this.checkPorts();
+      }
+    } catch (error: any) {
+      console.error('Error removing device:', error);
+      alert(error?.error?.error || 'Failed to remove device');
+    }
+  }
+
+  async checkPorts() {
+    this.isCheckingPorts.set(true);
+    this.portCheckResults.set('Checking ports...');
+
+    try {
+      const response = await this.http.get<PortCheckResponse>(
+        'http://localhost:5001/api/network/attendance-devices/check-ports'
+      ).toPromise();
+
+      if (response) {
+        this.portCheckResults.set(response.results || 'No results');
+      }
+    } catch (error) {
+      console.error('Error checking ports:', error);
+      this.portCheckResults.set('Error checking ports');
+    } finally {
+      this.isCheckingPorts.set(false);
+    }
+  }
+
+  async refreshPortCheck() {
+    await this.checkPorts();
   }
 }

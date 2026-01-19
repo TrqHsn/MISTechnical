@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import {
   KioskApiService,
   MediaItem,
@@ -82,7 +83,17 @@ export class KioskAdminComponent implements OnInit {
     { value: 6, label: 'Saturday' },
   ];
 
-  constructor(private kioskApi: KioskApiService) {}
+  constructor(private kioskApi: KioskApiService, private route: ActivatedRoute) {
+    // Listen for tab query parameter
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        const tab = params['tab'] as 'media' | 'playlists' | 'schedules' | 'settings' | 'preview';
+        if (tab === 'media' || tab === 'playlists' || tab === 'schedules' || tab === 'settings' || tab === 'preview') {
+          this.activeTab.set(tab);
+        }
+      }
+    });
+  }
 
   ngOnInit() {
     this.loadData();

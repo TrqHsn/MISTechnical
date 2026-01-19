@@ -2,7 +2,7 @@
   <h1>Device Testing Tools</h1>
 
   <div class="tools-grid">
-    @for (tool of tools; track tool.id) {
+    @for (tool of tools(); track tool.id) {
       <div class="tool-card" (click)="openTool(tool.url)">
         <div class="tool-icon">{{ tool.name }}</div>
         <div class="tool-info">

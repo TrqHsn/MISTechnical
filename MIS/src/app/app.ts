@@ -1,16 +1,20 @@
-import { Component, signal, OnDestroy } from '@angular/core';
+import { Component, signal, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { ApiService } from './services/api';
 import { ToastComponent } from './components/toast/toast.component';
+import { UniversalSearchComponent } from './components/universal-search/universal-search';
+import { NavigationService } from './services/navigation.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, ToastComponent],
+  imports: [RouterOutlet, RouterLink, ToastComponent, UniversalSearchComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('MIS');
+
+  @ViewChild(UniversalSearchComponent) universalSearch?: UniversalSearchComponent;
 
   buttons = [
     { name: 'AD Tools', id: 'testapi' },
@@ -21,7 +25,7 @@ export class App {
     { name: 'Network', id: 'network' },
     { name: 'Display', id: 'kiosk' },
     { name: 'Links', id: 'links' },
-    { name: 'Unlock', id: 'unlock' }
+    { name: 'Unlock', id: 'unlock' },
   ];
 
   // Work timer (7:30 -> 16:30 local time)
@@ -44,9 +48,30 @@ export class App {
   unlocked = signal<string[]>([]);
   failed = signal<{ samAccountName: string; reason: string }[]>([]);
 
-  constructor(private apiService: ApiService) {
+  constructor(
+    private apiService: ApiService,
+    public navService: NavigationService
+  ) {
     this.startWorkTimer();
     this.startClock();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Ctrl+Space to open universal search (easy left-hand shortcut)
+    if (event.ctrlKey && event.code === 'Space') {
+      event.preventDefault();
+      this.universalSearch?.open();
+    }
+  }
+
+  handleUniversalSearchAction(actionId: string) {
+    switch (actionId) {
+      case 'unlock-accounts':
+        this.openUnlockDialog();
+        break;
+      // Add more action handlers here as needed
+    }
   }
 
   onTopButtonClick(evt: Event, id: string) {
@@ -55,6 +80,10 @@ export class App {
       evt.preventDefault();
       return;
     }
+  }
+
+  getButtonRoute(buttonId: string): string | null {
+    return this.navService.getRoute(buttonId);
   }
 
   openUnlockDialog() {

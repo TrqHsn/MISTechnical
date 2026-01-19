@@ -469,3 +469,263 @@
     height: 300px;
   }
 }
+
+/* ============= ATTENDANCE DEVICE TAB STYLES ============= */
+
+.attendance-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.attendance-section h2 {
+  color: #ffffff;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+}
+
+.attendance-section h3 {
+  color: #e8f5e9;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+/* Form Section */
+.attendance-form-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.attendance-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.form-row .input-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.add-btn {
+  width: 100%;
+  max-width: 200px;
+  margin-top: 0.5rem;
+}
+
+.ip-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  transition: border-color 0.3s ease;
+}
+
+.ip-input-group:focus-within {
+  border-color: #4caf50;
+}
+
+.ip-prefix {
+  color: #4caf50;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.ip-octet-input {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  width: 120px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  color: #ffffff !important;
+  font-size: 1rem;
+}
+
+.ip-octet-input:focus {
+  outline: none;
+}
+
+.error-text {
+  color: #ff5252;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* Content Layout */
+.attendance-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Device List Section */
+.device-list-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.no-devices {
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.device-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.device-table thead {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+.device-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.device-table td {
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.device-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.device-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ip-cell {
+  font-family: 'Courier New', monospace;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.btn-small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+/* Port Check Section */
+.port-check-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.refresh-btn {
+  white-space: nowrap;
+}
+
+.no-results {
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.port-check-results {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow-y: auto;
+  max-height: 400px;
+  flex: 1;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.port-check-results::-webkit-scrollbar {
+  width: 8px;
+}
+
+.port-check-results::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.port-check-results::-webkit-scrollbar-thumb {
+  background: rgba(76, 175, 80, 0.5);
+  border-radius: 4px;
+}
+
+.port-check-results::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 175, 80, 0.7);
+}
+
+/* Responsive for Attendance Tab */
+@media (max-width: 1024px) {
+  .attendance-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .add-btn {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 600px) {
+  .device-table {
+    font-size: 0.85rem;
+  }
+  
+  .device-table th,
+  .device-table td {
+    padding: 0.5rem;
+  }
+  
+  .port-check-results {
+    font-size: 0.8rem;
+    max-height: 300px;
+  }
+}
