@@ -23,6 +23,14 @@ export class DeviceToolsService {
       keywords: ['keyboard', 'test', 'keys', 'typing']
     },
     {
+      id: 'mouse',
+      name: 'Mouse & Touchpad Test',
+      description: 'Test mouse buttons, scroll, movement, drag & drop, and touchpad gestures',
+      url: '/mouse-test',
+      icon: '🖱️',
+      keywords: ['mouse', 'touchpad', 'test', 'click', 'scroll', 'gesture', 'drag', 'precision']
+    },
+    {
       id: 'stress',
       name: 'Stress Test',
       description: 'CPU and GPU stress testing tool',
@@ -37,6 +45,14 @@ export class DeviceToolsService {
       url: '/display-test',
       icon: '🖥️',
       keywords: ['display', 'screen', 'monitor', 'pixel', 'test', 'dead pixel', 'backlight']
+    },
+    {
+      id: 'cammic',
+      name: 'Camera / Mic Test',
+      description: 'Test webcam video, microphone, and record audio/video',
+      url: '',
+      icon: '🎥',
+      keywords: ['camera', 'mic', 'webcam', 'audio', 'video', 'test', 'record']
     }
   ]);
 

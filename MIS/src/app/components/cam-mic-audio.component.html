@@ -1,0 +1,58 @@
+<div #container class="cam-mic-audio-container">
+  <div class="controls-row">
+    <label>
+      Webcam:
+      <select class="device-dropdown" [value]="selectedVideoId()" (change)="onSelectChange($event, 'video')">
+        <option value="">Select webcam</option>
+        @for (cam of videoInputs(); track cam.deviceId) {
+          <option [value]="cam.deviceId">{{ cam.label || 'Camera' }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Microphone:
+      <select class="device-dropdown" [value]="selectedAudioId()" (change)="onSelectChange($event, 'audio')">
+        <option value="">Select microphone</option>
+        @for (mic of audioInputs(); track mic.deviceId) {
+          <option [value]="mic.deviceId">{{ mic.label || 'Microphone' }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Speaker:
+      <select class="device-dropdown" [value]="selectedSpeakerId()" (change)="onSelectChange($event, 'speaker')" [disabled]="!supportsSinkId">
+        <option value="">Select speaker</option>
+        @for (spk of audioOutputs(); track spk.deviceId) {
+          <option [value]="spk.deviceId">{{ spk.label || 'Speaker' }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  <div class="video-row">
+    <video #video class="preview-video" autoplay playsinline></video>
+    <button class="fullscreen-btn" (click)="enterFullscreen()" title="Fullscreen">⛶</button>
+    @if (errorMsg()) {
+      <div class="error-msg">{{ errorMsg() }}</div>
+    }
+  </div>
+
+  <div class="recorder-controls">
+    @if (!recording() && !downloadUrl()) {
+      <button class="start-btn" (click)="startRecording()">Start Recording</button>
+    }
+    @if (recording()) {
+      <span class="timer">{{ timerDisplay }}</span>
+      <button (click)="pauseRecording()" [disabled]="paused()">Pause</button>
+      <button (click)="resumeRecording()" [disabled]="!paused()">Resume</button>
+      <button (click)="stopRecording()">Stop</button>
+      <button (click)="cancelRecording()" class="cancel-btn">✖</button>
+    }
+    @if (downloadUrl()) {
+      <a [href]="downloadUrl()" download="recording.webm">
+        <button class="download-btn">Download Recording</button>
+      </a>
+      <button (click)="cancelRecording()" class="cancel-btn">Reset</button>
+    }
+  </div>
+</div>

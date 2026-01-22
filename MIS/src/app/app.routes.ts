@@ -56,6 +56,10 @@ export const routes: Routes = [
   {
     path: 'important-links',
     loadComponent: () => import('./components/important-links/important-links').then(m => m.ImportantLinksComponent)
+  },
+  {
+    path: 'cam-mic-test',
+    loadComponent: () => import('./components/cam-mic-audio.component').then(m => m.CamMicAudioComponent)
   }
   ,
   {
@@ -63,6 +67,7 @@ export const routes: Routes = [
     loadComponent: () => import('./components/display-test/display-test.component').then(m => m.DisplayTestComponent)
   }
   ,
+  // ...existing code...
   // Fallback - redirect any unknown path to ad-tools
   { path: '**', redirectTo: 'ad-tools' }
 ];

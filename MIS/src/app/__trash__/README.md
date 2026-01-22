@@ -1,0 +1,1 @@
+This folder is used as a temporary holding area for deleted files. Safe to delete.

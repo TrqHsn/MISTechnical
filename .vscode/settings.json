@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^dotnet watch run$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

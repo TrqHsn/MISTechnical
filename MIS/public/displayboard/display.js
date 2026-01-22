@@ -396,8 +396,7 @@
             '      </div>' +
             '      <div class="text-404">' +
             '        <article>' +
-            '          <p>Broadcasting is off</p>' +
-            '          <button>Home 🏠</button>' +
+            '          <h1>Broadcasting is off</h1>' +
             '        </article>' +
             '      </div>' +
             '    </div>' +
