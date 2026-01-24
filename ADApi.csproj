@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.7" />
     <PackageReference Include="System.DirectoryServices" Version="10.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
     <PackageReference Include="System.Management" Version="9.0.0" />

@@ -5,6 +5,12 @@ using System.Collections.Concurrent;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
+// For SNMP test endpoint
+using Lextm.SharpSnmpLib;
+using Lextm.SharpSnmpLib.Messaging;
+using System.Net;
+using System.Collections.Generic;
+
 namespace ADApi.Controllers
 {
     [ApiController]
@@ -27,6 +33,34 @@ namespace ADApi.Controllers
             if (!System.IO.File.Exists(_attendanceDeviceCsvPath))
             {
                 System.IO.File.WriteAllText(_attendanceDeviceCsvPath, "\"Attendance device IP\",\"Location\"\n");
+            }
+        }
+
+        /// <summary>
+        /// Temporary SNMP test endpoint. Returns true if SNMP v2 responds to sysDescr.0 on the given IP.
+        /// </summary>
+        [HttpGet("snmp/test")]
+        public IActionResult TestSnmp([FromQuery] string ip)
+        {
+            if (string.IsNullOrWhiteSpace(ip))
+                return BadRequest(new { success = false, message = "IP is required" });
+            try
+            {
+                var result = Messenger.Get(
+                    VersionCode.V2,
+                    new IPEndPoint(IPAddress.Parse(ip), 161),
+                    new OctetString("public"),
+                    new List<Variable> {
+                        new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0"))
+                    },
+                    3000
+                );
+                return Ok(new { success = result.Count > 0 });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "SNMP test failed for {IP}", ip);
+                return Ok(new { success = false });
             }
         }
 
