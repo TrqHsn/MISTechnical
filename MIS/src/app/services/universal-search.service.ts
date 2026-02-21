@@ -48,6 +48,12 @@ export class UniversalSearchService {
     // Forms Tabs
     { id: 'os-form', title: 'OS Installation Form', description: 'Create OS installation documentation', category: 'Tabs', route: '/forms', component: 'forms', tab: 'os-form', icon: '💿', keywords: ['os', 'installation', 'form', 'windows'] },
     { id: 'device-form', title: 'Device Form', description: 'Create device assignment documentation', category: 'Tabs', route: '/forms', component: 'forms', tab: 'device-form', icon: '📄', keywords: ['device', 'form', 'assignment'] },
+
+    // Print PDF Forms
+    { id: 'pdf-asset-transfer-form', title: 'Asset Transfer Form', description: 'Open Print → Forms to print Asset Transfer Form PDF', category: 'Tabs', route: '/print', component: 'print', tab: 'forms', icon: '🧾', keywords: ['pdf', 'form', 'asset', 'transfer', 'print forms'] },
+    { id: 'pdf-desktop-user-policy', title: 'Desktop User Policy', description: 'Open Print → Forms to print Desktop User Policy PDF', category: 'Tabs', route: '/print', component: 'print', tab: 'forms', icon: '🧾', keywords: ['pdf', 'form', 'desktop', 'user', 'policy', 'print forms'] },
+    { id: 'pdf-laptop-user-policy', title: 'Laptop User Policy', description: 'Open Print → Forms to print Laptop User Policy PDF', category: 'Tabs', route: '/print', component: 'print', tab: 'forms', icon: '🧾', keywords: ['pdf', 'form', 'laptop', 'user', 'policy', 'print forms'] },
+    { id: 'pdf-mobile-wifi-access', title: 'Mobile WiFi Access', description: 'Open Print → Forms to print Mobile WiFi Access PDF', category: 'Tabs', route: '/print', component: 'print', tab: 'forms', icon: '🧾', keywords: ['pdf', 'form', 'mobile', 'wifi', 'access', 'print forms'] },
     
     // Additional standalone pages not in main buttons
     { id: 'stress-test', title: 'Stress CPU/GPU', description: 'Hardware stress testing tool', category: 'Pages', route: '/stress-cpu-gpu', icon: '💪', keywords: ['stress', 'test', 'cpu', 'gpu', 'benchmark'] },

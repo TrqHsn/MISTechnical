@@ -39,7 +39,16 @@ export class LaptopAssignFormComponent {
     { name: 'Headphone', providedKey: 'pro5', conditionKey: 'con5' }
   ];
 
-  private apiUrl = 'http://localhost:5001/api/print';
+  // Dynamically generate API URL based on environment
+  private getApiUrl(): string {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      return `http://${hostname}:5001/api/print`;
+    }
+    return 'http://localhost:5001/api/print';
+  }
+
+  private apiUrl = this.getApiUrl();
 
   constructor(private fb: FormBuilder, private http: HttpClient, private apiService: ApiService) {
     // Setup user search with debounce

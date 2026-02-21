@@ -354,18 +354,6 @@
         
         nextLayer.innerHTML = 
             '<div class="error-404-page">' +
-            '  <div class="about-404">' +
-            '    <a class="bg_links social portfolio" href="https://www.rafaelalucas.com" target="_blank">' +
-            '      <span class="icon"></span>' +
-            '    </a>' +
-            '    <a class="bg_links social dribbble" href="https://dribbble.com/rafaelalucas" target="_blank">' +
-            '      <span class="icon"></span>' +
-            '    </a>' +
-            '    <a class="bg_links social linkedin" href="https://www.linkedin.com/in/rafaelalucas/" target="_blank">' +
-            '      <span class="icon"></span>' +
-            '    </a>' +
-            '    <a class="bg_links logo"></a>' +
-            '  </div>' +
             '  <section class="wrapper-404">' +
             '    <div class="container-404">' +
             '      <div id="scene" class="scene" data-hover-only="false">' +
@@ -391,12 +379,12 @@
             '            <span class="piece"></span>' +
             '          </div>' +
             '        </div>' +
-            '        <p class="p404" data-depth="0.50">404</p>' +
-            '        <p class="p404" data-depth="0.10">404</p>' +
+            '        <p class="p404" data-depth="0.50">MIS</p>' +
+            '        <p class="p404" data-depth="0.10">MIS</p>' +
             '      </div>' +
             '      <div class="text-404">' +
             '        <article>' +
-            '          <h1>Broadcasting is off</h1>' +
+            '          <h1></h1>' +
             '        </article>' +
             '      </div>' +
             '    </div>' +

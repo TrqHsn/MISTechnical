@@ -47,13 +47,13 @@ export class DeviceToolsService {
       keywords: ['display', 'screen', 'monitor', 'pixel', 'test', 'dead pixel', 'backlight']
     },
     {
-      id: 'cammic',
-      name: 'Camera / Mic Test',
-      description: 'Test webcam video, microphone, and record audio/video',
-      url: '',
-      icon: '🎥',
-      keywords: ['camera', 'mic', 'webcam', 'audio', 'video', 'test', 'record']
-    }
+      id: 'cammicspeaker',
+      name: 'Camera / Mic / Speaker Test',
+      description: 'Diagnose webcam preview, microphone recording, and speaker output',
+      url: '/cam-mic-speaker',
+      icon: '🎤',
+      keywords: ['camera', 'microphone', 'speaker', 'webcam', 'audio', 'diagnostic', 'recording']
+    },
   ]);
 
   getTools(): DeviceTool[] {

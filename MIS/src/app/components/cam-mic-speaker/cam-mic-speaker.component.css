@@ -1,0 +1,127 @@
+.cam-mic-speaker {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+}
+
+.messages {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.message {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.message.info {
+  background: #edf4ff;
+  color: #1f4a8a;
+}
+
+.message.success {
+  background: #e9f8ee;
+  color: #1f6b3d;
+}
+
+.message.warning {
+  background: #fff7e6;
+  color: #8a5a00;
+}
+
+.message.error {
+  background: #ffecec;
+  color: #a30000;
+}
+
+.refresh-btn {
+  margin-bottom: 1rem;
+}
+
+.sections {
+  display: grid;
+  gap: 1rem;
+}
+
+.section {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.section h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.field-select {
+  width: 100%;
+  max-width: 420px;
+  height: 38px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0 0.65rem;
+}
+
+.preview-wrapper {
+  margin-top: 0.85rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #111;
+  max-width: 640px;
+}
+
+.camera-preview {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+  min-height: 280px;
+  object-fit: cover;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.button-row button,
+.refresh-btn {
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  background: #f5f5f5;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+}
+
+.button-row button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.audio-preview {
+  margin-top: 0.85rem;
+}
+
+.audio-preview p {
+  margin: 0 0 0.45rem;
+}
+
+.audio-preview audio {
+  width: min(420px, 100%);
+}

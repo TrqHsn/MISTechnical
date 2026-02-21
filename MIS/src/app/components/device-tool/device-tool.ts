@@ -16,8 +16,4 @@ export class DeviceToolComponent {
   openTool(url: string) {
     this.deviceToolsService.openTool(url);
   }
-
-  openCamMicTest() {
-    window.open('/cam-mic-test', '_blank', 'noopener,noreferrer');
-  }
 }

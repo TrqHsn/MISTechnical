@@ -1,0 +1,140 @@
+<div class="smb-browser-container">
+  <h1>SMB Browser</h1>
+
+  <div class="address-bar">
+    <input
+      type="text"
+      class="path-input"
+      placeholder="Enter network path (UNC)"
+      [value]="uncPathInput()"
+      (input)="uncPathInput.set($any($event.target).value)"
+      (keydown.enter)="onGo()"
+    />
+    <button class="go-button" (click)="onGo()" [disabled]="isLoading()">Go</button>
+  </div>
+
+  <div class="controls-row">
+    <button class="secondary-button" (click)="onBack()" [disabled]="isLoading()">Back</button>
+    <button class="secondary-button" (click)="downloadFolder()" [disabled]="!currentPath() || isLoading()">Download Folder</button>
+
+    <div class="view-toggle">
+      <button
+        class="toggle-button"
+        [class.active]="viewMode() === 'list'"
+        (click)="setViewMode('list')"
+      >
+        List View
+      </button>
+      <button
+        class="toggle-button"
+        [class.active]="viewMode() === 'grid'"
+        (click)="setViewMode('grid')"
+      >
+        Grid View
+      </button>
+    </div>
+  </div>
+
+  @if (breadcrumbs().length > 0) {
+    <div class="breadcrumbs">
+      @for (crumb of breadcrumbs(); track crumb.path; let last = $last) {
+        @if (!last) {
+          <button class="breadcrumb-link" (click)="onBreadcrumbClick(crumb.path)">{{ crumb.label }}</button>
+          <span class="separator">\</span>
+        } @else {
+          <span class="breadcrumb-current">{{ crumb.label }}</span>
+        }
+      }
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="status loading">Loading folder contents...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="status error">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && !errorMessage() && currentPath() && items().length === 0) {
+    <div class="status empty">This folder is empty.</div>
+  }
+
+  @if (!isLoading() && !errorMessage() && items().length > 0 && viewMode() === 'list') {
+    <div class="list-view">
+      <div class="list-header row">
+        <div class="col-name">Name</div>
+        <div class="col-type">Type</div>
+        <div class="col-size">Size</div>
+        <div class="col-date">Date Modified</div>
+        <div class="col-actions">Actions</div>
+      </div>
+
+      @for (item of items(); track trackByPath($index, item)) {
+        <div class="row">
+          <div class="col-name name-cell">
+            <span class="icon">{{ item.isDirectory ? '📁' : '📄' }}</span>
+            @if (item.isDirectory) {
+              <button class="name-link" (click)="onOpenFolder(item)">{{ item.name }}</button>
+            } @else {
+              <span>{{ item.name }}</span>
+            }
+            @if (item.isHidden) {
+              <span class="attribute-tag">Hidden</span>
+            }
+            @if (item.isSystem) {
+              <span class="attribute-tag">System</span>
+            }
+          </div>
+          <div class="col-type">{{ item.type }}</div>
+          <div class="col-size">{{ formatSize(item.size) }}</div>
+          <div class="col-date">{{ item.lastModified | date:'yyyy-MM-dd HH:mm' }}</div>
+          <div class="col-actions">
+            @if (item.isDirectory) {
+              <button class="action-button" (click)="onOpenFolder(item)">Open</button>
+              <button class="action-button" (click)="downloadFolder(item)">Download Folder</button>
+            } @else {
+              <button class="action-button" (click)="downloadFile(item)">Download</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage() && items().length > 0 && viewMode() === 'grid') {
+    <div class="grid-view">
+      @for (item of items(); track trackByPath($index, item)) {
+        <div class="grid-item">
+          <div class="grid-icon">{{ item.isDirectory ? '📁' : '📄' }}</div>
+          <div class="grid-name">
+            @if (item.isDirectory) {
+              <button class="name-link" (click)="onOpenFolder(item)">{{ item.name }}</button>
+            } @else {
+              <span>{{ item.name }}</span>
+            }
+          </div>
+          <div class="grid-meta">{{ item.type }}</div>
+          <div class="grid-meta">{{ item.isDirectory ? '—' : formatSize(item.size) }}</div>
+          <div class="grid-meta">{{ item.lastModified | date:'yyyy-MM-dd HH:mm' }}</div>
+          <div class="grid-tags">
+            @if (item.isHidden) {
+              <span class="attribute-tag">Hidden</span>
+            }
+            @if (item.isSystem) {
+              <span class="attribute-tag">System</span>
+            }
+          </div>
+          <div class="grid-actions">
+            @if (item.isDirectory) {
+              <button class="action-button" (click)="onOpenFolder(item)">Open</button>
+              <button class="action-button" (click)="downloadFolder(item)">Download Folder</button>
+            } @else {
+              <button class="action-button" (click)="downloadFile(item)">Download</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

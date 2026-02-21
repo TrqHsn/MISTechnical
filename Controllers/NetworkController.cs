@@ -37,7 +37,7 @@ namespace ADApi.Controllers
         }
 
         /// <summary>
-        /// Temporary SNMP test endpoint. Returns true if SNMP v2 responds to sysDescr.0 on the given IP.
+        /// Temporary SNMP test endpoint. Returns sysDescr.0 and toner status (if available) from SNMP v2 on the given IP.
         /// </summary>
         [HttpGet("snmp/test")]
         public IActionResult TestSnmp([FromQuery] string ip)
@@ -46,22 +46,78 @@ namespace ADApi.Controllers
                 return BadRequest(new { success = false, message = "IP is required" });
             try
             {
+                // OIDs: sysDescr.0 and common toner status OIDs (black, cyan, magenta, yellow)
+                var oids = new List<Variable>
+                {
+                    new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")), // sysDescr.0
+                    // Black toner level (Lexmark/HP/Canon common):
+                    new Variable(new ObjectIdentifier("1.3.6.1.2.1.43.11.1.1.9.1.1")),
+                    // Cyan toner level
+                    new Variable(new ObjectIdentifier("1.3.6.1.2.1.43.11.1.1.9.1.2")),
+                    // Magenta toner level
+                    new Variable(new ObjectIdentifier("1.3.6.1.2.1.43.11.1.1.9.1.3")),
+                    // Yellow toner level
+                    new Variable(new ObjectIdentifier("1.3.6.1.2.1.43.11.1.1.9.1.4")),
+                };
+
                 var result = Messenger.Get(
                     VersionCode.V2,
                     new IPEndPoint(IPAddress.Parse(ip), 161),
                     new OctetString("public"),
-                    new List<Variable> {
-                        new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0"))
-                    },
+                    oids,
                     3000
                 );
-                return Ok(new { success = result.Count > 0 });
+
+                // Parse results
+                string sysDescr = null;
+                int? black = null, cyan = null, magenta = null, yellow = null;
+                foreach (var v in result)
+                {
+                    var oid = v.Id.ToString();
+                    switch (oid)
+                    {
+                        case "1.3.6.1.2.1.1.1.0":
+                            sysDescr = v.Data.ToString();
+                            break;
+                        case "1.3.6.1.2.1.43.11.1.1.9.1.1":
+                            black = TryParseInt(v.Data.ToString());
+                            break;
+                        case "1.3.6.1.2.1.43.11.1.1.9.1.2":
+                            cyan = TryParseInt(v.Data.ToString());
+                            break;
+                        case "1.3.6.1.2.1.43.11.1.1.9.1.3":
+                            magenta = TryParseInt(v.Data.ToString());
+                            break;
+                        case "1.3.6.1.2.1.43.11.1.1.9.1.4":
+                            yellow = TryParseInt(v.Data.ToString());
+                            break;
+                    }
+                }
+
+                return Ok(new
+                {
+                    success = result.Count > 0,
+                    sysDescr,
+                    toner = new
+                    {
+                        black,
+                        cyan,
+                        magenta,
+                        yellow
+                    }
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "SNMP test failed for {IP}", ip);
                 return Ok(new { success = false });
             }
+        }
+
+        private int? TryParseInt(string s)
+        {
+            if (int.TryParse(s, out var v)) return v;
+            return null;
         }
 
         [HttpPost("ping/start")]

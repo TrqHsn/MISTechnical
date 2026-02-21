@@ -26,6 +26,7 @@ export class App {
     { name: 'Display', id: 'kiosk' },
     { name: 'Links', id: 'links' },
     { name: 'Unlock', id: 'unlock' },
+    { name: 'Files', id: 'files' }
   ];
 
   // Work timer (7:30 -> 16:30 local time)
@@ -127,9 +128,9 @@ export class App {
     const update = () => {
       const now = new Date();
       const start = new Date(now);
-      start.setHours(7, 30, 0, 0);
+      start.setHours(6, 30, 0, 0);
       const end = new Date(now);
-      end.setHours(16, 30, 0, 0);
+      end.setHours(15, 0, 0, 0);
 
       let label = '';
       let remainingMs = 0;

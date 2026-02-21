@@ -237,6 +237,10 @@ export class KioskAdminComponent implements OnInit {
   }
 
   getMediaUrl(fileName: string): string {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      return `http://${hostname}:5001/displayboard/${fileName}`;
+    }
     return `http://localhost:5001/displayboard/${fileName}`;
   }
 

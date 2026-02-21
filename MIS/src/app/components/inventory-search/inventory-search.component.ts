@@ -9,9 +9,6 @@ interface ExcelRow {
   [key: string]: any;
 }
 
-// Server CSV URL - proxied through .NET API to avoid CORS issues
-const SERVER_CSV_URL = 'http://localhost:5001/api/inventory/csv';
-
 @Component({
   selector: 'app-inventory-search',
   standalone: true,
@@ -20,6 +17,17 @@ const SERVER_CSV_URL = 'http://localhost:5001/api/inventory/csv';
   styleUrl: './inventory-search.component.css'
 })
 export class InventorySearchComponent {
+  // Dynamically generate API URL based on environment
+  private getApiUrl(): string {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      return `http://${hostname}:5001/api/inventory/csv`;
+    }
+    return 'http://localhost:5001/api/inventory/csv';
+  }
+
+  private apiUrl = this.getApiUrl();
+
   // File upload state
   fileName = signal('');
   fileUploaded = signal(false);
@@ -76,7 +84,7 @@ export class InventorySearchComponent {
     this.resetFileState();
 
     try {
-      const response = await fetch(SERVER_CSV_URL);
+      const response = await fetch(this.apiUrl);
       
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);

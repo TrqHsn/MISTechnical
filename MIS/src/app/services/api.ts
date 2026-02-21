@@ -10,6 +10,23 @@ export interface Computer {
   [key: string]: any;
 }
 
+export interface SmbItem {
+  name: string;
+  fullPath: string;
+  isDirectory: boolean;
+  size: number | null;
+  lastModified: string;
+  extension: string;
+  isHidden: boolean;
+  isSystem: boolean;
+  type: string;
+}
+
+export interface SmbBrowseResponse {
+  path: string;
+  items: SmbItem[];
+}
+
 // Dynamically determine API base URL from current hostname
 const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
@@ -64,5 +81,17 @@ export class ApiService {
   // Update user attributes by userPrincipalName (UPN)
   updateUserAttributes(userPrincipalName: string, payload: { department?: string; title?: string; manager?: string }): Observable<any> {
     return this.http.put(`${this.apiUrl}/users/${encodeURIComponent(userPrincipalName)}/attributes`, payload);
+  }
+
+  browseSmb(path: string): Observable<SmbBrowseResponse> {
+    return this.http.get<SmbBrowseResponse>(`${this.apiUrl}/smb/browse?path=${encodeURIComponent(path)}`);
+  }
+
+  getSmbFileDownloadUrl(path: string): string {
+    return `${this.apiUrl}/smb/download/file?path=${encodeURIComponent(path)}`;
+  }
+
+  getSmbFolderDownloadUrl(path: string): string {
+    return `${this.apiUrl}/smb/download/folder?path=${encodeURIComponent(path)}`;
   }
 }

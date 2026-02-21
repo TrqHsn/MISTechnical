@@ -3,7 +3,7 @@
 
   <div class="tools-grid">
     @for (tool of tools(); track tool.id) {
-      <div class="tool-card" (click)="tool.id === 'cammic' ? openCamMicTest() : openTool(tool.url)">
+      <div class="tool-card" (click)="openTool(tool.url)">
         <div class="tool-icon">{{ tool.icon || tool.name }}</div>
         <div class="tool-info">
           <h3>{{ tool.name }}</h3>
@@ -15,9 +15,6 @@
       </div>
     }
   </div>
-
-  <!-- Camera / Mic Test now opens in a new tab, not embedded -->
-
   <div class="info-section">
     <p class="info-text">
       💡 <strong>Note:</strong> All tools open in a new browser tab. Make sure to allow pop-ups if needed.

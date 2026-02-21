@@ -26,6 +26,13 @@ export class NetworkComponent implements OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
+  private getApiBaseUrl(): string {
+    if (this.isBrowser) {
+      return `http://${window.location.hostname}:5001`;
+    }
+    return 'http://localhost:5001';
+  }
+
   // Tab management
   activeTab = signal<'ping' | 'activeip' | 'attendance'>('ping');
 
@@ -123,7 +130,7 @@ export class NetworkComponent implements OnDestroy {
     }
 
     // Create EventSource for Server-Sent Events
-    const url = `http://localhost:5001/api/network/ping/start`;
+    const url = `${this.getApiBaseUrl()}/api/network/ping/start`;
     
     // Use fetch to POST the request and get the stream
     fetch(url, {
@@ -220,7 +227,7 @@ export class NetworkComponent implements OnDestroy {
     }
 
     if (this.sessionId) {
-      this.http.post('http://localhost:5001/api/network/ping/stop', { sessionId: this.sessionId })
+      this.http.post(`${this.getApiBaseUrl()}/api/network/ping/stop`, { sessionId: this.sessionId })
         .subscribe({
           next: () => {
             this.pingResult.set(this.pingResult() + '\n\n🛑 Ping stopped by user');
@@ -280,7 +287,7 @@ export class NetworkComponent implements OnDestroy {
     this.activeIps.set([]);
     this.scanStatus.set('🔄 Starting scan...');
 
-    const url = `http://localhost:5001/api/network/scan/stream?baseIp=${encodeURIComponent(baseIp)}`;
+    const url = `${this.getApiBaseUrl()}/api/network/scan/stream?baseIp=${encodeURIComponent(baseIp)}`;
 
     fetch(url, {
       method: 'GET',
@@ -342,7 +349,7 @@ export class NetworkComponent implements OnDestroy {
 
   stopScan() {
     if (this.scanSessionId) {
-      this.http.post('http://localhost:5001/api/network/scan/stop', { sessionId: this.scanSessionId })
+      this.http.post(`${this.getApiBaseUrl()}/api/network/scan/stop`, { sessionId: this.scanSessionId })
         .subscribe({
           next: () => {
             this.scanStatus.set('🛑 Scan stopped by user');
@@ -412,7 +419,7 @@ export class NetworkComponent implements OnDestroy {
     try {
       console.log('Loading attendance devices...');
       const response = await this.http.get<{ devices: AttendanceDevice[] }>(
-        'http://localhost:5001/api/network/attendance-devices'
+        `${this.getApiBaseUrl()}/api/network/attendance-devices`
       ).toPromise();
       
       console.log('Received response:', response);
@@ -457,7 +464,7 @@ export class NetworkComponent implements OnDestroy {
 
     try {
       const response = await this.http.post<{ success: boolean; device: AttendanceDevice }>(
-        'http://localhost:5001/api/network/attendance-devices',
+        `${this.getApiBaseUrl()}/api/network/attendance-devices`,
         { ip, location }
       ).toPromise();
 
@@ -497,7 +504,7 @@ export class NetworkComponent implements OnDestroy {
 
     try {
       const response = await this.http.delete<{ success: boolean }>(
-        `http://localhost:5001/api/network/attendance-devices/${encodeURIComponent(ip)}`
+        `${this.getApiBaseUrl()}/api/network/attendance-devices/${encodeURIComponent(ip)}`
       ).toPromise();
 
       if (response?.success) {
@@ -521,7 +528,7 @@ export class NetworkComponent implements OnDestroy {
 
     try {
       const response = await this.http.get<PortCheckResponse>(
-        'http://localhost:5001/api/network/attendance-devices/check-ports'
+        `${this.getApiBaseUrl()}/api/network/attendance-devices/check-ports`
       ).toPromise();
 
       if (response) {

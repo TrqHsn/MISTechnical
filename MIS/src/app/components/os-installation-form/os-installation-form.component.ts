@@ -282,10 +282,15 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
     // Build patch data
     const patchData: any = {
       oldComputerName: computerName,
-      description: oldDesc,
       operatingSystem: osValue,
       deviceType: deviceType,
     };
+
+    if (actionType === 'R') {
+      patchData.description = oldDesc;
+    } else if (actionType === 'RB' && this.newComputerDescription()) {
+      patchData.description = this.newComputerDescription();
+    }
     
     // Only copy to new computer name if action type is Rebuild
     if (actionType === 'RB') {
@@ -319,14 +324,14 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
     // Get current action type
     const actionType = this.form.get('actionType')?.value;
     
-    // If action is 'N' (New), populate description from new computer
+    // If action is 'N' (New) or 'RB' (Rebuild), populate description from new computer
     const patchData: any = {
       newComputerName: computerName,
       operatingSystem: osValue,
       deviceType: deviceType,
     };
     
-    if (actionType === 'N') {
+    if (actionType === 'N' || actionType === 'RB') {
       patchData.description = desc;
     }
     

@@ -39,6 +39,7 @@ export class DeviceAssignFormComponent {
     { name: 'Headphone', providedKey: 'pro5', conditionKey: 'con5' }
   ];
 
+  //Dynamically generate API URL based on environment
   private getApiUrl(): string {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;

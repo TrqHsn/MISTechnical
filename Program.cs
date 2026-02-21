@@ -30,6 +30,9 @@ builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
 // Register Kiosk/Digital Signage service
 builder.Services.AddSingleton<IKioskService, KioskService>();
 
+// Register SMB filesystem service
+builder.Services.AddScoped<ISmbService, SmbService>();
+
 // Configure CORS for Angular app on port 4200
 builder.Services.AddCors(options =>
 {

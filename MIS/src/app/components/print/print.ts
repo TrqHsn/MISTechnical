@@ -1,6 +1,7 @@
-import { Component, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-print',
@@ -9,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './print.html',
   styleUrl: './print.css',
 })
-export class Print {
+export class Print implements OnInit {
   // Tab management
   activeTab = signal<'label' | 'service-tag' | 'forms'>('label');
 
@@ -33,7 +34,23 @@ export class Print {
   printStatus = signal('');
   isPrinting = signal(false);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'] as 'label' | 'service-tag' | 'forms' | undefined;
+      if (tab === 'label' || tab === 'service-tag' || tab === 'forms') {
+        this.activeTab.set(tab);
+      }
+    });
+  }
+
+  private getApiBaseUrl(): string {
+    if (typeof window !== 'undefined') {
+      return `http://${window.location.hostname}:5001`;
+    }
+    return 'http://localhost:5001';
+  }
 
   // Label Print Tab - methods
   setText1(value: string) {
@@ -191,7 +208,7 @@ export class Print {
       caps: this.caps()
     };
 
-    this.http.post('http://localhost:5001/api/print/label', request)
+    this.http.post(`${this.getApiBaseUrl()}/api/print/label`, request)
       .subscribe({
         next: () => {
           this.printStatus.set('✅ Printed successfully!');

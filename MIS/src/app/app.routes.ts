@@ -58,10 +58,13 @@ export const routes: Routes = [
     loadComponent: () => import('./components/important-links/important-links').then(m => m.ImportantLinksComponent)
   },
   {
-    path: 'cam-mic-test',
-    loadComponent: () => import('./components/cam-mic-audio.component').then(m => m.CamMicAudioComponent)
-  }
-  ,
+    path: 'files',
+    loadComponent: () => import('./components/smb-browser/smb-browser').then(m => m.SmbBrowserComponent)
+  },
+  {
+    path: 'cam-mic-speaker',
+    loadComponent: () => import('./components/cam-mic-speaker/cam-mic-speaker.component').then(m => m.CamMicSpeakerComponent)
+  },
   {
     path: 'display-test',
     loadComponent: () => import('./components/display-test/display-test.component').then(m => m.DisplayTestComponent)

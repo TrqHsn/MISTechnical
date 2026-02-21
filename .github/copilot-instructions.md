@@ -1,7 +1,7 @@
 # Copilot / Agent Instructions for ADApi
 
 ## Project Overview
-- **Backend:** .NET 10 Web API (no database, direct AD via `System.DirectoryServices`).
+- **Backend:** .NET 10 Web API (no database; direct Active Directory via `System.DirectoryServices`).
 - **Frontend:** Angular 21 SPA (SSR, signals, new template syntax) in `MIS/`.
 - **Platform:** Windows, domain-joined required for AD access.
 - **Key Features:** AD user/computer/device management, digital signage (kiosk), network tools, label printing, inventory proxy.
@@ -61,4 +61,4 @@
 - Kiosk: `GET /api/kiosk/display/content`, upload media: `POST /api/kiosk/media/upload`
 
 ---
-If any section is unclear or missing, please specify which part to expand or clarify.
+If any section is unclear, incomplete, or missing, please specify which part to expand or clarify.

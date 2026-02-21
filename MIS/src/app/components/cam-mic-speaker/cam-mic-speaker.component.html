@@ -1,0 +1,79 @@
+<div class="cam-mic-speaker">
+  <h1>Camera / Microphone / Speaker Diagnostic</h1>
+
+  <div class="messages">
+    @if (loadingDevices()) {
+      <div class="message info">Detecting media devices...</div>
+    }
+    @if (statusMessage()) {
+      <div class="message success">{{ statusMessage() }}</div>
+    }
+    @if (warningMessage()) {
+      <div class="message warning">{{ warningMessage() }}</div>
+    }
+    @if (errorMessage()) {
+      <div class="message error">{{ errorMessage() }}</div>
+    }
+  </div>
+
+  <button class="refresh-btn" type="button" (click)="refreshDevices()">Refresh Device List</button>
+
+  <form [formGroup]="form" class="sections">
+    <section class="section">
+      <h2>1. Camera Test</h2>
+      <label class="field-label" for="cameraId">Camera</label>
+      <select id="cameraId" formControlName="cameraId" class="field-select">
+        <option value="">Select a camera</option>
+        @for (camera of cameras(); track trackByDeviceId($index, camera)) {
+          <option [value]="camera.deviceId">{{ getDeviceLabel(camera, 'videoinput', $index) }}</option>
+        }
+      </select>
+
+      <div class="preview-wrapper">
+        <video #cameraPreview class="camera-preview" autoplay playsinline muted></video>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>2. Microphone Test</h2>
+      <label class="field-label" for="microphoneId">Microphone</label>
+      <select id="microphoneId" formControlName="microphoneId" class="field-select">
+        <option value="">Select a microphone</option>
+        @for (mic of microphones(); track trackByDeviceId($index, mic)) {
+          <option [value]="mic.deviceId">{{ getDeviceLabel(mic, 'audioinput', $index) }}</option>
+        }
+      </select>
+
+      <div class="button-row">
+        <button type="button" (click)="startRecording()" [disabled]="isRecording()">Start Recording</button>
+        <button type="button" (click)="pauseRecording()" [disabled]="!isRecording() || isPaused()">Pause</button>
+        <button type="button" (click)="resumeRecording()" [disabled]="!isRecording() || !isPaused()">Resume</button>
+        <button type="button" (click)="stopRecording()" [disabled]="!isRecording()">Stop</button>
+      </div>
+
+      @if (hasRecordedAudio()) {
+        <div class="audio-preview">
+          <p>Recorded Audio Preview</p>
+          <audio [src]="recordedAudioSrc" controls></audio>
+        </div>
+      }
+    </section>
+
+    <section class="section">
+      <h2>3. Speaker Test</h2>
+      <label class="field-label" for="speakerId">Speaker</label>
+      <select id="speakerId" formControlName="speakerId" class="field-select">
+        <option value="">Select a speaker</option>
+        @for (speaker of speakers(); track trackByDeviceId($index, speaker)) {
+          <option [value]="speaker.deviceId">{{ getDeviceLabel(speaker, 'audiooutput', $index) }}</option>
+        }
+      </select>
+
+      <div class="button-row">
+        <button type="button" (click)="testSpeaker()">Test Speaker</button>
+      </div>
+
+      <audio #speakerTestAudio preload="auto"></audio>
+    </section>
+  </form>
+</div>
