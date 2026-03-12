@@ -1,6 +1,16 @@
 <div class="inventory-container">
-  <h1>Inventory Search</h1>
-  <p class="subtitle">Load from server or upload a file to search inventory data</p>
+
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'inventory'" (click)="onTabChange('inventory')">
+      Inventory
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'contacts'" (click)="onTabChange('contacts')">
+      Contacts
+    </button>
+  </div>
+
+  @if (activeTab() === 'inventory') {
+  <div class="tab-content">
 
   <!-- Combined Load/Upload Section -->
   <div class="load-upload-section">
@@ -41,7 +51,7 @@
   <!-- Search Section - Disabled until file uploaded -->
   <div class="search-section" [class.disabled]="!fileUploaded()">
     <!-- Column Selector Dropdown -->
-    <div class="column-selector">
+    <!-- <div class="column-selector">
       <label for="columnSelect">Search in Column:</label>
       <select 
         id="columnSelect"
@@ -54,7 +64,7 @@
           <option [value]="col.value">{{ col.label }}</option>
         }
       </select>
-    </div>
+    </div> -->
 
     <!-- Search Input with Live Search -->
     <div class="search-input-wrapper">
@@ -117,5 +127,78 @@
         }
       </div>
     </div>
+  }
+
+  </div>
+  }
+
+  @if (activeTab() === 'contacts') {
+  <div class="tab-content">
+    @if (contactsError()) {
+      <div class="error-message">❌ {{ contactsError() }}</div>
+    }
+
+    <div class="search-section" [class.disabled]="!contactsLoaded()">
+      <div class="search-input-wrapper">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by EmployeeName or Email"
+          [value]="contactsSearchTerm()"
+          (input)="onContactsSearchInput($any($event.target).value)"
+          (keydown)="onContactsSearchKeydown($event)"
+          [disabled]="!contactsLoaded()"
+        />
+
+        @if (contactsSearching()) {
+          <div class="searching-indicator">Searching...</div>
+        }
+
+        @if (contactsShowDropdown() && contactsSearchResults().length > 0) {
+          <div class="results-dropdown">
+            @for (result of contactsSearchResults(); track $index) {
+              <div class="result-item" (click)="selectContact(result)">
+                {{ getContactResultDisplay(result) }}
+              </div>
+            }
+          </div>
+        }
+
+        @if (contactsShowDropdown() && contactsSearchResults().length === 0 && !contactsSearching() && contactsSearchTerm()) {
+          <div class="results-dropdown">
+            <div class="no-results">No contacts found</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (selectedContact()) {
+      <div class="contact-card">
+        <div class="contact-header">
+          <h2>{{ getContactValue('EmployeeName') }}</h2>
+          <div class="contact-subtitle">{{ getContactValue('Designation') }}</div>
+        </div>
+
+        <div class="contact-content">
+          <div class="contact-grid">
+            <div class="contact-item"><strong>Plant Name:</strong> {{ getContactValue('Plant Name') }}</div>
+            <div class="contact-item"><strong>Division:</strong> {{ getContactValue('Division') }}</div>
+            <div class="contact-item"><strong>Department:</strong> {{ getContactValue('Department') }}</div>
+            <div class="contact-item"><strong>Section:</strong> {{ getContactValue('Section info') }}</div>
+            <div class="contact-item"><strong>Phone:</strong> {{ getContactValue('Phone Number') }}</div>
+            <div class="contact-item"><strong>Email:</strong> {{ getContactValue('Email') }}</div>
+          </div>
+
+          @if (contactQrCodeUrl()) {
+            <div class="qr-section">
+              <div class="qr-title">Phone QR</div>
+              <img class="qr-image" [src]="contactQrCodeUrl()" alt="Phone Number QR code" />
+              <div class="qr-hint">Scan to get the phone number</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
   }
 </div>

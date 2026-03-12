@@ -22,7 +22,7 @@ export class NavigationService {
     'inventory': '/inventory',
     'network': '/network',
     'devicetool': '/device-tool',
-    'kiosk': '/kiosk-admin',
+    'kiosk': '/sinage',
     'newuser': '/device-assign',
     'links': '/important-links',
     'files': '/files',

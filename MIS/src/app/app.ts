@@ -21,12 +21,12 @@ export class App {
     { name: 'Print', id: 'print' },
     { name: 'Forms', id: 'oif' },
     { name: 'Device Tool', id: 'devicetool' },
-    { name: 'Inventory', id: 'inventory' },
+    { name: 'search', id: 'inventory' },
     { name: 'Network', id: 'network' },
-    { name: 'Display', id: 'kiosk' },
+    { name: 'Sinage', id: 'kiosk' },
     { name: 'Links', id: 'links' },
-    { name: 'Unlock', id: 'unlock' },
-    { name: 'Files', id: 'files' }
+    { name: 'Files', id: 'files' },
+    { name: 'Unlock', id: 'unlock' }
   ];
 
   // Work timer (7:30 -> 16:30 local time)

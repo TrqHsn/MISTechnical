@@ -14,8 +14,8 @@
   </div>
 
   <div class="controls-row">
-    <button class="secondary-button" (click)="onBack()" [disabled]="isLoading()">Back</button>
-    <button class="secondary-button" (click)="downloadFolder()" [disabled]="!currentPath() || isLoading()">Download Folder</button>
+    <button class="secondary-button back-button" (click)="onBack()" [disabled]="isLoading()">Back</button>
+    <button class="secondary-button download-button" (click)="downloadFolder()" [disabled]="!currentPath() || isLoading()">Download Folder</button>
 
     <div class="view-toggle">
       <button
@@ -32,6 +32,11 @@
       >
         Grid View
       </button>
+    </div>
+
+    <div class="quick-path-actions">
+      <button class="secondary-button" (click)="goTo568()" [disabled]="isLoading()">568</button>
+      <button class="secondary-button" (click)="goToFp7()" [disabled]="isLoading()">fp7</button>
     </div>
   </div>
 
@@ -91,10 +96,10 @@
           <div class="col-date">{{ item.lastModified | date:'yyyy-MM-dd HH:mm' }}</div>
           <div class="col-actions">
             @if (item.isDirectory) {
-              <button class="action-button" (click)="onOpenFolder(item)">Open</button>
-              <button class="action-button" (click)="downloadFolder(item)">Download Folder</button>
+              <button class="action-button open-button" (click)="onOpenFolder(item)">Open</button>
+              <button class="action-button download-button" (click)="downloadFolder(item)">Download Folder</button>
             } @else {
-              <button class="action-button" (click)="downloadFile(item)">Download</button>
+              <button class="action-button download-button" (click)="downloadFile(item)">Download</button>
             }
           </div>
         </div>
@@ -127,10 +132,10 @@
           </div>
           <div class="grid-actions">
             @if (item.isDirectory) {
-              <button class="action-button" (click)="onOpenFolder(item)">Open</button>
-              <button class="action-button" (click)="downloadFolder(item)">Download Folder</button>
+              <button class="action-button open-button" (click)="onOpenFolder(item)">Open</button>
+              <button class="action-button download-button" (click)="downloadFolder(item)">Download Folder</button>
             } @else {
-              <button class="action-button" (click)="downloadFile(item)">Download</button>
+              <button class="action-button download-button" (click)="downloadFile(item)">Download</button>
             }
           </div>
         </div>

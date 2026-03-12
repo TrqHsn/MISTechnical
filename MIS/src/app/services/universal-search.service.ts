@@ -40,10 +40,10 @@ export class UniversalSearchService {
     { id: 'attendance-device', title: 'Attendance Device', description: 'Manage attendance devices and check TCP ports', category: 'Tabs', route: '/network', component: 'network', tab: 'attendance', icon: '🕐', keywords: ['attendance', 'device', 'tcp', 'port', 'check'] },
     
     // Kiosk Admin Tabs
-    { id: 'media-library', title: 'Media Library', description: 'Upload and manage kiosk media files', category: 'Tabs', route: '/kiosk-admin', component: 'kiosk-admin', tab: 'media', icon: '📁', keywords: ['media', 'kiosk', 'upload', 'images', 'video'] },
-    { id: 'playlists', title: 'Playlists', description: 'Create and manage kiosk playlists', category: 'Tabs', route: '/kiosk-admin', component: 'kiosk-admin', tab: 'playlists', icon: '🎬', keywords: ['playlist', 'kiosk', 'schedule'] },
-    { id: 'schedules', title: 'Schedules', description: 'Configure kiosk display schedules', category: 'Tabs', route: '/kiosk-admin', component: 'kiosk-admin', tab: 'schedules', icon: '📅', keywords: ['schedule', 'kiosk', 'time', 'display'] },
-    { id: 'display-settings', title: 'Display Settings', description: 'Configure kiosk display mode settings', category: 'Tabs', route: '/kiosk-admin', component: 'kiosk-admin', tab: 'settings', icon: '⚙️', keywords: ['settings', 'kiosk', 'display', 'mode'] },
+    { id: 'media-library', title: 'Media Library', description: 'Upload and manage kiosk media files', category: 'Tabs', route: '/sinage', component: 'sinage', tab: 'media', icon: '📁', keywords: ['media', 'kiosk', 'upload', 'images', 'video'] },
+    { id: 'playlists', title: 'Playlists', description: 'Create and manage kiosk playlists', category: 'Tabs', route: '/sinage', component: 'sinage', tab: 'playlists', icon: '🎬', keywords: ['playlist', 'kiosk', 'schedule'] },
+    { id: 'schedules', title: 'Schedules', description: 'Configure kiosk display schedules', category: 'Tabs', route: '/sinage', component: 'sinage', tab: 'schedules', icon: '📅', keywords: ['schedule', 'kiosk', 'time', 'display'] },
+    { id: 'display-settings', title: 'Display Settings', description: 'Configure kiosk display mode settings', category: 'Tabs', route: '/sinage', component: 'sinage', tab: 'settings', icon: '⚙️', keywords: ['settings', 'kiosk', 'display', 'mode'] },
     
     // Forms Tabs
     { id: 'os-form', title: 'OS Installation Form', description: 'Create OS installation documentation', category: 'Tabs', route: '/forms', component: 'forms', tab: 'os-form', icon: '💿', keywords: ['os', 'installation', 'form', 'windows'] },

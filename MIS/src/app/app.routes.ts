@@ -44,13 +44,18 @@ export const routes: Routes = [
   }
   ,
   {
-    path: 'inventory',
-    loadComponent: () => import('./components/inventory-search/inventory-search.component').then(m => m.InventorySearchComponent)
+    path: 'jobsheet',
+    loadComponent: () => import('./components/jobsheet/jobsheet.component').then(m => m.JobsheetComponent)
   }
   ,
   {
-    path: 'kiosk-admin',
-    loadComponent: () => import('./components/kiosk-admin/kiosk-admin').then(m => m.KioskAdminComponent)
+    path: 'inventory',
+    loadComponent: () => import('./components/search/search.component').then(m => m.SearchComponent)
+  }
+  ,
+  {
+    path: 'sinage',
+    loadComponent: () => import('./components/sinage/sinage').then(m => m.SinageComponent)
   }
   ,
   {

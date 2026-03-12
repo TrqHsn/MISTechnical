@@ -1,0 +1,309 @@
+.jobsheet-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 1rem;
+  border-bottom: 3px solid #0066cc;
+  padding-bottom: 0.5rem;
+
+  h1 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.jobsheet-form {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 0.9rem;
+    color: #0066cc;
+    font-size: 1rem;
+  }
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.grid-three {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.asset-status-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  .section-card {
+    margin-bottom: 0;
+  }
+}
+
+.compact-card {
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+
+  label {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+}
+
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  padding: 0.495rem 0.585rem;
+  font-size: 0.81rem;
+
+  &:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.08);
+  }
+
+  &:read-only {
+    background: #f4f7fb;
+  }
+}
+
+.search-container {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #f7f9ff;
+  }
+}
+
+.user-display {
+  color: #333;
+  font-weight: 600;
+}
+
+.user-detail {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.loading {
+  padding: 0.75rem;
+  text-align: center;
+  color: #666;
+}
+
+.status-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.status-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    border: 1px solid #e0e0e0;
+    padding: 0.55rem;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #f3f7ff;
+    color: #2f3d4a;
+    font-size: 0.85rem;
+    text-align: left;
+  }
+}
+
+.parts-table {
+  width: 100%;
+  table-layout: fixed;
+
+  th.description-col,
+  td.description-col {
+    width: 62%;
+  }
+
+  th.quantity-col,
+  td.quantity-col {
+    width: 10%;
+  }
+
+  th.price-col,
+  td.price-col {
+    width: 16%;
+  }
+
+  th.action-col,
+  td.action-col {
+    width: 12%;
+  }
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border: 1px solid #b6d4fe;
+  border-radius: 6px;
+  background: #eaf3ff;
+  color: #0a58ca;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.58rem 1rem;
+}
+
+.btn-primary {
+  background: #0066cc;
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: #fff;
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: #fff;
+}
+
+.add-row-btn {
+  margin-top: 1.5mm;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: #fff;
+
+  &:hover {
+    background: #c82333;
+  }
+}
+
+@media (max-width: 900px) {
+  .grid-three {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .asset-status-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .jobsheet-container {
+    padding: 0.75rem;
+  }
+
+  .jobsheet-form {
+    padding: 0.75rem;
+  }
+
+  .grid-two,
+  .grid-three {
+    grid-template-columns: 1fr;
+  }
+
+  .status-row {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

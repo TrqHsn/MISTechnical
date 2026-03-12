@@ -73,12 +73,51 @@ h1 {
   cursor: not-allowed;
 }
 
+.back-button {
+  background: #6b7280;
+  border-color: #6b7280;
+  color: #fff;
+}
+
+.back-button:hover {
+  background: #4b5563;
+  border-color: #4b5563;
+}
+
+.download-button {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.download-button:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.open-button {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+}
+
+.open-button:hover {
+  background: #15803d;
+  border-color: #15803d;
+}
+
 .controls-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
   margin-bottom: 0.9rem;
+}
+
+.quick-path-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+  margin-left: auto;
 }
 
 .view-toggle {

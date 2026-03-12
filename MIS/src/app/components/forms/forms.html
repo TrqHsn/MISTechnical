@@ -9,6 +9,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'device-form'" (click)="activeTab.set('device-form')">
       Device Form
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'jobsheet'" (click)="activeTab.set('jobsheet')">
+      JobSheet
+    </button>
   </div>
 
   <!-- OS Form Tab -->
@@ -22,6 +25,13 @@
   @if (activeTab() === 'device-form') {
     <div class="tab-content">
       <app-device-assign-form></app-device-assign-form>
+    </div>
+  }
+
+  <!-- JobSheet Tab -->
+  @if (activeTab() === 'jobsheet') {
+    <div class="tab-content">
+      <app-jobsheet></app-jobsheet>
     </div>
   }
 </div>

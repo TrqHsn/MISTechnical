@@ -3,6 +3,7 @@
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
+  width: 100%;
   max-width: 900px;
   margin: 0 auto;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
@@ -33,6 +34,7 @@
 /* Tabs */
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 2rem;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
@@ -49,6 +51,8 @@
   transition: all 0.3s ease;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
+  white-space: nowrap;
+  min-height: 44px;
 }
 
 .tab-btn:hover {
@@ -95,13 +99,15 @@
 
 .input-row {
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 1.5rem;
   justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .input-group.half-width {
-  flex: 0 0 48%;
+  flex: 1 1 360px;
+  min-width: 280px;
 }
 
 .sound-toggle-container {
@@ -111,6 +117,8 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 1 1 280px;
+  min-width: 280px;
 }
 
 .sound-toggle {
@@ -118,6 +126,8 @@
   align-items: center;
   gap: 0.75rem;
   cursor: pointer;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .sound-toggle input[type="checkbox"] {
@@ -161,6 +171,39 @@
   color: #e8f5e9;
   font-weight: 600;
   font-size: 0.95rem;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+@media (min-width: 1025px) {
+  .input-row {
+    flex-wrap: nowrap;
+    align-items: flex-end;
+  }
+
+  .input-group.half-width {
+    flex: 0 1 460px;
+    max-width: 460px;
+    min-width: 320px;
+  }
+
+  .sound-toggle-container {
+    flex: 0 0 340px;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+
+  .sound-toggle {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .toggle-label-text {
+    white-space: nowrap;
+  }
 }
 
 .text-input {
@@ -187,6 +230,7 @@
 .button-row {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .btn {
@@ -197,6 +241,7 @@
   font-size: 1rem;
   font-weight: 600;
   transition: all 0.2s;
+  min-height: 44px;
 }
 
 .btn.primary {
@@ -242,8 +287,10 @@
   border-radius: 8px;
   padding: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  width: 735px;
+  width: 100%;
+  max-width: 735px;
   height: 395px;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
 }
@@ -448,25 +495,108 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .network-container {
+    padding: 1.25rem;
+  }
+
+  .tabs {
+    gap: 0.6rem;
+  }
+
+  .tab-btn {
+    flex: 1 1 calc(50% - 0.6rem);
+    text-align: center;
+    padding: 0.85rem 1rem;
+  }
+
+  .input-row {
+    gap: 1rem;
+  }
+
+  .input-group.half-width,
+  .sound-toggle-container {
+    flex: 1 1 100%;
+  }
+
+  .button-row {
+    flex-direction: column;
+  }
+
+  .button-row .btn {
+    width: 100%;
+  }
+
   .result-container {
     width: 100%;
-    max-width: 735px;
-    height: 395px;
+    max-width: 100%;
+    height: 330px;
+  }
+
+  .attendance-form-section,
+  .device-list-section,
+  .port-check-section {
+    padding: 1rem;
   }
 }
 
 @media (max-width: 600px) {
-  .button-row {
-    flex-direction: column;
+  .network-container h1 {
+    font-size: 1.6rem;
+    margin-bottom: 1.25rem;
   }
-  
-  .btn {
-    width: 100%;
+
+  .tabs {
+    gap: 0.5rem;
   }
-  
+
+  .tab-btn {
+    flex: 1 1 100%;
+    margin-bottom: 0;
+  }
+
+  .toggle-label-text {
+    font-size: 0.85rem;
+  }
+
   .result-container {
     width: 100%;
     height: 300px;
+  }
+
+  .result-header {
+    padding: 0.65rem 0.8rem;
+  }
+
+  .result-header h3 {
+    font-size: 0.9rem;
+  }
+
+  .status-light {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .network-container {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  .tabs {
+    gap: 0.8rem;
+  }
+
+  .tab-btn {
+    padding: 0.9rem 1.1rem;
+  }
+
+  .button-row .btn {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+
+  .result-container {
+    max-width: 100%;
   }
 }
 
@@ -728,6 +858,8 @@
 
 @media (max-width: 600px) {
   .device-table {
+    display: block;
+    overflow-x: auto;
     font-size: 0.85rem;
   }
   

@@ -113,6 +113,18 @@ export class SmbBrowserComponent implements OnInit, OnDestroy {
     }
   }
 
+  goTo568(): void {
+    const path = '\\\\sdld568b\\trqhsn';
+    this.uncPathInput.set(path);
+    this.updateRoute(path, this.viewMode());
+  }
+
+  goToFp7(): void {
+    const path = '\\\\sdlfp7';
+    this.uncPathInput.set(path);
+    this.updateRoute(path, this.viewMode());
+  }
+
   setViewMode(mode: 'list' | 'grid'): void {
     if (this.viewMode() === mode) {
       return;

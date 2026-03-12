@@ -1,0 +1,198 @@
+<div class="jobsheet-container">
+  <div class="form-header">
+    <h1>JobSheet</h1>
+  </div>
+
+  <form [formGroup]="jobSheetForm" class="jobsheet-form">
+    <section class="section-card">
+      <h2>Ticket Information</h2>
+
+      <div class="grid-two">
+        <div class="form-group">
+          <label for="ticketNumber">Ticket Number</label>
+          <input id="ticketNumber" class="form-input" type="text" formControlName="ticketNumber" />
+        </div>
+
+        <div class="form-group">
+          <label for="userSearch">User Search (Active Directory)</label>
+          <div class="search-container">
+            <input
+              id="userSearch"
+              class="form-input"
+              type="text"
+              placeholder="Search by username, display name or email"
+              [value]="userSearchInput()"
+              (input)="onUserSearch($any($event).target.value)"
+              (focus)="userShowDropdown.set(true)"
+              (keydown.enter)="onUserSearchEnter()"
+            />
+
+            @if (userShowDropdown() && (userResults().length > 0 || userLoading())) {
+              <div class="dropdown">
+                @if (userLoading()) {
+                  <div class="loading">Loading...</div>
+                }
+
+                @for (user of userResults(); track $index) {
+                  <div class="dropdown-item" (click)="selectUser(user)">
+                    <span class="user-display">{{ user['displayName'] || user['sAMAccountName'] }}</span>
+                    <span class="user-detail">{{ user['sAMAccountName'] || user['userPrincipalName'] }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-three">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input id="username" class="form-input" type="text" formControlName="username" readonly />
+        </div>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input id="name" class="form-input" type="text" formControlName="name" readonly />
+        </div>
+        <div class="form-group">
+          <label for="designation">Designation</label>
+          <input id="designation" class="form-input" type="text" formControlName="designation" readonly />
+        </div>
+        <div class="form-group">
+          <label for="production">Production</label>
+          <input id="production" class="form-input" type="text" formControlName="production" readonly />
+        </div>
+        <div class="form-group">
+          <label for="department">Department</label>
+          <input id="department" class="form-input" type="text" formControlName="department" readonly />
+        </div>
+        <div class="form-group">
+          <label for="site">Site</label>
+          <input id="site" class="form-input" type="text" formControlName="site" readonly />
+        </div>
+      </div>
+    </section>
+
+    <div class="asset-status-row">
+      <section class="section-card compact-card">
+        <div class="form-group">
+          <label for="assetNo">Asset No</label>
+          <input id="assetNo" class="form-input" type="text" formControlName="assetNo" />
+        </div>
+      </section>
+
+      <section class="section-card compact-card">
+        <h2>Status</h2>
+        <div class="status-row">
+          <label class="status-option">
+            <input
+              type="checkbox"
+              [checked]="jobSheetForm.get('status')?.value === 'Pending'"
+              (change)="setStatus('Pending', $any($event).target.checked)"
+            />
+            <span>Pending</span>
+          </label>
+
+          <label class="status-option">
+            <input
+              type="checkbox"
+              [checked]="jobSheetForm.get('status')?.value === 'Done'"
+              (change)="setStatus('Done', $any($event).target.checked)"
+            />
+            <span>Done</span>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <section class="section-card">
+      <h2>Problems</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Complain</th>
+              <th>Our Findings</th>
+              <th>Solutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input class="form-input" type="text" formControlName="complain" /></td>
+              <td><input class="form-input" type="text" formControlName="findings" /></td>
+              <td><input class="form-input" type="text" formControlName="solutions" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Items Required for Service and Repair (From inventory or to be purchased)</h2>
+
+      <div class="table-wrap">
+        <table class="data-table parts-table">
+          <thead>
+            <tr>
+              <th class="description-col">Part Description</th>
+              <th class="quantity-col">Quantity</th>
+              <th class="price-col">Price</th>
+              <th class="action-col">Action</th>
+            </tr>
+          </thead>
+          <tbody formArrayName="parts">
+            @for (part of parts.controls; track trackPartRow($index, part)) {
+              <tr [formGroupName]="$index">
+                <td class="description-col">
+                  <input class="form-input" type="text" formControlName="description" />
+                </td>
+                <td class="quantity-col">
+                  <input class="form-input" type="number" min="0" formControlName="quantity" />
+                </td>
+                <td class="price-col">
+                  <input class="form-input" type="number" min="0" formControlName="price" />
+                </td>
+                <td class="action-col">
+                  <button type="button" class="btn btn-danger" (click)="removePartRow($index)">R</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <button type="button" class="btn btn-info add-row-btn" (click)="addPartRow()">Add Row</button>
+    </section>
+
+    <section class="section-card">
+      <h2>Approval</h2>
+      <div class="grid-three">
+        <div class="form-group">
+          <label for="raisedBy">Raised By</label>
+          <select id="raisedBy" class="form-input" formControlName="raisedBy">
+            <option value="Tareque Hasan">Tareque Hasan</option>
+            <option value="Nurul Mustafa">Nurul Mustafa</option>
+            <option value="Piyer Mollah">Piyer Mollah</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="requestedBy">Requested By</label>
+          <input id="requestedBy" class="form-input" type="text" formControlName="requestedBy" />
+        </div>
+        <div class="form-group">
+          <label for="verifiedBy">Verified By</label>
+          <input id="verifiedBy" class="form-input" type="text" formControlName="verifiedBy" />
+        </div>
+      </div>
+    </section>
+
+    @if (exportMessage()) {
+      <div class="message">{{ exportMessage() }}</div>
+    }
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="clearForm()">Clear</button>
+      <button type="button" class="btn btn-primary" (click)="generateJobSheet()">Generate JS</button>
+    </div>
+  </form>
+</div>

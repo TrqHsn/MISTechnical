@@ -20,6 +20,43 @@ h1 {
   margin-bottom: 1.5rem;
 }
 
+.tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e3e8f8;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: #4b5a7a;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-btn.active {
+  color: #2b3f8f;
+  border-bottom-color: #667eea;
+}
+
+.tab-content {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Combined Load/Upload Section */
 .load-upload-section {
   display: flex;
@@ -197,6 +234,95 @@ h1 {
   z-index: 1000;
 }
 
+.contacts-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.contact-card {
+  margin-top: 1.5rem;
+  border: 2px solid #667eea;
+  border-radius: 10px;
+  background: #f8f9ff;
+  overflow: hidden;
+}
+
+.contact-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #d9def7;
+  background: #eef1ff;
+}
+
+.contact-header h2 {
+  margin: 0;
+  color: #283465;
+  font-size: 1.25rem;
+}
+
+.contact-subtitle {
+  margin-top: 0.2rem;
+  color: #5a679a;
+  font-weight: 600;
+}
+
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.contact-item {
+  background: #fff;
+  border: 1px solid #e2e7ff;
+  border-radius: 8px;
+  padding: 0.7rem 0.8rem;
+  color: #2f3d4a;
+  word-break: break-word;
+}
+
+.qr-section {
+  background: #fff;
+  border: 1px solid #e2e7ff;
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-title {
+  font-weight: 700;
+  color: #3b4b80;
+  margin-bottom: 0.4rem;
+}
+
+.qr-image {
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #e6eafc;
+  background: #fff;
+}
+
+.qr-hint {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  color: #5c6897;
+}
+
 .result-item {
   padding: 1rem;
   border-bottom: 1px solid #eee;
@@ -359,6 +485,14 @@ h1 {
   }
 
   .data-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-content {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-grid {
     grid-template-columns: 1fr;
   }
 }

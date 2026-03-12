@@ -3,9 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import * as XLSX from 'xlsx';
+import * as QRCode from 'qrcode';
 
 // Interface for Excel row data
 interface ExcelRow {
+  [key: string]: any;
+}
+
+interface ContactRow {
+  'Plant Name': string;
+  EmployeeName: string;
+  Designation: string;
+  Division: string;
+  Department: string;
+  'Section info': string;
+  'Phone Number': string;
+  Email: string;
   [key: string]: any;
 }
 
@@ -17,6 +30,8 @@ interface ExcelRow {
   styleUrl: './search.component.css'
 })
 export class SearchComponent {
+  activeTab = signal<'inventory' | 'contacts'>('inventory');
+
   // Dynamically generate API URL based on environment
   private getApiUrl(): string {
     if (typeof window !== 'undefined') {
@@ -66,6 +81,19 @@ export class SearchComponent {
   isSearching = signal(false);
   showDropdown = signal(false);
 
+  // Contacts tab state
+  contactsLoading = signal(false);
+  contactsLoaded = signal(false);
+  contactsError = signal('');
+  private contactsData = signal<ContactRow[]>([]);
+  contactsSearchTerm = signal('');
+  contactsSearchResults = signal<ContactRow[]>([]);
+  contactsSearching = signal(false);
+  contactsShowDropdown = signal(false);
+  selectedContact = signal<ContactRow | null>(null);
+  contactQrCodeUrl = signal('');
+  private contactsSearchSubject = new Subject<string>();
+
   constructor() {
     // Setup debounced search - wait 300ms after user stops typing
     this.searchSubject.pipe(
@@ -73,6 +101,199 @@ export class SearchComponent {
     ).subscribe(term => {
       this.performSearch(term);
     });
+
+    this.contactsSearchSubject.pipe(
+      debounceTime(250)
+    ).subscribe(term => {
+      this.performContactsSearch(term);
+    });
+
+    void this.loadFromServer();
+  }
+
+  onTabChange(tab: 'inventory' | 'contacts'): void {
+    this.activeTab.set(tab);
+
+    if (tab === 'inventory' && !this.isLoadingFromServer()) {
+      void this.loadFromServer();
+    }
+
+    if (tab === 'contacts' && !this.contactsLoaded() && !this.contactsLoading()) {
+      void this.loadContactsFromPublic();
+    }
+  }
+
+  async loadContactsFromPublic(): Promise<void> {
+    this.contactsLoading.set(true);
+    this.contactsError.set('');
+
+    const candidatePaths = ['ContactsList.xlsx', '/ContactsList.xlsx'];
+
+    try {
+      let fileBuffer: ArrayBuffer | null = null;
+
+      for (const path of candidatePaths) {
+        try {
+          const response = await fetch(path);
+          if (response.ok) {
+            fileBuffer = await response.arrayBuffer();
+            break;
+          }
+        } catch {
+        }
+      }
+
+      if (!fileBuffer) {
+        throw new Error('Could not load ContactsList.xlsx from public folder');
+      }
+
+      const workbook = XLSX.read(fileBuffer, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const rows = XLSX.utils.sheet_to_json<ContactRow>(worksheet, { defval: '' });
+
+      if (!rows.length) {
+        throw new Error('Contacts file is empty');
+      }
+
+      const requiredColumns = [
+        'Plant Name',
+        'EmployeeName',
+        'Designation',
+        'Division',
+        'Department',
+        'Section info',
+        'Phone Number',
+        'Email'
+      ];
+
+      const firstRowKeys = Object.keys(rows[0] || {});
+      const missingColumns = requiredColumns.filter(column => !firstRowKeys.includes(column));
+      if (missingColumns.length > 0) {
+        throw new Error(`Missing columns: ${missingColumns.join(', ')}`);
+      }
+
+      this.contactsData.set(rows);
+      this.contactsLoaded.set(true);
+      this.contactsSearchResults.set([]);
+      this.selectedContact.set(null);
+    } catch (error) {
+      this.contactsLoaded.set(false);
+      this.contactsData.set([]);
+      this.contactsError.set(error instanceof Error ? error.message : 'Failed to load contacts');
+    } finally {
+      this.contactsLoading.set(false);
+    }
+  }
+
+  onContactsSearchInput(value: string): void {
+    this.contactsSearchTerm.set(value);
+    this.selectedContact.set(null);
+    this.contactQrCodeUrl.set('');
+
+    if (!value.trim()) {
+      this.contactsSearchResults.set([]);
+      this.contactsShowDropdown.set(false);
+      this.contactsSearching.set(false);
+      return;
+    }
+
+    this.contactsSearching.set(true);
+    this.contactsShowDropdown.set(true);
+    this.contactsSearchSubject.next(value);
+  }
+
+  onContactsSearchKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const results = this.contactsSearchResults();
+      if (results.length > 0) {
+        this.selectContact(results[0]);
+      }
+    }
+  }
+
+  async selectContact(contact: ContactRow): Promise<void> {
+    this.selectedContact.set(contact);
+    this.contactsShowDropdown.set(false);
+
+    const phone = String(contact['Phone Number'] || '').trim();
+    if (!phone) {
+      this.contactQrCodeUrl.set('');
+      return;
+    }
+
+    try {
+      const qrDataUrl = await QRCode.toDataURL(`tel:${phone}`, {
+        width: 180,
+        margin: 1
+      });
+      this.contactQrCodeUrl.set(qrDataUrl);
+    } catch {
+      this.contactQrCodeUrl.set('');
+    }
+  }
+
+  private performContactsSearch(term: string): void {
+    const searchValue = term.trim().toLowerCase();
+
+    if (!searchValue) {
+      this.contactsSearchResults.set([]);
+      this.contactsSearching.set(false);
+      return;
+    }
+
+    const searchTerms = new Set<string>([searchValue]);
+    const reorderedName = this.reorderCommaSeparatedName(searchValue);
+    if (reorderedName) {
+      searchTerms.add(reorderedName);
+    }
+
+    const results = this.contactsData().filter((row) => {
+      const name = String(row.EmployeeName || '').toLowerCase();
+      const email = String(row.Email || '').toLowerCase();
+      return Array.from(searchTerms).some((termVariant) =>
+        name.includes(termVariant) || email.includes(termVariant)
+      );
+    });
+
+    this.contactsSearchResults.set(results.slice(0, 5));
+    this.contactsSearching.set(false);
+  }
+
+  private reorderCommaSeparatedName(value: string): string {
+    if (!value.includes(',')) {
+      return '';
+    }
+
+    const parts = value
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
+
+    if (parts.length !== 2) {
+      return '';
+    }
+
+    return `${parts[1]} ${parts[0]}`.replace(/\s+/g, ' ').trim();
+  }
+
+  getContactValue(column: keyof ContactRow): string {
+    const row = this.selectedContact();
+    if (!row) {
+      return '-';
+    }
+
+    const value = row[column];
+    if (value === undefined || value === null || `${value}`.trim() === '') {
+      return '-';
+    }
+
+    return `${value}`;
+  }
+
+  getContactResultDisplay(row: ContactRow): string {
+    return `${row.EmployeeName || '-'} • ${row.Email || '-'}`;
   }
 
   /**
