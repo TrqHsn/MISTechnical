@@ -156,21 +156,21 @@ export class JobsheetComponent implements OnInit, OnDestroy {
 
       validParts.forEach((part: any, index: number) => {
         const row = 28 + index;
-        worksheet.getCell(`A${row}`).value = part.description || '';
+        worksheet.getCell(`B${row}`).value = part.description || '';
         worksheet.getCell(`H${row}`).value = part.quantity ?? '';
         worksheet.getCell(`I${row}`).value = part.price ?? '';
       });
 
-      worksheet.getCell('B32').value = formValue.raisedBy || '';
+      worksheet.getCell('B36').value = formValue.raisedBy || '';
       const requestedBy = (formValue.requestedBy || '').toString().trim();
       const verifiedBy = (formValue.verifiedBy || '').toString().trim();
 
       if (requestedBy) {
-        worksheet.getCell('B35').value = requestedBy;
+        worksheet.getCell('B39').value = requestedBy;
       }
 
       if (verifiedBy) {
-        worksheet.getCell('B38').value = verifiedBy;
+        worksheet.getCell('B42').value = verifiedBy;
       }
 
       const output = await workbook.xlsx.writeBuffer();
