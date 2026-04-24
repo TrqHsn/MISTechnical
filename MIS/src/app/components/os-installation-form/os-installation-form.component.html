@@ -223,6 +223,14 @@
       >
         Generate Excel
       </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="downloadEmail()"
+        [disabled]="form.invalid"
+      >
+        Mail
+      </button>
     </div>
   </form>
 </div>

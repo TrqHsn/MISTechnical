@@ -94,4 +94,8 @@ export class ApiService {
   getSmbFolderDownloadUrl(path: string): string {
     return `${this.apiUrl}/smb/download/folder?path=${encodeURIComponent(path)}`;
   }
+
+  generateEmail(formData: any): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/email/generate`, formData, { responseType: 'blob' });
+  }
 }

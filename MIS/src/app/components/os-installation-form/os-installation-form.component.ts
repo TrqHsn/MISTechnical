@@ -535,6 +535,41 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
     }
   }
 
+  downloadEmail(): void {
+    if (this.form.invalid) {
+      alert('Please complete the required fields before sending email.');
+      console.warn('Mail button clicked while form is invalid', this.form.value);
+      return;
+    }
+
+    const formData = {
+      ...this.form.value,
+      site: this.sitePreview(),
+      company: this.divisionPreview()
+    };
+
+    console.log('downloadEmail invoked', formData);
+
+    this.apiService.generateEmail(formData).subscribe({
+      next: (blob) => {
+        console.log('generateEmail response blob received', blob);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'email.eml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        console.log('Email download triggered');
+      },
+      error: (error) => {
+        console.error('Error downloading email:', error);
+        alert(`Failed to generate email: ${error?.message || 'Unknown error'}`);
+      }
+    });
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

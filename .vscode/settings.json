@@ -3,6 +3,7 @@
         "/^dotnet watch run$/": {
             "approve": true,
             "matchCommandLine": true
-        }
+        },
+        "dotnet build": true
     }
 }
