@@ -34,6 +34,11 @@ export const routes: Routes = [
   }
   ,
   {
+    path: 'network-dashboard',
+    loadComponent: () => import('./components/network-dashboard/network-dashboard').then(m => m.NetworkDashboardComponent)
+  }
+  ,
+  {
     path: 'device-tool',
     loadComponent: () => import('./components/device-tool/device-tool').then(m => m.DeviceToolComponent)
   }

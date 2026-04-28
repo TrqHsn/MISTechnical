@@ -1,0 +1,97 @@
+
+> mis@0.0.0 build
+> ng build
+
+[33mÔØ»[39m Building...
+[32mÔ£ö[39m Building...
+[35mBrowser bundles[39m     
+[1mInitial chunk files[22m [2m | [22m[1mNames[22m                    [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-GCF2JTPJ.js[39m   [2m | [22m[2m-[22m                        [2m | [22m[36m204.00 kB[39m[2m | [22m               [36m60.00 kB[39m
+[32mchunk-MAEG7YE4.js[39m   [2m | [22m[2m-[22m                        [2m | [22m [36m83.34 kB[39m[2m | [22m               [36m21.19 kB[39m
+[32mchunk-RTC3QSZC.js[39m   [2m | [22m[2m-[22m                        [2m | [22m [36m50.13 kB[39m[2m | [22m                [36m9.92 kB[39m
+[32mmain-JW67IAEZ.js[39m    [2m | [22m[2mmain[22m                     [2m | [22m [36m48.11 kB[39m[2m | [22m                [36m9.84 kB[39m
+[32mchunk-4NQZWBZE.js[39m   [2m | [22m[2m-[22m                        [2m | [22m [36m23.11 kB[39m[2m | [22m                [36m6.77 kB[39m
+[32mchunk-GQUOSRYF.js[39m   [2m | [22m[2m-[22m                        [2m | [22m  [36m2.56 kB[39m[2m | [22m                [36m1.03 kB[39m
+[32mchunk-CKAGSY4M.js[39m   [2m | [22m[2m-[22m                        [2m | [22m  [36m1.60 kB[39m[2m | [22m              [36m516 bytes[39m
+[32mchunk-CDJ4KS37.js[39m   [2m | [22m[2m-[22m                        [2m | [22m  [36m1.41 kB[39m[2m | [22m              [36m601 bytes[39m
+[32mchunk-TATKVRZG.js[39m   [2m | [22m[2m-[22m                        [2m | [22m[36m502 bytes[39m[2m | [22m              [36m502 bytes[39m
+[32mstyles-5INURTSO.css[39m [2m | [22m[2mstyles[22m                   [2m | [22m  [36m0 bytes[39m[2m | [22m                [36m0 bytes[39m
+
+[1m [22m                   [2m | [22m[1mInitial total[22m            [2m | [22m[1m414.78 kB[22m[2m | [22m              [1m110.37 kB[22m
+
+[1mLazy chunk files[22m    [2m | [22m[1mNames[22m                    [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-FEES4LUR.js[39m   [2m | [22m[2m-[22m                        [2m | [22m[36m946.36 kB[39m[2m | [22m              [36m217.36 kB[39m
+[32mchunk-YHV4DE2D.js[39m   [2m | [22m[2mstress-cpu-gpu-component[22m [2m | [22m[36m487.67 kB[39m[2m | [22m              [36m102.30 kB[39m
+[32mchunk-4F4PQCC5.js[39m   [2m | [22m[2m-[22m                        [2m | [22m[36m429.01 kB[39m[2m | [22m              [36m118.77 kB[39m
+[32mchunk-C2ZNLFDJ.js[39m   [2m | [22m[2msearch-component[22m         [2m | [22m [36m47.42 kB[39m[2m | [22m               [36m13.87 kB[39m
+[32mchunk-XVLAFKSE.js[39m   [2m | [22m[2mad-tools[22m                 [2m | [22m [36m40.59 kB[39m[2m | [22m                [36m8.03 kB[39m
+[32mchunk-A3HGZ3YB.js[39m   [2m | [22m[2mnetwork[22m                  [2m | [22m [36m33.95 kB[39m[2m | [22m                [36m7.86 kB[39m
+[32mchunk-LDPIELPC.js[39m   [2m | [22m[2msinage[22m                   [2m | [22m [36m33.54 kB[39m[2m | [22m                [36m7.26 kB[39m
+[32mchunk-XMEK3CER.js[39m   [2m | [22m[2m-[22m                        [2m | [22m [36m23.62 kB[39m[2m | [22m                [36m5.28 kB[39m
+[32mchunk-VXN7SLEZ.js[39m   [2m | [22m[2mprint[22m                    [2m | [22m [36m22.85 kB[39m[2m | [22m                [36m5.54 kB[39m
+[32mchunk-EL36PDOX.js[39m   [2m | [22m[2mdisplay-test-component[22m   [2m | [22m [36m22.57 kB[39m[2m | [22m                [36m4.54 kB[39m
+[32mchunk-4PRRHEP7.js[39m   [2m | [22m[2m-[22m                        [2m | [22m [36m19.66 kB[39m[2m | [22m                [36m5.63 kB[39m
+[32mchunk-AHQQ4RIU.js[39m   [2m | [22m[2m-[22m                        [2m | [22m [36m17.20 kB[39m[2m | [22m                [36m4.23 kB[39m
+[32mchunk-3VXZJYOU.js[39m   [2m | [22m[2mnetwork-dashboard[22m        [2m | [22m [36m16.51 kB[39m[2m | [22m                [36m4.56 kB[39m
+[32mchunk-34GQVUPC.js[39m   [2m | [22m[2msmb-browser[22m              [2m | [22m [36m16.32 kB[39m[2m | [22m                [36m4.13 kB[39m
+[32mchunk-F3P2Y6IO.js[39m   [2m | [22m[2mcam-mic-speaker-component[22m[2m | [22m [36m14.57 kB[39m[2m | [22m                [36m4.07 kB[39m
+[2m...and 6 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+
+[35mServer bundles[39m      
+[1mInitial chunk files[22m [2m | [22m[1mNames[22m                    [2m | [22m [1mRaw size[22m
+[32mserver.mjs[39m          [2m | [22m[2mserver[22m                   [2m | [22m[36m805.33 kB[39m[2m | [22m                       
+[32mmain.server.mjs[39m     [2m | [22m[2mmain.server[22m              [2m | [22m[36m498.43 kB[39m[2m | [22m                       
+[32mpolyfills.server.mjs[39m[2m | [22m[2mpolyfills.server[22m         [2m | [22m[36m233.48 kB[39m[2m | [22m                       
+[32mchunk-QW3OGA4J.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m[36m202.23 kB[39m[2m | [22m                       
+[32mchunk-YA5R6QPI.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m [36m83.62 kB[39m[2m | [22m                       
+[32mchunk-LBGVIXLC.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m [36m50.20 kB[39m[2m | [22m                       
+[32mchunk-V2BMPQTA.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m [36m23.42 kB[39m[2m | [22m                       
+[32mchunk-J6QEC7MK.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m  [36m2.59 kB[39m[2m | [22m                       
+[32mchunk-FEUARQYD.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m  [36m1.64 kB[39m[2m | [22m                       
+[32mchunk-DGJQU3KY.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m  [36m1.51 kB[39m[2m | [22m                       
+[32mchunk-6HF7OQ4U.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m  [36m1.45 kB[39m[2m | [22m                       
+[32mchunk-L2MVFUKD.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m  [36m1.32 kB[39m[2m | [22m                       
+[32mchunk-VDSCWWTI.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m[36m536 bytes[39m[2m | [22m                       
+
+[1mLazy chunk files[22m    [2m | [22m[1mNames[22m                    [2m | [22m [1mRaw size[22m
+[32mchunk-WCKDGAYF.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m  [36m1.03 MB[39m[2m | [22m                       
+[32mchunk-TX6XH5TK.mjs[39m  [2m | [22m[2mstress-cpu-gpu-component[22m [2m | [22m[36m487.73 kB[39m[2m | [22m                       
+[32mchunk-6U5OWGUM.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m[36m429.04 kB[39m[2m | [22m                       
+[32mchunk-FATYFVVJ.mjs[39m  [2m | [22m[2msearch-component[22m         [2m | [22m [36m82.09 kB[39m[2m | [22m                       
+[32mchunk-YUPF4WWY.mjs[39m  [2m | [22m[2mad-tools[22m                 [2m | [22m [36m40.67 kB[39m[2m | [22m                       
+[32mchunk-GCNVL6QO.mjs[39m  [2m | [22m[2mnetwork[22m                  [2m | [22m [36m34.02 kB[39m[2m | [22m                       
+[32mchunk-UWC4PLYZ.mjs[39m  [2m | [22m[2msinage[22m                   [2m | [22m [36m33.60 kB[39m[2m | [22m                       
+[32mchunk-YEEDL7AD.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m [36m23.69 kB[39m[2m | [22m                       
+[32mchunk-TVI6TQN2.mjs[39m  [2m | [22m[2mprint[22m                    [2m | [22m [36m22.91 kB[39m[2m | [22m                       
+[32mchunk-O6JA2NRI.mjs[39m  [2m | [22m[2mdisplay-test-component[22m   [2m | [22m [36m22.64 kB[39m[2m | [22m                       
+[32mchunk-5X73MDGG.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m [36m19.73 kB[39m[2m | [22m                       
+[32mchunk-3SW47AGR.mjs[39m  [2m | [22m[2m-[22m                        [2m | [22m [36m17.24 kB[39m[2m | [22m                       
+[32mchunk-VRX2RK53.mjs[39m  [2m | [22m[2mnetwork-dashboard[22m        [2m | [22m [36m16.58 kB[39m[2m | [22m                       
+[32mchunk-UXQRA7CS.mjs[39m  [2m | [22m[2msmb-browser[22m              [2m | [22m [36m16.38 kB[39m[2m | [22m                       
+[32mchunk-US2GOVON.mjs[39m  [2m | [22m[2mcam-mic-speaker-component[22m[2m | [22m [36m14.63 kB[39m[2m | [22m                       
+[2m...and 8 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+[35mPrerendered 17 static routes.[39m
+Application bundle generation complete. [12.951 seconds] - 2026-04-28T09:50:13.071Z
+
+Ôû▓ [WARNING] Module 'qrcode' used by 'src/app/components/search/search.component.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Ôû▓ [WARNING] Module 'exceljs' used by 'src/app/components/os-installation-form/os-installation-form.component.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Ôû▓ [WARNING] Module 'file-saver' used by 'src/app/components/jobsheet/jobsheet.component.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Output location: C:\ad PROJECT\MIS\dist\MIS
+

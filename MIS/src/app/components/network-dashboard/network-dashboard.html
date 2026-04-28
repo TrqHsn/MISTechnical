@@ -1,0 +1,131 @@
+<div class="network-dashboard-shell">
+  <div class="header-row">
+    <div>
+      <h1>Network Dashboard</h1>
+      <p>Monitor servers continuously and keep the page open on a dedicated display.</p>
+    </div>
+    <button class="primary-button" type="button" (click)="openAddDialog()">➕</button>
+  </div>
+
+  <div *ngIf="showAddDialog" class="dialog-overlay" (click)="closeAddDialog()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>Add Server</h2>
+        <button class="dialog-close" type="button" (click)="closeAddDialog()">✕</button>
+      </div>
+
+      <form class="dialog-form" (ngSubmit)="addServer()">
+        <label>
+          Name
+          <input type="text" [(ngModel)]="serverName" name="serverName" placeholder="Server name" />
+        </label>
+
+        <label>
+          Hostname / IP
+          <input type="text" [(ngModel)]="serverHost" name="serverHost" placeholder="10.140.5.10 or example.local" />
+        </label>
+
+        <div class="dialog-actions">
+          <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+          <button type="submit" class="primary-button">Save</button>
+        </div>
+
+        <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="servers().length === 0" class="empty-state">
+    <p>No servers configured yet. Add one to begin monitoring.</p>
+  </div>
+
+  <div class="grid" *ngIf="servers().length > 0">
+    <article class="card" [ngClass]="server.status" *ngFor="let server of servers()">
+      <div class="card-header">
+        <div>
+          <h2>{{ server.name }}</h2>
+          <span class="host">{{ server.host }}</span>
+        </div>
+        <button type="button" class="remove header-remove" (click)="removeServer(server.id)">➖</button>
+      </div>
+
+      <div class="metrics">
+        <div>
+          <span>STATUS</span>
+          <strong class="status-pill" [ngClass]="server.status">{{ getStatusLabel(server.status) }}</strong>
+        </div>
+        <div>
+          <span>AVG LATENCY</span>
+          <strong>{{ server.averageLatencyMs !== null ? server.averageLatencyMs + ' ms' : '—' }}</strong>
+        </div>
+        <div>
+          <span>PACKET LOSS</span>
+          <strong>{{ server.packetLossPercent !== null ? server.packetLossPercent + ' %' : '—' }}</strong>
+        </div>
+      </div>
+
+      <div class="details">
+        <div>
+          <span>Last check</span>
+          <strong *ngIf="server.lastCheckTime">
+            Date: {{ networkMonitor.formatDate(server.lastCheckTime) }} || Time: {{ networkMonitor.formatTime(server.lastCheckTime) }} || Zone: {{ networkMonitor.formatUtcOffset(server.lastCheckTime) }}
+          </strong>
+          <strong *ngIf="!server.lastCheckTime">—</strong>
+        </div>
+        <div>
+          <span>Last down</span>
+          <strong *ngIf="server.lastDownTime">
+            Date: {{ networkMonitor.formatDate(server.lastDownTime) }} || Time: {{ networkMonitor.formatTime(server.lastDownTime) }} || Zone: {{ networkMonitor.formatUtcOffset(server.lastDownTime) }}
+          </strong>
+          <strong *ngIf="!server.lastDownTime">—</strong>
+        </div>
+      </div>
+
+      <div class="live-ping">
+        <div class="live-ping-row">
+          <div>
+            <span>Live ping</span>
+            <strong>{{ networkMonitor.getLivePingState(server.id).status.toUpperCase() }}</strong>
+          </div>
+          <div class="live-ping-buttons">
+            <button type="button" class="secondary-button" (click)="networkMonitor.startLivePing(server.id)" [disabled]="networkMonitor.getLivePingState(server.id).active">
+              Ping
+            </button>
+            <button type="button" class="secondary-button" (click)="networkMonitor.stopLivePing(server.id)" [disabled]="!networkMonitor.getLivePingState(server.id).active">
+              Stop
+            </button>
+            <button type="button" class="secondary-button" (click)="networkMonitor.clearLivePing(server.id)">
+              Clear
+            </button>
+          </div>
+        </div>
+        <pre
+          #livePingOutput
+          class="live-ping-output ping-result cmd-style"
+          attr.data-server-id="{{ server.id }}"
+          (scroll)="onLivePingScroll(server.id, $event)"
+          *ngIf="networkMonitor.getLivePingState(server.id).visible"
+        >
+          {{ networkMonitor.getLivePingOutput(server.id) }}
+        </pre>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="maintenance" (click)="toggleMaintenance(server.id)">
+          {{ server.maintenance ? 'Disable maintenance' : 'Enable maintenance' }}
+        </button>
+      </div>
+
+      <div class="log-section">
+        <h3>Recent events</h3>
+        <ul>
+          <li *ngFor="let entry of server.logs">
+            <span class="entry-time">{{ entry.timestamp }}</span>
+            <span class="entry-text">{{ entry.message }}</span>
+          </li>
+          <li *ngIf="server.logs.length === 0" class="empty-log">No recent activity.</li>
+        </ul>
+      </div>
+    </article>
+  </div>
+</div>

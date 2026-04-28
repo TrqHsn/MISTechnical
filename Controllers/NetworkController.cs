@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
@@ -20,7 +22,14 @@ namespace ADApi.Controllers
         private readonly ILogger<NetworkController> _logger;
         private static readonly ConcurrentDictionary<string, Process> _activeProcesses = new();
         private static readonly ConcurrentDictionary<string, CancellationTokenSource> _activeScanners = new();
+        private static readonly ConcurrentDictionary<string, MonitoredServer> _monitoredServers = new();
+        private static readonly SemaphoreSlim _serverStorageLock = new(1, 1);
         private readonly string _attendanceDeviceCsvPath;
+
+        public sealed record MonitoredServer(string Id, string Name, string Host, bool Maintenance, string? LastDownTime);
+        public sealed record CreateServerRequest(string Name, string Host);
+        public sealed record UpdateMaintenanceRequest(bool maintenance);
+        private readonly string _serverStoragePath;
 
         public NetworkController(ILogger<NetworkController> logger, IWebHostEnvironment env)
         {
@@ -28,12 +37,117 @@ namespace ADApi.Controllers
             var csvDirectory = Path.Combine(env.ContentRootPath, "MIS", "public", "Attendance device IP");
             Directory.CreateDirectory(csvDirectory);
             _attendanceDeviceCsvPath = Path.Combine(csvDirectory, "Attendance device IP.csv");
+            _serverStoragePath = Path.Combine(env.ContentRootPath, "network-servers.json");
+            LoadStoredServers();
             
             // Initialize CSV with headers if it doesn't exist
             if (!System.IO.File.Exists(_attendanceDeviceCsvPath))
             {
                 System.IO.File.WriteAllText(_attendanceDeviceCsvPath, "\"Attendance device IP\",\"Location\"\n");
             }
+        }
+
+        private void LoadStoredServers()
+        {
+            try
+            {
+                if (!System.IO.File.Exists(_serverStoragePath))
+                {
+                    return;
+                }
+
+                var raw = System.IO.File.ReadAllText(_serverStoragePath, Encoding.UTF8);
+                var saved = JsonSerializer.Deserialize<List<MonitoredServer>>(raw, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                });
+
+                if (saved is null)
+                {
+                    return;
+                }
+
+                foreach (var server in saved)
+                {
+                    _monitoredServers[server.Id] = server;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unable to load stored network servers");
+            }
+        }
+
+        private async Task SaveStoredServersAsync()
+        {
+            await _serverStorageLock.WaitAsync();
+            try
+            {
+                var payload = _monitoredServers.Values;
+                var serialized = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+                await System.IO.File.WriteAllTextAsync(_serverStoragePath, serialized, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unable to save stored network servers");
+            }
+            finally
+            {
+                _serverStorageLock.Release();
+            }
+        }
+
+        [HttpGet("servers")]
+        public IActionResult GetServers()
+        {
+            return Ok(_monitoredServers.Values);
+        }
+
+        [HttpPost("servers")]
+        public async Task<IActionResult> AddServer([FromBody] CreateServerRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.Name) || string.IsNullOrWhiteSpace(request?.Host))
+            {
+                return BadRequest(new { success = false, message = "Name and host are required" });
+            }
+
+            var server = new MonitoredServer(
+                Guid.NewGuid().ToString(),
+                request.Name.Trim(),
+                request.Host.Trim(),
+                false,
+                null
+            );
+
+            _monitoredServers[server.Id] = server;
+            await SaveStoredServersAsync();
+            return Ok(server);
+        }
+
+        [HttpDelete("servers/{id}")]
+        public async Task<IActionResult> RemoveServer(string id)
+        {
+            if (!_monitoredServers.TryRemove(id, out _))
+            {
+                return NotFound(new { success = false, message = "Server not found" });
+            }
+
+            await SaveStoredServersAsync();
+            return Ok(new { success = true });
+        }
+
+        [HttpPatch("servers/{id}/maintenance")]
+        public async Task<IActionResult> UpdateServerMaintenance(string id, [FromBody] UpdateMaintenanceRequest request)
+        {
+            if (!_monitoredServers.TryGetValue(id, out var existing))
+            {
+                return NotFound(new { success = false, message = "Server not found" });
+            }
+
+            var updated = existing with { Maintenance = request.maintenance };
+            _monitoredServers[id] = updated;
+            await SaveStoredServersAsync();
+            return Ok(updated);
         }
 
         /// <summary>
@@ -111,6 +225,41 @@ namespace ADApi.Controllers
             {
                 _logger.LogWarning(ex, "SNMP test failed for {IP}", ip);
                 return Ok(new { success = false });
+            }
+        }
+
+        [HttpGet("ping")]
+        public async Task<IActionResult> PingHost([FromQuery] string host)
+        {
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                return BadRequest(new { success = false, message = "Host is required" });
+            }
+
+            try
+            {
+                using var ping = new Ping();
+                var reply = await ping.SendPingAsync(host.Trim(), 4000);
+                if (reply.Status == IPStatus.Success)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        latency = reply.RoundtripTime
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = false,
+                    latency = (long?)null,
+                    status = reply.Status.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Ping failed for {Host}", host);
+                return Ok(new { success = false, latency = (long?)null, status = "Error" });
             }
         }
 

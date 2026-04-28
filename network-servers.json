@@ -1,0 +1,16 @@
+﻿[
+  {
+    "Id": "957526dd-0e41-4d68-b5cd-6d8b5c559c2f",
+    "Name": "router",
+    "Host": "10.140.5.1",
+    "Maintenance": false,
+    "LastDownTime": null
+  },
+  {
+    "Id": "528c633b-2362-45ea-a961-8b00535429a6",
+    "Name": "failed",
+    "Host": "sdll410",
+    "Maintenance": false,
+    "LastDownTime": null
+  }
+]
