@@ -1,11 +1,11 @@
 <div class="network-dashboard-shell">
-  <div class="header-row">
+  <!-- <div class="header-row">
     <div>
       <h1>Network Dashboard</h1>
       <p>Monitor servers continuously and keep the page open on a dedicated display.</p>
     </div>
-    <button class="primary-button" type="button" (click)="openAddDialog()">➕</button>
-  </div>
+  </div> -->
+  <button class="primary-button fab-button" type="button" (click)="openAddDialog()">➕</button>
 
   <div *ngIf="showAddDialog" class="dialog-overlay" (click)="closeAddDialog()">
     <div class="dialog" (click)="$event.stopPropagation()">
@@ -114,9 +114,12 @@
         <button type="button" class="maintenance" (click)="toggleMaintenance(server.id)">
           {{ server.maintenance ? 'Disable maintenance' : 'Enable maintenance' }}
         </button>
+        <button type="button" class="secondary-button event-toggle" (click)="toggleEvents(server.id)">
+          {{ isEventsExpanded(server.id) ? 'Hide events ▲' : 'Events ▼' }}
+        </button>
       </div>
 
-      <div class="log-section">
+      <div class="log-section" *ngIf="isEventsExpanded(server.id)">
         <h3>Recent events</h3>
         <ul>
           <li *ngFor="let entry of server.logs">

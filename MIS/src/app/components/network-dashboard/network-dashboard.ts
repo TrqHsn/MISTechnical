@@ -1,4 +1,4 @@
-import { Component, ViewChildren, QueryList, ElementRef, effect } from '@angular/core';
+import { Component, ViewChildren, QueryList, ElementRef, effect, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NetworkMonitorService } from '../../services/network-monitor.service';
@@ -10,11 +10,14 @@ import { NetworkMonitorService } from '../../services/network-monitor.service';
   templateUrl: './network-dashboard.html',
   styleUrls: ['./network-dashboard.css'],
 })
-export class NetworkDashboardComponent {
+export class NetworkDashboardComponent implements OnDestroy {
   @ViewChildren('livePingOutput') livePingOutputs?: QueryList<ElementRef<HTMLElement>>;
 
   private lastLivePingOutput = new Map<string, string>();
   private livePingScrollLocked = new Map<string, boolean>();
+  private expandedEventCards = new Set<string>();
+  private offlineAlertIntervalId: number | null = null;
+  private alertAudio: HTMLAudioElement | null = null;
 
   serverName = '';
   serverHost = '';
@@ -26,6 +29,12 @@ export class NetworkDashboardComponent {
   }
 
   constructor(public networkMonitor: NetworkMonitorService) {
+    if (typeof window !== 'undefined') {
+      this.alertAudio = new Audio('/ping-beep.mp3');
+      this.alertAudio.preload = 'auto';
+      this.alertAudio.volume = 0.8;
+    }
+
     effect(() => {
       const livePing = this.networkMonitor.livePing();
       const changedServerIds = new Set<string>();
@@ -51,6 +60,51 @@ export class NetworkDashboardComponent {
       if (changedServerIds.size > 0 && typeof window !== 'undefined') {
         setTimeout(() => this.scrollLivePingOutputsToBottom(changedServerIds), 0);
       }
+    });
+
+    effect(() => {
+      this.updateOfflineAlertState();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopOfflineAlert();
+  }
+
+  private updateOfflineAlertState(): void {
+    const hasOffline = this.servers().some((server) => server.status === 'red');
+    if (hasOffline) {
+      this.startOfflineAlert();
+    } else {
+      this.stopOfflineAlert();
+    }
+  }
+
+  private startOfflineAlert(): void {
+    if (this.offlineAlertIntervalId !== null) {
+      return;
+    }
+
+    this.playAlertTone();
+    this.offlineAlertIntervalId = window.setInterval(() => this.playAlertTone(), 5000);
+  }
+
+  private stopOfflineAlert(): void {
+    if (this.offlineAlertIntervalId !== null) {
+      window.clearInterval(this.offlineAlertIntervalId);
+      this.offlineAlertIntervalId = null;
+    }
+  }
+
+  private playAlertTone(): void {
+    if (!this.alertAudio) {
+      return;
+    }
+
+    this.alertAudio.pause();
+    this.alertAudio.currentTime = 0;
+    this.alertAudio.play().catch(() => {
+      // Playback may be blocked until the user interacts with the page.
     });
   }
 
@@ -113,6 +167,18 @@ export class NetworkDashboardComponent {
 
   toggleMaintenance(serverId: string): void {
     this.networkMonitor.toggleMaintenance(serverId);
+  }
+
+  toggleEvents(serverId: string): void {
+    if (this.expandedEventCards.has(serverId)) {
+      this.expandedEventCards.delete(serverId);
+    } else {
+      this.expandedEventCards.add(serverId);
+    }
+  }
+
+  isEventsExpanded(serverId: string): boolean {
+    return this.expandedEventCards.has(serverId);
   }
 
   getStatusLabel(status: string): string {

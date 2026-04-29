@@ -57,6 +57,26 @@
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.2);
 }
 
+.fab-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.28);
+  z-index: 1050;
+}
+
+.fab-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
 .primary-button {
   background: linear-gradient(135deg, #2563eb, #38bdf8);
   color: #fff;
@@ -208,20 +228,30 @@
 
 .grid {
   display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+}
+
+@media (max-width: 1120px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
   background: rgba(15, 23, 42, 0.92);
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.32);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.26);
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 14px;
 }
 
 .card.green,
@@ -241,7 +271,7 @@
 
 .card-header h2 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: -0.03em;
 }
@@ -249,48 +279,46 @@
 .host {
   display: block;
   color: rgba(226, 232, 240, 0.72);
-  font-size: 0.95rem;
-  margin-top: 6px;
+  font-size: 0.82rem;
+  margin-top: 4px;
 }
 
 .card .remove {
   background: rgba(248, 113, 113, 0.16);
   color: #fee2e2;
   border-radius: 999px;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 36px;
+  min-height: 36px;
+  width: 36px;
+  height: 36px;
   align-self: start;
-}
-
-.card .remove:hover {
-  background: rgba(248, 113, 113, 0.26);
 }
 
 .metrics {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .metrics div,
 .details div {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .metrics span,
 .details span,
 .live-ping-row span {
   color: rgba(226, 232, 240, 0.72);
-  font-size: 0.79rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 
 .metrics strong,
 .details strong,
 .live-ping-row strong {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #f8fafc;
   font-weight: 700;
 }
@@ -299,14 +327,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 92px;
-  padding: 10px 14px;
+  min-width: 80px;
+  padding: 8px 12px;
   border-radius: 999px;
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: 700;
-  border: 1px solid transparent;
+  font-size: 0.82rem;
 }
 
 .status-pill.green {
@@ -340,74 +364,70 @@
 }
 
 .metrics div {
-  padding: 16px;
-  border-radius: 18px;
+  padding: 12px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .details {
   display: grid;
-  gap: 14px;
-  padding-top: 14px;
+  gap: 10px;
+  padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .live-ping {
   display: grid;
-  gap: 14px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 10px;
+  padding-top: 12px;
 }
 
 .live-ping-row {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 
 .live-ping-row strong {
   display: block;
-  margin-top: 6px;
-  font-size: 1rem;
+  margin-top: 4px;
+  font-size: 0.95rem;
 }
 
 .live-ping-buttons {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .live-ping-buttons button {
-  min-width: 96px;
-  padding: 10px 14px;
+  min-width: 78px;
+  padding: 8px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #f8fafc;
   font-weight: 700;
-}
-
-.live-ping-buttons button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.82rem;
 }
 
 .live-ping-output {
   margin: 0;
-  max-height: 250px;
+  max-height: 180px;
   overflow: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
-  padding: 1rem;
-  border-radius: 0 0 16px 16px;
+  padding: 0.85rem;
+  border-radius: 0 0 14px 14px;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #7dd3fc;
   font-family: 'Consolas', 'Courier New', monospace;
-  font-size: 0.92rem;
-  line-height: 1.55;
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .live-ping-output::-webkit-scrollbar {
@@ -436,28 +456,23 @@
 
 .actions button {
   flex: 1;
-  min-width: 140px;
-  padding: 12px 16px;
+  min-width: 110px;
+  padding: 10px 12px;
   border: none;
   border-radius: 999px;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.actions button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-}
-
-.actions .maintenance {
   background: rgba(255, 255, 255, 0.12);
   color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.84rem;
 }
 
+.event-toggle {
+  min-width: 100px;
+  font-size: 0.82rem;
+  padding: 9px 12px;
 .actions .remove {
   background: rgba(248, 113, 113, 0.16);
   color: #fee2e2;
@@ -465,12 +480,12 @@
 
 .log-section {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 16px;
+  padding-top: 14px;
 }
 
 .log-section h3 {
-  margin: 0 0 12px;
-  font-size: 1.05rem;
+  margin: 0 0 10px;
+  font-size: 1rem;
   font-weight: 700;
   color: #f8fafc;
 }
@@ -480,15 +495,15 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .log-section li {
   display: grid;
   gap: 6px;
-  padding: 14px;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
