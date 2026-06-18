@@ -1,24 +1,13 @@
 import { Component, signal, OnDestroy, ViewChild, ElementRef, effect, PLATFORM_ID, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 
-interface AttendanceDevice {
-  ip: string;
-  location: string;
-}
-
-interface PortCheckResponse {
-  results: string;
-  devicesNeedReboot: string[];
-  allResponding: boolean;
-}
-
 @Component({
   selector: 'app-network',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './network.html',
   styleUrl: './network.css',
 })
@@ -34,7 +23,7 @@ export class NetworkComponent implements OnDestroy {
   }
 
   // Tab management
-  activeTab = signal<'ping' | 'activeip' | 'attendance'>('ping');
+  activeTab = signal<'ping' | 'activeip'>('ping');
 
   // Ping tab
   pingAddress = signal('10.140.');
@@ -55,17 +44,8 @@ export class NetworkComponent implements OnDestroy {
 
   @ViewChild('pingResultElement') pingResultElement?: ElementRef<HTMLPreElement>;
 
-  // Attendance Device tab
-  attendanceForm: FormGroup;
-  attendanceDevices = signal<AttendanceDevice[]>([]);
-  portCheckResults = signal('');
-  isCheckingPorts = signal(false);
-  lastOctet = signal('');
-  location = signal('');
-
   constructor(
     private http: HttpClient, 
-    private fb: FormBuilder, 
     private route: ActivatedRoute,
     private toastService: ToastService
   ) {
@@ -74,26 +54,13 @@ export class NetworkComponent implements OnDestroy {
       this.audio = new Audio('/ping-beep.mp3');
     }
 
-    // Initialize attendance device form
-    this.attendanceForm = this.fb.group({
-      lastOctet: ['', [Validators.required, Validators.pattern(/^\d{1,3}$/), Validators.min(0), Validators.max(255)]],
-      location: ['', Validators.required]
-    });
-
     // Listen for tab query parameter
     this.route.queryParams.subscribe(params => {
       if (params['tab']) {
-        const tab = params['tab'] as 'ping' | 'activeip' | 'attendance';
-        if (tab === 'ping' || tab === 'activeip' || tab === 'attendance') {
+        const tab = params['tab'] as 'ping' | 'activeip';
+        if (tab === 'ping' || tab === 'activeip') {
           this.activeTab.set(tab);
         }
-      }
-    });
-
-    // Load attendance devices only when tab becomes active
-    effect(() => {
-      if (this.activeTab() === 'attendance') {
-        this.loadAttendanceDevices();
       }
     });
 
@@ -413,160 +380,5 @@ export class NetworkComponent implements OnDestroy {
     return `<span>${escaped}</span>\n`;
   }
 
-  // ============= ATTENDANCE DEVICE METHODS =============
 
-  async loadAttendanceDevices() {
-    try {
-      console.log('Loading attendance devices...');
-      const response = await this.http.get<{ devices: AttendanceDevice[] }>(
-        `${this.getApiBaseUrl()}/api/network/attendance-devices`
-      ).toPromise();
-      
-      console.log('Received response:', response);
-      if (response?.devices) {
-        console.log('Setting devices:', response.devices);
-        this.attendanceDevices.set(response.devices);
-      } else {
-        console.log('No devices in response');
-        this.attendanceDevices.set([]);
-      }
-    } catch (error) {
-      console.error('Error loading attendance devices:', error);
-      this.attendanceDevices.set([]);
-    }
-  }
-
-  async addAttendanceDevice() {
-    if (this.attendanceForm.invalid) {
-      // Mark all fields as touched to show validation errors
-      Object.keys(this.attendanceForm.controls).forEach(key => {
-        this.attendanceForm.get(key)?.markAsTouched();
-      });
-      this.toastService.error('Please fill in all required fields');
-      return;
-    }
-
-    // Normalize last octet (remove leading zeros)
-    const lastOctetInput = this.attendanceForm.value.lastOctet;
-    const normalizedOctet = parseInt(lastOctetInput, 10).toString();
-    const location = this.attendanceForm.value.location;
-    const ip = `10.140.8.${normalizedOctet}`;
-
-    // Check for duplicate IP
-    const existingDevice = this.attendanceDevices().find(device => device.ip === ip);
-    if (existingDevice) {
-      this.toastService.error(`IP ${ip} already exists in the list`);
-      this.attendanceForm.get('lastOctet')?.setErrors({ duplicate: true });
-      return;
-    }
-
-    console.log('Adding device:', { ip, location });
-
-    try {
-      const response = await this.http.post<{ success: boolean; device: AttendanceDevice }>(
-        `${this.getApiBaseUrl()}/api/network/attendance-devices`,
-        { ip, location }
-      ).toPromise();
-
-      console.log('Add device response:', response);
-
-      if (response?.success) {
-        console.log('Device added successfully, reloading list...');
-        this.toastService.success(`Device ${ip} added successfully`);
-        
-        // Reload the list
-        await this.loadAttendanceDevices();
-        
-        // Reset form
-        this.attendanceForm.reset();
-        this.lastOctet.set('');
-        this.location.set('');
-
-        // Refresh port check
-        await this.checkPorts();
-      }
-    } catch (error: any) {
-      console.error('Error adding device:', error);
-      this.toastService.error(error?.error?.error || 'Failed to add device');
-    }
-  }
-
-  async removeAttendanceDevice(ip: string) {
-    // Find device to show location in confirmation
-    const device = this.attendanceDevices().find(d => d.ip === ip);
-    const confirmMessage = device 
-      ? `Are you sure you want to remove this device?\n\nIP: ${ip}\nLocation: ${device.location}`
-      : `Are you sure you want to remove device ${ip}?`;
-    
-    if (!confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      const response = await this.http.delete<{ success: boolean }>(
-        `${this.getApiBaseUrl()}/api/network/attendance-devices/${encodeURIComponent(ip)}`
-      ).toPromise();
-
-      if (response?.success) {
-        this.toastService.success(`Device ${ip} removed successfully`);
-        
-        // Reload the list
-        await this.loadAttendanceDevices();
-        
-        // Refresh port check
-        await this.checkPorts();
-      }
-    } catch (error: any) {
-      console.error('Error removing device:', error);
-      this.toastService.error(error?.error?.error || 'Failed to remove device');
-    }
-  }
-
-  async checkPorts() {
-    this.isCheckingPorts.set(true);
-    this.portCheckResults.set('Checking ports...');
-
-    try {
-      const response = await this.http.get<PortCheckResponse>(
-        `${this.getApiBaseUrl()}/api/network/attendance-devices/check-ports`
-      ).toPromise();
-
-      if (response) {
-        this.portCheckResults.set(response.results || 'No results');
-      }
-    } catch (error) {
-      console.error('Error checking ports:', error);
-      this.portCheckResults.set('Error checking ports');
-    } finally {
-      this.isCheckingPorts.set(false);
-    }
-  }
-
-  async refreshPortCheck() {
-    await this.checkPorts();
-  }
-
-  // Validate IP octet input in real-time
-  validateOctetInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value;
-
-    // Remove non-numeric characters
-    value = value.replace(/[^0-9]/g, '');
-
-    // Convert to number and check range
-    if (value !== '') {
-      const numValue = parseInt(value, 10);
-      
-      // If value exceeds 255, cap it at 255
-      if (numValue > 255) {
-        value = '255';
-        this.toastService.error('IP octet must be between 0 and 255');
-      }
-    }
-
-    // Update the form control value
-    this.attendanceForm.patchValue({ lastOctet: value });
-    input.value = value;
-  }
 }

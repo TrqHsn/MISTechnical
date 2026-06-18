@@ -1,0 +1,16 @@
+[
+  {
+    "Id": 1,
+    "Name": "test2",
+    "ContentType": 0,
+    "PlaylistId": 1,
+    "MediaId": null,
+    "StartTime": "03:11:00",
+    "EndTime": "15:14:00",
+    "DayOfWeek": null,
+    "IsActive": true,
+    "Priority": 1,
+    "Playlist": null,
+    "Media": null
+  }
+]

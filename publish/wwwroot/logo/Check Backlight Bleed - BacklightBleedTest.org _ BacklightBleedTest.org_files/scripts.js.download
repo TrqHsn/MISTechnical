@@ -1,0 +1,105 @@
+// Form submit function
+function submitForm(formId, module, script) {
+    var form = document.getElementById(formId);
+    var request = new XMLHttpRequest();
+    var response;
+    // Loader animation
+    formLoading(formId)
+    // Send request
+    request.open(form.method, '/' + module + '/scripts.php?script=' + script);
+    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+    request.send(encodeFormData(new FormData(form)));
+    // Get response
+    request.onload = function (progressEvent) {
+        response = request.responseText;
+        // If response is url, redirect
+        if (isURL(response)) {
+            window.location.assign(response);
+        } else {
+            // Else, replace inner html of form
+            form.innerHTML = response;
+        }
+    }
+}
+// Loading forms
+function formLoading(id) {
+    var form = document.getElementById(id);
+    var classes = form.className;
+    form.className = classes + ' display-container';
+    var loader = '<div class="veil">';
+    loader += '</div>';
+    loader += '<img class="display-middle" src="/elements/images/loader-black.svg">';
+    form.insertAdjacentHTML('beforeend', loader);
+}
+// Encode form data
+function encodeFormData(fd) {
+    var s = '';
+    function encode(s) { return encodeURIComponent(s).replace(/%20/g, '+'); }
+    for (var pair of fd.entries()) {
+        if (typeof pair[1] == 'string') {
+            s += (s ? '&' : '') + encode(pair[0]) + '=' + encode(pair[1]);
+        }
+    }
+    return s;
+}
+// Check if string is url
+function isURL(string) {
+    let url;
+    try {
+        url = new URL(string);
+    } catch (_) {
+        return false;
+    }
+    return url.protocol === "http:" || url.protocol === "https:";
+}
+// myModal
+function myModal(id) {
+    var element = document.getElementById(id);
+    var classes = element.className;
+    if (classes.indexOf('hide') > -1) {
+        element.className = classes.replace('hide', 'show');
+    }
+    if (classes.indexOf('show') > -1) {
+        element.className = classes.replace('show', 'hide');
+    }
+}
+
+// Menu scripts and sidebar
+if(document.querySelector('#main-navigation') != null) {
+    // Menu toggle for the className .menu-toggle
+    var menuToggle = document.querySelector('#main-navigation .menu-toggle');
+    if (menuToggle) {
+        menuToggle.addEventListener("click", toggleMenu);
+    }
+}
+
+function toggleMenu() {
+    var menu = document.querySelector('#main-navigation');
+    menu.classList.add('shadow-bottom');
+    myModal('mobile-toggle-menu');
+}
+
+// Hide mobile menu on resize if window width > 992px
+// And set sidebar top
+function handleResize() {
+    if (window.innerWidth > 992) {
+        var mobileMenu = document.getElementById('mobile-toggle-menu');
+        if (mobileMenu && mobileMenu.className.indexOf('show') > -1) {
+            mobileMenu.className = mobileMenu.className.replace('show', 'hide');
+        }
+    }
+    
+    const menu = document.querySelector('#main-navigation');
+    const sidebarElements = document.querySelectorAll('sidebar');
+    const menuHeight = menu?.offsetHeight || 0;
+    
+    sidebarElements.forEach(sidebar => {
+        sidebar.style.top = `${menuHeight}px`;
+    });
+}
+
+// Add resize event listener
+window.addEventListener('resize', handleResize);
+document.addEventListener('DOMContentLoaded', function() {
+    handleResize();
+});

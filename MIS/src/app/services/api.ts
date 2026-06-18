@@ -30,8 +30,13 @@ export interface SmbBrowseResponse {
 // Dynamically determine API base URL from current hostname
 const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    return `http://${hostname}:5001/api`;
+    const { protocol, hostname, port } = window.location;
+    // When running from ng serve on port 4200, the backend lives on port 5001.
+    if (port === '4200') {
+      return `http://${hostname}:5001/api`;
+    }
+    // Otherwise use same origin for built/served app.
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}/api`;
   }
   return 'http://localhost:5001/api';
 };
@@ -66,6 +71,10 @@ export class ApiService {
     return this.http.put(`${this.apiUrl}/computers/${encodeURIComponent(computerName)}/description`, JSON.stringify(description), {
       headers: { 'Content-Type': 'application/json' }
     });
+  }
+
+  sendAlertMessage(payload: { computerName?: string; userPrincipalName?: string; message: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/alerts/send`, payload);
   }
 
   // Devices API calls

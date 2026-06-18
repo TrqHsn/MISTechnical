@@ -33,15 +33,18 @@ builder.Services.AddSingleton<IKioskService, KioskService>();
 // Register SMB filesystem service
 builder.Services.AddScoped<ISmbService, SmbService>();
 
-// Configure CORS for Angular app on port 4200
+// Configure CORS for Angular app on port 4200 and same-host HTTPS origins
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
         policy.WithOrigins(
             "http://localhost:4200",
-            "http://10.140.9.252:4200",
-            "http://10.140.5.32:4200"
+            "https://localhost:4200",
+            "http://10.140.5.32:4200",
+            "https://10.140.5.32:4200",
+            "http://10.140.5.32",
+            "https://10.140.5.32"
         )
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -68,7 +71,13 @@ app.UseCors("AllowAngularApp");
 
 app.UseAuthorization();
 
+app.UseDefaultFiles(); // Serve index.html by default
+app.UseStaticFiles(); // Serve static files
+
 app.MapControllers();
+
+// fallback for angular routing
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

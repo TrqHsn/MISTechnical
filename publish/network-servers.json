@@ -1,0 +1,44 @@
+﻿[
+  {
+    "Id": "f2d9a164-569e-41ee-974f-e04bac832721",
+    "Name": "DBOSAP18",
+    "Host": "DBOSAP18",
+    "Maintenance": false,
+    "LastDownTime": null
+  },
+  {
+    "Id": "87a865e6-9032-4013-8518-9bd52f08fc3b",
+    "Name": "trQ",
+    "Host": "10.110.19.61",
+    "Maintenance": true,
+    "LastDownTime": null
+  },
+  {
+    "Id": "1c32776a-27c4-4262-a8fd-bf5be0a61459",
+    "Name": "DBOSAP19",
+    "Host": "DBOSAP19",
+    "Maintenance": false,
+    "LastDownTime": null
+  },
+  {
+    "Id": "408d93cc-7b51-4d22-9a52-6dfc462923a2",
+    "Name": "SDLFP8",
+    "Host": "SDLFP8",
+    "Maintenance": false,
+    "LastDownTime": null
+  },
+  {
+    "Id": "aba343ed-4489-45a2-a1b6-01f17ce1f1bd",
+    "Name": "DBOSAP17",
+    "Host": "DBOSAP17",
+    "Maintenance": false,
+    "LastDownTime": null
+  },
+  {
+    "Id": "2ff6fcd4-dba7-43a7-b87d-38a9616285f2",
+    "Name": "DBOSAP16",
+    "Host": "DBOSAP16",
+    "Maintenance": false,
+    "LastDownTime": null
+  }
+]

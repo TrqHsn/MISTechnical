@@ -9,6 +9,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'computers'" (click)="activeTab.set('computers')">
       Find Computer
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'alert'" (click)="activeTab.set('alert')">
+      Alert
+    </button>
     <button class="tab-btn" [class.active]="activeTab() === 'update-description'" (click)="activeTab.set('update-description')">
       Update Description
     </button>
@@ -107,6 +110,101 @@
         </div>
         }
       </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Alert Tab -->
+  @if (activeTab() === 'alert') {
+  <div class="tab-content">
+    <div class="form-group">
+      <label>Computer Name</label>
+      <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search computer name..."
+          [value]="alertComputerSearchInput()"
+          (input)="onAlertComputerSearchInput($any($event).target.value)"
+          (focus)="alertComputerShowDropdown.set(true)"
+          (keydown.enter)="onAlertComputerSearchEnter()">
+
+        @if (alertComputerShowDropdown() && (alertComputerResults().length > 0 || alertComputerLoading())) {
+        <div class="dropdown">
+          @if (alertComputerLoading()) {
+          <div class="loading">Loading...</div>
+          }
+          @for (computer of alertComputerResults(); track $index) {
+          <div class="dropdown-item" (click)="selectAlertComputer(computer)">
+            <span class="item-text">{{ computer['name'] || computer['description'] || 'Computer' }}</span>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    @if (selectedAlertComputer()) {
+    <div class="selected-item">
+      <span class="selected-text">Target computer: {{ selectedAlertComputer()?.['name'] || selectedAlertComputer()?.['description'] }}</span>
+      <button class="clear-btn" (click)="clearAlertComputer()">✕</button>
+    </div>
+    }
+
+    <div class="form-group">
+      <label>User Name</label>
+      <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search user name..."
+          [value]="alertUserSearchInput()"
+          (input)="onAlertUserSearchInput($any($event).target.value)"
+          (focus)="alertUserShowDropdown.set(true)"
+          (keydown.enter)="onAlertUserSearchEnter()">
+
+        @if (alertUserShowDropdown() && (alertUserResults().length > 0 || alertUserLoading())) {
+        <div class="dropdown">
+          @if (alertUserLoading()) {
+          <div class="loading">Loading...</div>
+          }
+          @for (user of alertUserResults(); track $index) {
+          <div class="dropdown-item" (click)="selectAlertUser(user)">
+            <span class="item-text">{{ user['displayName'] || user['sAMAccountName'] || 'User' }}</span>
+            @if (user['userPrincipalName'] || user['mail']) {
+            <small class="dropdown-subtext">{{ user['userPrincipalName'] || user['mail'] }}</small>
+            }
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    @if (selectedAlertUser()) {
+    <div class="selected-item">
+      <span class="selected-text">Target user: {{ selectedAlertUser()?.['displayName'] || selectedAlertUser()?.['sAMAccountName'] }}
+      <span class="selected-text">({{ selectedAlertUser()?.['userPrincipalName'] || selectedAlertUser()?.['mail'] }})</span>
+      </span>
+      <button class="clear-btn" (click)="clearAlertUser()">✕</button>
+    </div>
+    }
+
+    <div class="form-group">
+      <label>Message</label>
+      <textarea class="search-input" rows="6" placeholder="Type an alert message..."
+        [value]="alertMessage()"
+        (input)="alertMessage.set($any($event.target).value)"></textarea>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-success" (click)="sendAlert()"
+        [disabled]="alertSending() || (!selectedAlertComputer() && !selectedAlertUser()) || !alertMessage().trim()">
+        {{ alertSending() ? 'Sending...' : 'Send Alert' }}
+      </button>
+      @if (alertSending()) {
+      <button type="button" class="btn btn-danger" (click)="cancelAlert()">Stop</button>
+      }
+    </div>
+
+    @if (alertStatusMessage()) {
+    <div class="message" [class.success]="alertStatusType() === 'success'" [class.error]="alertStatusType() === 'error'">
+      {{ alertStatusMessage() }}
     </div>
     }
   </div>

@@ -378,29 +378,7 @@ public class KioskService : IKioskService
             _logger.LogInformation("Marking display {DisplayId} as having seen reload at {Timestamp}", displayId, reloadTimestamp);
         }
         
-        // PRIORITY 1: Check for directly activated media (bypasses all schedules)
-        if (_activeMediaId.HasValue && _media.TryGetValue(_activeMediaId.Value, out var activeMedia))
-        {
-            return new ActiveContentResponse
-            {
-                ContentType = "image",
-                SingleMedia = new ActiveMediaItem
-                {
-                    MediaId = activeMedia.Id,
-                    Url = $"/displayboard/{activeMedia.FileName}",
-                    Type = activeMedia.Type,
-                    DurationSeconds = 0,
-                    FileName = activeMedia.FileName
-                },
-                ServerTime = DateTime.UtcNow,
-                ScheduleName = "Direct Activation",
-                DisplayMode = _displayMode,
-                ShouldReload = shouldReload,
-                ReloadTimestamp = reloadTimestamp
-            };
-        }
-
-        // PRIORITY 2: Check scheduled content
+        // PRIORITY 1: Check scheduled content first
         var now = DateTime.Now;
         var currentTime = TimeOnly.FromDateTime(now);
         var currentDay = now.DayOfWeek;
@@ -413,12 +391,10 @@ public class KioskService : IKioskService
             .OrderByDescending(s => s.Priority)
             .ToList();
 
-        var activeSchedule = activeSchedules.FirstOrDefault();
-
-        if (activeSchedule != null)
+        foreach (var activeSchedule in activeSchedules)
         {
-            _logger.LogDebug("Active schedule found: {Name}", activeSchedule.Name);
-            
+            _logger.LogDebug("Active schedule candidate: {Name} (ID: {Id})", activeSchedule.Name, activeSchedule.Id);
+
             if (activeSchedule.ContentType == ScheduleContentType.Playlist && activeSchedule.PlaylistId.HasValue)
             {
                 var playlist = await GetPlaylistByIdAsync(activeSchedule.PlaylistId.Value);
@@ -470,6 +446,47 @@ public class KioskService : IKioskService
                     };
                 }
             }
+
+            _logger.LogWarning("Skipping invalid schedule content for schedule {ScheduleId}", activeSchedule.Id);
+        }
+
+        // PRIORITY 2: Check for directly activated media when no valid schedule content is active
+        if (_activeMediaId.HasValue && _media.TryGetValue(_activeMediaId.Value, out var activeMedia))
+        {
+            return new ActiveContentResponse
+            {
+                ContentType = "image",
+                SingleMedia = new ActiveMediaItem
+                {
+                    MediaId = activeMedia.Id,
+                    Url = $"/displayboard/{activeMedia.FileName}",
+                    Type = activeMedia.Type,
+                    DurationSeconds = 0,
+                    FileName = activeMedia.FileName
+                },
+                ServerTime = DateTime.UtcNow,
+                ScheduleName = "Direct Activation",
+                DisplayMode = _displayMode,
+                ShouldReload = shouldReload,
+                ReloadTimestamp = reloadTimestamp
+            };
+        }
+
+        // STOP BROADCAST: if scheduling is in use and there is no current active schedule window,
+        // treat this as schedule off-time rather than falling back to default content.
+        var hasEnabledSchedules = _schedules.Values.Any(s => s.IsActive);
+        if (hasEnabledSchedules && !activeSchedules.Any())
+        {
+            _logger.LogDebug("No current active schedule window and scheduling is enabled; stopping broadcast.");
+            return new ActiveContentResponse
+            {
+                ContentType = "stopped",
+                ServerTime = DateTime.UtcNow,
+                ScheduleName = "No Active Schedule",
+                DisplayMode = _displayMode,
+                ShouldReload = shouldReload,
+                ReloadTimestamp = reloadTimestamp
+            };
         }
 
         // Fallback: return first available playlist or first media item

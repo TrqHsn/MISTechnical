@@ -1,0 +1,21 @@
+{
+  "routes": {
+    "/": {},
+    "/ad-tools": {},
+    "/cam-mic-speaker": {},
+    "/device-assign": {},
+    "/device-tool": {},
+    "/display-test": {},
+    "/files": {},
+    "/forms": {},
+    "/important-links": {},
+    "/inventory": {},
+    "/jobsheet": {},
+    "/network": {},
+    "/network-dashboard": {},
+    "/os-installation-form": {},
+    "/print": {},
+    "/sinage": {},
+    "/stress-cpu-gpu": {}
+  }
+}
