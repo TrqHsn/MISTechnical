@@ -2,6 +2,7 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
+import { ApiService, User } from '../../services/api';
 import * as XLSX from 'xlsx';
 import * as QRCode from 'qrcode';
 
@@ -94,7 +95,19 @@ export class SearchComponent {
   contactQrCodeUrl = signal('');
   private contactsSearchSubject = new Subject<string>();
 
-  constructor() {
+  // AD edit modal state
+  adEditModalOpen = signal(false);
+  adUserSearch = signal('');
+  adUserSearchLoading = signal(false);
+  adUserSearchResults = signal<User[]>([]);
+  adSelectedUser = signal<User | null>(null);
+  adMobileNumberInput = signal('+88');
+  adSaveLoading = signal(false);
+  adSaveMessage = signal('');
+  adSaveMessageType = signal<'success' | 'error' | 'info'>('info');
+  private adUserSearchSubject = new Subject<string>();
+
+  constructor(private apiService: ApiService) {
     // Setup debounced search - wait 300ms after user stops typing
     this.searchSubject.pipe(
       debounceTime(300)
@@ -106,6 +119,12 @@ export class SearchComponent {
       debounceTime(250)
     ).subscribe(term => {
       this.performContactsSearch(term);
+    });
+
+    this.adUserSearchSubject.pipe(
+      debounceTime(300)
+    ).subscribe(term => {
+      this.performAdUserSearch(term);
     });
 
     void this.loadFromServer();
@@ -232,6 +251,128 @@ export class SearchComponent {
     } catch {
       this.contactQrCodeUrl.set('');
     }
+  }
+
+  openEditMobileModal(): void {
+    this.adEditModalOpen.set(true);
+    this.adUserSearch.set('');
+    this.adUserSearchResults.set([]);
+    this.adSelectedUser.set(null);
+    this.adMobileNumberInput.set('+88');
+    this.adSaveMessage.set('');
+    this.adSaveMessageType.set('info');
+    this.adSaveLoading.set(false);
+  }
+
+  closeEditMobileModal(): void {
+    this.adEditModalOpen.set(false);
+    this.adUserSearchLoading.set(false);
+  }
+
+  onAdUserSearchInput(value: string): void {
+    this.adUserSearch.set(value);
+    this.adSelectedUser.set(null);
+    this.adSaveMessage.set('');
+
+    if (!value.trim()) {
+      this.adUserSearchResults.set([]);
+      this.adUserSearchLoading.set(false);
+      return;
+    }
+
+    this.adUserSearchLoading.set(true);
+    this.adUserSearchSubject.next(value);
+  }
+
+  private performAdUserSearch(term: string): void {
+    const searchTerm = term.trim();
+    if (!searchTerm) {
+      this.adUserSearchResults.set([]);
+      this.adUserSearchLoading.set(false);
+      return;
+    }
+
+    this.apiService.searchUsers(searchTerm).subscribe(
+      (results) => {
+        this.adUserSearchResults.set(results.slice(0, 5));
+        this.adUserSearchLoading.set(false);
+      },
+      (error) => {
+        console.error('Error searching AD users:', error);
+        this.adUserSearchResults.set([]);
+        this.adUserSearchLoading.set(false);
+      }
+    );
+  }
+
+  selectAdUser(user: User): void {
+    this.adSelectedUser.set(user);
+    this.adUserSearchResults.set([]);
+    this.adMobileNumberInput.set((user.telephoneNumber || '+88').trim() || '+88');
+    this.adSaveMessage.set('');
+  }
+
+  private normalizeMobileNumber(value: string): string {
+    const digits = `${value}`.replace(/\D/g, '');
+    if (!digits) {
+      return '+88';
+    }
+
+    if (digits.startsWith('88')) {
+      return `+${digits}`;
+    }
+
+    if (digits.startsWith('0')) {
+      return `+88${digits.slice(1)}`;
+    }
+
+    return `+88${digits}`;
+  }
+
+  submitAdMobileUpdate(): void {
+    const selected = this.adSelectedUser();
+    if (!selected) {
+      this.adSaveMessageType.set('error');
+      this.adSaveMessage.set('Select an AD user first.');
+      return;
+    }
+
+    const rawValue = this.adMobileNumberInput().trim();
+    if (!rawValue) {
+      this.adSaveMessageType.set('error');
+      this.adSaveMessage.set('Enter a mobile number to update.');
+      return;
+    }
+
+    const formattedNumber = this.normalizeMobileNumber(rawValue);
+    const userPrincipalName = selected['userPrincipalName'] || selected['samAccountName'] || '';
+    if (!userPrincipalName) {
+      this.adSaveMessageType.set('error');
+      this.adSaveMessage.set('Selected AD user does not have a valid identifier.');
+      return;
+    }
+
+    this.adSaveLoading.set(true);
+    this.adSaveMessage.set('');
+
+    this.apiService.updateUserAttributes(userPrincipalName, { telephoneNumber: formattedNumber }).subscribe(
+      () => {
+        this.adSaveLoading.set(false);
+        this.adSaveMessageType.set('success');
+        this.adSaveMessage.set(`Mobile number updated to ${formattedNumber}`);
+        this.adMobileNumberInput.set(formattedNumber);
+        if (selected) {
+          selected.telephoneNumber = formattedNumber;
+          this.adSelectedUser.set(selected);
+        }
+      },
+      (error) => {
+        console.error('Error updating mobile number in AD:', error);
+        this.adSaveLoading.set(false);
+        this.adSaveMessageType.set('error');
+        this.adSaveMessage.set(error.error?.message || error.message || 'Failed to update mobile number');
+      }
+    );
   }
 
   private performContactsSearch(term: string): void {

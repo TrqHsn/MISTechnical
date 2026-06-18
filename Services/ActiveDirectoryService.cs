@@ -32,7 +32,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
                     "sAMAccountName", "displayName", "userPrincipalName", "title", 
-                    "department", "company","physicalDeliveryOfficeName", "manager", "userAccountControl"
+                    "department", "company", "telephoneNumber", "physicalDeliveryOfficeName", "manager", "userAccountControl"
                 });
 
                 var results = searcher.FindAll();
@@ -69,7 +69,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
                     "sAMAccountName", "displayName", "userPrincipalName", "title", 
-                    "department", "company", "physicalDeliveryOfficeName", "manager", "userAccountControl"
+                    "department", "company", "telephoneNumber", "physicalDeliveryOfficeName", "manager", "userAccountControl"
                 });
 
                 var result = searcher.FindOne();
@@ -266,7 +266,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 using var entry = new DirectoryEntry(_domainPath);
                 using var searcher = new DirectorySearcher(entry)
                 {
-                    Filter = $"(&(objectClass=user)(objectCategory=person)(userPrincipalName={userPrincipalName}))",
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(userPrincipalName={userPrincipalName})(sAMAccountName={userPrincipalName})))",
                     SearchScope = SearchScope.Subtree
                 };
 
@@ -362,6 +362,13 @@ public class ActiveDirectoryService : IActiveDirectoryService
                     }
                 }
 
+                // Update telephoneNumber if provided
+                if (updateDto?.TelephoneNumber != null)
+                {
+                    userEntry.Properties["telephoneNumber"].Clear();
+                    if (!string.IsNullOrWhiteSpace(updateDto.TelephoneNumber))
+                        userEntry.Properties["telephoneNumber"].Add(updateDto.TelephoneNumber.Trim());
+                }
 
                 userEntry.CommitChanges();
             }
@@ -514,6 +521,10 @@ public class ActiveDirectoryService : IActiveDirectoryService
             // company
             if (result.Properties["company"].Count > 0)
                 user.Company = result.Properties["company"][0]?.ToString();
+
+            // telephoneNumber
+            if (result.Properties["telephoneNumber"].Count > 0)
+                user.TelephoneNumber = result.Properties["telephoneNumber"][0]?.ToString();
 
             // Site
             if (result.Properties["physicalDeliveryOfficeName"].Count > 0)

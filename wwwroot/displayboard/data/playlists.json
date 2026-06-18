@@ -9,14 +9,6 @@
       {
         "Id": 0,
         "PlaylistId": 0,
-        "MediaId": 33,
-        "DurationSeconds": 5,
-        "Order": 0,
-        "Media": null
-      },
-      {
-        "Id": 0,
-        "PlaylistId": 0,
         "MediaId": 32,
         "DurationSeconds": 5,
         "Order": 1,

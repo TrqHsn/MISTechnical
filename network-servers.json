@@ -1,22 +1,15 @@
 ﻿[
   {
-    "Id": "a19cbad4-8c1e-4baf-8321-1d13fbeeb2a6",
-    "Name": "AP22-FR",
-    "Host": "SDLAP22",
+    "Id": "fbc05ac7-9c33-4300-af3c-f82cc13d539d",
+    "Name": "MyDevice",
+    "Host": "10.140.5.32",
     "Maintenance": false,
     "LastDownTime": null
   },
   {
-    "Id": "408d93cc-7b51-4d22-9a52-6dfc462923a2",
-    "Name": "SDLFP8",
-    "Host": "SDLFP8",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "cb29a352-2778-47a1-84f2-635e1cf7eb6b",
-    "Name": "Google DNS",
-    "Host": "8.8.8.8",
+    "Id": "3a8bd3a1-aae9-4406-9ea0-28e10b825e61",
+    "Name": "1.1.1.1",
+    "Host": "1.1.1.1",
     "Maintenance": false,
     "LastDownTime": null
   },
@@ -24,7 +17,14 @@
     "Id": "2ff6fcd4-dba7-43a7-b87d-38a9616285f2",
     "Name": "DBOSAP16",
     "Host": "DBOSAP16",
-    "Maintenance": false,
+    "Maintenance": true,
+    "LastDownTime": null
+  },
+  {
+    "Id": "0b26a753-e839-44e8-8f3d-383745f1a082",
+    "Name": "DBOSAP18",
+    "Host": "DBOSAP18",
+    "Maintenance": true,
     "LastDownTime": null
   }
 ]

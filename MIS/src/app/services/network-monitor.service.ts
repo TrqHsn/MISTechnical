@@ -14,13 +14,10 @@ export interface NetworkServer {
   host: string;
   maintenance: boolean;
   status: 'green' | 'yellow' | 'red' | 'maintenance' | 'unknown';
-  averageLatencyMs: number | null;
-  packetLossPercent: number | null;
   lastCheckTime: string | null;
   lastDownTime: string | null;
   lastPingStatus: string | null;
   logs: NetworkLogEntry[];
-  recentCycles: Array<{ timestamp: number; packetLossPercent: number; averageLatencyMs: number | null }>;
   redSince: number | null;
   alertCooldownUntil: number | null;
 }
@@ -55,7 +52,6 @@ interface LivePingState {
   status: 'starting' | 'running' | 'stopped' | 'error';
 }
 
-const LATENCY_THRESHOLD_MS = 100;
 const POLL_INTERVAL_MS = 8000;
 const RED_DELAY_MS = 30_000;
 const ALERT_COOLDOWN_MS = 300_000;
@@ -120,13 +116,10 @@ export class NetworkMonitorService {
         host: server.host,
         maintenance: server.maintenance,
         status: 'unknown',
-        averageLatencyMs: null,
-        packetLossPercent: null,
         lastCheckTime: null,
         lastDownTime: server.lastDownTime,
         lastPingStatus: null,
         logs: [],
-        recentCycles: [],
         redSince: null,
         alertCooldownUntil: null,
       };
@@ -392,13 +385,10 @@ export class NetworkMonitorService {
         host: item.host,
         maintenance: item.maintenance,
         status: 'unknown' as const,
-        averageLatencyMs: null,
-        packetLossPercent: null,
         lastCheckTime: null,
         lastDownTime: item.lastDownTime ?? null,
         lastPingStatus: null,
         logs: [],
-        recentCycles: [],
         redSince: null,
         alertCooldownUntil: null,
       }));
@@ -431,6 +421,11 @@ export class NetworkMonitorService {
   }
 
   private performCycle(serverId: string) {
+    const livePingState = this.getLivePingState(serverId);
+    if (livePingState.active) {
+      return of(void 0);
+    }
+
     const server = this.servers().find((item) => item.id === serverId);
     if (!server) {
       return of(void 0);
@@ -468,45 +463,17 @@ export class NetworkMonitorService {
         }
 
         const now = Date.now();
-        const successful = results.filter((result) => result.success && typeof result.latency === 'number');
-        const loss = results.length
-          ? Math.round(((results.length - successful.length) / results.length) * 100)
-          : 100;
-        const averageLatency = successful.length
-          ? Math.round(successful.reduce((sum, result) => sum + (result.latency ?? 0), 0) / successful.length)
-          : null;
+        const successful = results.filter((result) => result.success);
+        const isSuccess = successful.length > 0;
+        const redSince = !isSuccess ? item.redSince ?? now : null;
 
-        const recentCycles = [
-          ...item.recentCycles,
-          {
-            timestamp: now,
-            packetLossPercent: loss,
-            averageLatencyMs: averageLatency,
-          },
-        ].filter((cycle) => now - cycle.timestamp <= 60_000);
-
-        const hasFull60SecondWindow = recentCycles.length > 0 && now - recentCycles[0].timestamp >= 60_000;
-        const allGoodFor60Seconds = hasFull60SecondWindow && recentCycles.every(
-          (cycle) => cycle.packetLossPercent === 0 && (cycle.averageLatencyMs ?? 0) < LATENCY_THRESHOLD_MS
-        );
-
-        const lossIsFull = loss === 100;
-        const redSince = lossIsFull ? item.redSince ?? now : null;
-
-        let nextStatus: NetworkServer['status'] = 'unknown';
-        if (item.maintenance) {
-          nextStatus = 'maintenance';
-        } else if (lossIsFull && redSince && now - redSince >= RED_DELAY_MS) {
-          nextStatus = 'red';
-        } else if (lossIsFull) {
-          nextStatus = 'yellow';
-        } else if (allGoodFor60Seconds) {
-          nextStatus = 'green';
-        } else if (loss > 0 || (averageLatency !== null && averageLatency >= LATENCY_THRESHOLD_MS)) {
-          nextStatus = 'yellow';
-        } else if (averageLatency !== null) {
-          nextStatus = 'green';
-        }
+        const nextStatus: NetworkServer['status'] = item.maintenance
+          ? 'maintenance'
+          : !isSuccess && redSince && now - redSince >= RED_DELAY_MS
+          ? 'red'
+          : !isSuccess
+          ? 'yellow'
+          : 'green';
 
         const logs = [...item.logs];
         let lastDownTime = item.lastDownTime;
@@ -535,13 +502,10 @@ export class NetworkMonitorService {
 
         return {
           ...item,
-          recentCycles,
           redSince,
-          packetLossPercent: loss,
-          averageLatencyMs: averageLatency,
           lastCheckTime: new Date(now).toISOString(),
           lastDownTime,
-          lastPingStatus: results[0]?.status ?? (successful.length ? 'Success' : 'No response'),
+          lastPingStatus: results[0]?.status ?? (isSuccess ? 'Success' : 'No response'),
           status: nextStatus,
           logs,
         };

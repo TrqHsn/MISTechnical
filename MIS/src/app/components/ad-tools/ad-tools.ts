@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { debounceTime, Subject, Subscription, timeout } from 'rxjs';
+import { debounceTime, Subject } from 'rxjs';
 import { ApiService, User, Computer } from '../../services/api';
 import { lastValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
@@ -15,7 +15,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class AdToolsComponent {
   // Tab management
-  activeTab = signal<'users' | 'computers' | 'alert' | 'update-description' | 'last-device' | 'update-user'>('users');
+  activeTab = signal<'users' | 'computers' | 'update-description' | 'last-device' | 'update-user'>('users');
 
   //Copy text to clipboard
   copyText(text: string | null | undefined) {
@@ -61,27 +61,6 @@ export class AdToolsComponent {
   targetComputerShowDropdown = signal(false);
   private targetComputerSearchSubject = new Subject<string>();
 
-  // Alert tab state
-  alertComputerSearchInput = signal('');
-  alertComputerResults = signal<Computer[]>([]);
-  selectedAlertComputer = signal<Computer | null>(null);
-  alertComputerLoading = signal(false);
-  alertComputerShowDropdown = signal(false);
-  private alertComputerSearchSubject = new Subject<string>();
-
-  alertUserSearchInput = signal('');
-  alertUserResults = signal<User[]>([]);
-  selectedAlertUser = signal<User | null>(null);
-  alertUserLoading = signal(false);
-  alertUserShowDropdown = signal(false);
-  private alertUserSearchSubject = new Subject<string>();
-
-  alertMessage = signal('');
-  alertSending = signal(false);
-  alertStatusMessage = signal('');
-  alertStatusType = signal<'success' | 'error' | 'info'>('info');
-  private alertSendSubscription: Subscription | null = null;
-
   descriptionInput = signal('');
   isUpdating = signal(false);
   updateMessage = signal('');
@@ -112,8 +91,8 @@ export class AdToolsComponent {
     // Listen for tab query parameter
     this.route.queryParams.subscribe(params => {
       if (params['tab']) {
-        const tab = params['tab'] as 'users' | 'computers' | 'alert' | 'update-description' | 'last-device' | 'update-user';
-        if (tab === 'users' || tab === 'computers' || tab === 'alert' || tab === 'update-description' || tab === 'last-device' || tab === 'update-user') {
+        const tab = params['tab'] as 'users' | 'computers' | 'update-description' | 'last-device' | 'update-user';
+        if (tab === 'users' || tab === 'computers' || tab === 'update-description' || tab === 'last-device' || tab === 'update-user') {
           this.activeTab.set(tab);
         }
       }
@@ -218,55 +197,6 @@ export class AdToolsComponent {
       }
     });
 
-    // Setup alert computer search
-    this.alertComputerSearchSubject.pipe(
-      debounceTime(300)
-    ).subscribe(searchTerm => {
-      if (searchTerm.trim()) {
-        this.alertComputerLoading.set(true);
-        this.alertComputerShowDropdown.set(true);
-
-        this.apiService.searchComputers(searchTerm).subscribe(
-          (results) => {
-            this.alertComputerResults.set(results.slice(0, 5));
-            this.alertComputerLoading.set(false);
-          },
-          (error) => {
-            console.error('Error searching alert computers:', error);
-            this.alertComputerResults.set([]);
-            this.alertComputerLoading.set(false);
-          }
-        );
-      } else {
-        this.alertComputerResults.set([]);
-        this.alertComputerShowDropdown.set(false);
-      }
-    });
-
-    // Setup alert user search
-    this.alertUserSearchSubject.pipe(
-      debounceTime(300)
-    ).subscribe(searchTerm => {
-      if (searchTerm.trim()) {
-        this.alertUserLoading.set(true);
-        this.alertUserShowDropdown.set(true);
-
-        this.apiService.searchUsers(searchTerm).subscribe(
-          (results) => {
-            this.alertUserResults.set(results.slice(0, 5));
-            this.alertUserLoading.set(false);
-          },
-          (error) => {
-            console.error('Error searching alert users:', error);
-            this.alertUserResults.set([]);
-            this.alertUserLoading.set(false);
-          }
-        );
-      } else {
-        this.alertUserResults.set([]);
-        this.alertUserShowDropdown.set(false);
-      }
-    });
   }
 
   // Users handlers
@@ -382,130 +312,6 @@ export class AdToolsComponent {
 
   clearTargetComputer() {
     this.selectedTargetComputer.set(null);
-  }
-
-  // Alert tab handlers
-  onAlertComputerSearchInput(value: string) {
-    this.alertComputerSearchInput.set(value);
-    this.alertComputerSearchSubject.next(value);
-  }
-
-  selectAlertComputer(computer: Computer) {
-    this.selectedAlertComputer.set(computer);
-    this.alertComputerShowDropdown.set(false);
-    this.alertComputerSearchInput.set('');
-    this.alertComputerResults.set([]);
-    this.alertStatusMessage.set('');
-  }
-
-  clearAlertComputer() {
-    this.selectedAlertComputer.set(null);
-    this.alertStatusMessage.set('');
-  }
-
-  onAlertComputerSearchEnter() {
-    const results = this.alertComputerResults();
-    if (results && results.length > 0) {
-      this.selectAlertComputer(results[0]);
-    }
-  }
-
-  onAlertUserSearchInput(value: string) {
-    this.alertUserSearchInput.set(value);
-    this.alertUserSearchSubject.next(value);
-  }
-
-  selectAlertUser(user: User) {
-    this.selectedAlertUser.set(user);
-    this.alertUserShowDropdown.set(false);
-    this.alertUserSearchInput.set('');
-    this.alertUserResults.set([]);
-    this.alertStatusMessage.set('');
-  }
-
-  clearAlertUser() {
-    this.selectedAlertUser.set(null);
-    this.alertStatusMessage.set('');
-  }
-
-  onAlertUserSearchEnter() {
-    const results = this.alertUserResults();
-    if (results && results.length > 0) {
-      this.selectAlertUser(results[0]);
-    }
-  }
-
-  private getAlertTarget(): { computerName?: string; userPrincipalName?: string } {
-    const computer = this.selectedAlertComputer();
-    const user = this.selectedAlertUser();
-
-    if (computer && computer['name']) {
-      return { computerName: computer['name'] };
-    }
-
-    if (user) {
-      return {
-        userPrincipalName: user['userPrincipalName'] || user['mail'] || user['sAMAccountName'] || undefined
-      };
-    }
-
-    return {};
-  }
-
-  sendAlert() {
-    const target = this.getAlertTarget();
-    const message = this.alertMessage().trim();
-
-    if (!target.computerName && !target.userPrincipalName) {
-      this.alertStatusType.set('error');
-      this.alertStatusMessage.set('Select a computer or a user before sending.');
-      return;
-    }
-
-    if (!message) {
-      this.alertStatusType.set('error');
-      this.alertStatusMessage.set('Enter an alert message before sending.');
-      return;
-    }
-
-    this.alertSending.set(true);
-    this.alertStatusMessage.set('');
-
-    const request$ = this.apiService.sendAlertMessage({
-      computerName: target.computerName,
-      userPrincipalName: target.userPrincipalName,
-      message
-    }).pipe(timeout(20000));
-
-    this.alertSendSubscription = request$.subscribe(
-      () => {
-        this.alertStatusType.set('success');
-        this.alertStatusMessage.set('Alert sent successfully.');
-        this.alertSending.set(false);
-        this.alertSendSubscription = null;
-      },
-      (error) => {
-        if (error.name === 'TimeoutError') {
-          this.alertStatusMessage.set('Request timed out. You can stop and retry.');
-        } else {
-          console.error('Error sending alert:', error);
-          this.alertStatusMessage.set('Error sending alert: ' + (error.error?.message || error.message || 'Unknown error'));
-        }
-        this.alertStatusType.set('error');
-        this.alertSending.set(false);
-        this.alertSendSubscription = null;
-      }
-    );
-  }
-
-  cancelAlert() {
-    if (this.alertSendSubscription) {
-      this.alertSendSubscription.unsubscribe();
-      this.alertSendSubscription = null;
-      this.alertSending.set(false);
-      this.alertStatusType.set('error');
-      this.alertStatusMessage.set('Alert send cancelled.');
-    }
   }
 
   clearAll() {

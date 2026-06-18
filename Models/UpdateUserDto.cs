@@ -8,4 +8,5 @@ public class UpdateUserDto
     public string? Description { get; set; }
     // Manager provided as User Principal Name (UPN), sAMAccountName, or DisplayName - service will resolve to DN
     public string? Manager { get; set; }
+    public string? TelephoneNumber { get; set; }
 }

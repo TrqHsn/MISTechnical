@@ -175,8 +175,13 @@
     @if (selectedContact()) {
       <div class="contact-card">
         <div class="contact-header">
-          <h2>{{ getContactValue('EmployeeName') }}</h2>
-          <div class="contact-subtitle">{{ getContactValue('Designation') }}</div>
+          <div>
+            <h2>{{ getContactValue('EmployeeName') }}</h2>
+            <div class="contact-subtitle">{{ getContactValue('Designation') }}</div>
+          </div>
+          <button type="button" class="edit-ad-btn" (click)="openEditMobileModal()">
+            Edit Mobile
+          </button>
         </div>
 
         <div class="contact-content">
@@ -196,6 +201,68 @@
               <div class="qr-hint">Scan to get the phone number</div>
             </div>
           }
+        </div>
+      </div>
+    }
+
+    @if (adEditModalOpen()) {
+      <div class="modal-overlay" (click)="closeEditMobileModal()">
+        <div class="modal" (click)="$any($event).stopPropagation()">
+          <div class="modal-header">
+            <h2>Edit Mobile Number</h2>
+            <button type="button" class="modal-close" (click)="closeEditMobileModal()">✕</button>
+          </div>
+
+          <div class="modal-body">
+            <div class="modal-input-wrapper">
+              <label class="modal-label">Search AD user</label>
+              <input
+                type="text"
+                class="modal-input"
+                placeholder="Search by name, username, or email"
+                [value]="adUserSearch()"
+                (input)="onAdUserSearchInput($any($event.target).value)"
+              />
+
+              @if (adUserSearchLoading()) {
+                <div class="modal-loading">Searching AD...</div>
+              }
+
+              @if (adUserSearchResults().length > 0) {
+                <div class="results-dropdown modal-results">
+                  @for (user of adUserSearchResults(); track $index) {
+                    <div class="result-item" (click)="selectAdUser(user)">
+                      {{ user['displayName'] || user['samAccountName'] || user['userPrincipalName'] || 'AD user' }}
+                      <div class="result-subtext">{{ user['userPrincipalName'] || user['samAccountName'] }}</div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="modal-input-wrapper">
+              <label class="modal-label">Mobile Number</label>
+              <input
+                type="text"
+                class="modal-input"
+                [value]="adMobileNumberInput()"
+                (input)="adMobileNumberInput.set($any($event.target).value)"
+              />
+            </div>
+
+            @if (adSaveMessage()) {
+              <div class="modal-status" [class.success]="adSaveMessageType() === 'success'" [class.error]="adSaveMessageType() === 'error'">
+                {{ adSaveMessage() }}
+              </div>
+            }
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="modal-submit" (click)="submitAdMobileUpdate()" [disabled]="adSaveLoading()">
+              {{ adSaveLoading() ? 'Updating...' : 'Submit' }}
+            </button>
+            <button type="button" class="modal-cancel" (click)="closeEditMobileModal()">Cancel</button>
+          </div>
         </div>
       </div>
     }

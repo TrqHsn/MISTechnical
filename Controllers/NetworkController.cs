@@ -244,22 +244,20 @@ namespace ADApi.Controllers
                 {
                     return Ok(new
                     {
-                        success = true,
-                        latency = reply.RoundtripTime
+                        success = true
                     });
                 }
 
                 return Ok(new
                 {
                     success = false,
-                    latency = (long?)null,
                     status = reply.Status.ToString()
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Ping failed for {Host}", host);
-                return Ok(new { success = false, latency = (long?)null, status = "Error" });
+                return Ok(new { success = false, status = "Error" });
             }
         }
 

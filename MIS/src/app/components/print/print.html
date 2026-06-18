@@ -118,81 +118,70 @@
   <!-- Service Tag Tab -->
   @if (activeTab() === 'service-tag') {
   <div class="tab-content">
-    <div #printSection class="service-container">
-      <div class="print-wrapper">
-        <table class="form-table">
-          <tr>
-            <td colspan="2">
-              <input 
-                type="text" 
-                class="header-input" 
-                placeholder="Where to claim / Service"
-                #whereToClaim
-              >
-            </td>
-          </tr>
+    <div class="service-heading screen-heading">IT Device Service / Warranty Form</div>
+    <div class="service-card">
+      <form [formGroup]="serviceTagForm" class="service-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Asset Number</label>
+            <input type="text" formControlName="assetNumber" placeholder="e.g. IT-2026-001" />
+          </div>
 
-          <tr>
-            <th>Host Name</th>
-            <td>
-              <input 
-                type="text" 
-                #hostName
-              >
-            </td>
-          </tr>
+          <div class="form-field">
+            <label>Device Type / Model</label>
+            <input type="text" formControlName="deviceTypeModel" placeholder="e.g. Dell Latitude 5530" />
+          </div>
 
-          <tr>
-            <th>Device Model</th>
-            <td>
-              <input 
-                type="text" 
-                #deviceModel
-              >
-            </td>
-          </tr>
+          <div class="form-field">
+            <label>Serial Number (SN)</label>
+            <input type="text" formControlName="serialNumber" placeholder="e.g. SN12345678" />
+          </div>
 
-          <tr>
-            <th>Sending Date</th>
-            <td>
-              <input 
-                type="text" 
-                #sendingDate
-              >
-            </td>
-          </tr>
+          <div class="form-field">
+            <label>Username</label>
+            <input type="text" formControlName="username" placeholder="e.g. john.doe" />
+          </div>
 
-          <tr>
-            <th>Current Condition</th>
-            <td>
-              <textarea 
-                rows="3"
-                #currentCondition
-              ></textarea>
-            </td>
-          </tr>
+          <div class="form-field">
+            <label>Sending Date</label>
+            <input type="date" formControlName="sendingDate" />
+          </div>
 
-          <tr>
-            <th>Problem Details</th>
-            <td>
-              <textarea 
-                rows="3"
-                #problemDetails
-              ></textarea>
-            </td>
-          </tr>
+          <div class="form-field">
+            <label>Sent To</label>
+            <input type="text" formControlName="sentTo" placeholder="e.g. IT Support Desk" />
+          </div>
 
-          <tr>
-            <th>Contacts</th>
-            <td>Piyer Mollah - +8801752800084<br>Ridoan Zahan - +8801712158121</td>
-          </tr>
-        </table>
-      </div>
+          <div class="form-field full-width">
+            <label>Diagnosis / Observation</label>
+            <textarea formControlName="diagnosis" rows="3" placeholder="e.g. Screen flickers, battery drains quickly"></textarea>
+          </div>
 
-      <div class="btn-row">
-        <button class="btn-clear" (click)="clearAll()">Clear All</button>
-        <button class="btn-print" (click)="printServiceTag()">Print</button>
-      </div>
+          <div class="form-field">
+            <label>Accessories Included</label>
+            <input type="text" formControlName="accessories" placeholder="e.g. Charger, mouse, docking cable" />
+          </div>
+
+          <div class="form-field">
+            <label>Sent By</label>
+            <select formControlName="sentBy">
+              <option value="TH">TH</option>
+              <option value="NM">NM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
+
+          <div class="form-field full-width">
+            <label>Remarks</label>
+            <textarea formControlName="remarks" rows="2" placeholder="e.g. Requires urgent replacement"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="clearAll()">Clear All</button>
+          <button type="button" class="btn btn-primary" (click)="printServiceTag()">Print</button>
+        </div>
+      </form>
     </div>
   </div>
   }

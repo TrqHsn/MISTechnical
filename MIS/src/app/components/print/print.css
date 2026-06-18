@@ -364,152 +364,272 @@ h1 {
 }
 
 /* Service Tag Styles */
-.service-container {
-  font-family: Arial, sans-serif;
-  background: rgba(255,255,255,0.04);
-  padding: 50px;
-  border-radius: 12px;
+.service-heading {
+  text-align: center;
+  color: #1f3c72;
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.screen-heading {
+  color: #1f3c72;
+}
+
+  .service-card {
+    max-width: 820px;
+    width: min(92%, 820px);
+    margin: 0 auto;
+    border: 1px solid #d4dce8;
+    border-radius: 14px;
+    background: #f8fbff;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 12px 26px rgba(26, 56, 98, 0.07);
+    color: #17233d;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .service-form {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.72rem;
+}
+
+.form-field {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 50vh;
+  gap: 0.24rem;
+  font-size: 0.72rem;
+    min-width: 0;
+
+}
+.form-field label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #213a64;
 }
 
-.print-wrapper {
-  display: inline-block;
-  padding: 8px;
-  border: 2px dashed black;
-  position: relative;
-  background: white;
-}
-
-.print-wrapper::before {
-  content: "✂";
-  position: absolute;
-  top: -18px;
-  left: -18px;
-  font-size: 20px;
-  display: none;
-}
-
-.form-table {
-  width: 512px;
-  height: 310px;
-  border-collapse: collapse;
-  background: white;
-  border: 1px solid #dcdcdc;
-  table-layout: fixed;
-}
-
-.form-table th,
-.form-table td {
-  border: 1px solid #dcdcdc;
-  padding: 6px 8px;
-  font-size: 14px;
-  overflow: hidden;
-}
-
-.form-table th {
-  width: 35%;
-  background: #f1f1f1;
-  text-align: left;
-  font-weight: 600;
-}
-
-.service-container input[type="text"],
-.service-container textarea {
-  width: 100%;
+.form-field input,
+.form-field textarea,
+.form-field select {
+  width: 80%;
+  max-width: 80%;
+  min-width: 0;
+  padding: 0.38rem 0.50rem;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  font-family: Inter, system-ui, sans-serif;
+  border-radius: 18px;
   box-sizing: border-box;
-  padding: 5px;
-  border: 1px solid #c7c7c7;
-  border-radius: 4px;
-  font-size: 14px;
-  font-family: Arial, sans-serif;
-  background: white;
-  color: black;
 }
 
-.service-container textarea {
-  resize: none;
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: #7a8ca8;
 }
 
-.header-input {
-  width: 100%;
-  padding: 6px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.btn-row {
-  width: 512px;
-  margin-top: 18px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.btn-row button {
-  padding: 8px 18px;
-  font-size: 14px;
-  border: none;
-  border-radius: 6px;
+.form-field select {
   cursor: pointer;
-  transition: opacity 0.2s;
-  min-width: 120px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b2d4f' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
 }
 
-.btn-row button:hover {
-  opacity: 0.9;
+.form-field textarea {
+    min-height: 2.6rem;
 }
 
-.btn-clear { 
-  background: #ff4d4d; 
-  color: white; 
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+    align-items: center;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 999px;
+    padding: 0.75rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
-.btn-print { 
-  background: #4d79ff; 
-  color: white; 
+.btn-primary {
+    background: #4caf50;
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: #43a047;
+  }
+
+  .btn-secondary {
+    background: #ef5350;
+    color: #ffffff;
+  }
+
+  .btn-secondary:hover {
+    background: #e53935;
+  }
+
+.error {
+  color: #9d2033;
+  font-size: 0.74rem;
+  line-height: 1.2;
 }
 
-/* Print Mode for Service Tag */
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
 @media print {
-  body * {
-    visibility: hidden;
+  * {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  @page {
+    size: 148mm 210mm;
+    margin: 0.5in 1in 1in 1in;
+  }
+
+  html, body {
+    width: 148mm;
+    height: 210mm;
     margin: 0;
     padding: 0;
-  }
-
-  .print-wrapper, .print-wrapper * {
-    visibility: visible;
-  }
-
-  .print-wrapper {
-    position: fixed;
-    left: 0;
-    top: 0;
-    border: 2px dashed black !important;
-  }
-
-  .print-wrapper::before {
-    display: block;
-  }
-
-  .form-table {
-    width: 512px !important;
-    height: 310px !important;
-    transform: scale(1);
-    print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    /* center the content within the page */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff !important;
   }
 
-  .btn-row {
+  .print-container {
     display: none !important;
   }
-  
-  .service-container input, 
-  .service-container textarea {
-    border: none !important;
-    background: transparent !important;
+
+  .tab-content {
+    display: none !important;
+  }
+
+  .tab-content:has(.service-card) {
+    display: block !important;
+  }
+
+  .service-heading {
+    display: block !important;
+    text-align: center;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1f3c72;
+    margin-bottom: 4mm;
+    padding: 0 !important;
+  }
+
+  .service-card {
+    max-width: none !important;
+    width: 100%;
+    margin: 0 !important;
+    padding: 3mm !important;
+    border-radius: 8px !important;
+    border: 0.5pt solid #1f3c72 !important;
+    box-shadow: 0 8px 20px rgba(31,60,114,0.06) !important;
+    background: linear-gradient(180deg,#ffffff,#f7fbff) !important;
+    page-break-inside: avoid !important;
+  }
+
+  .service-form {
+    display: grid;
+    gap: 2mm;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+    width: 100%;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5mm;
+    font-size: 8pt;
+    page-break-inside: avoid;
+  }
+
+  .form-field.full-width {
+    grid-column: span 2;
+  }
+
+  .form-field label {
+    font-size: 7pt;
+    font-weight: 700;
+    color: #000000;
+  }
+
+  .form-field input,
+  .form-field textarea,
+  .form-field select {
+    width: 100% !important;
+    border: 0.5pt solid #000 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 1mm !important;
+    font-size: 7pt !important;
+    font-family: Arial, sans-serif !important;
+    line-height: 1.2 !important;
+  }
+
+  .form-field input[readonly] {
+    background: #f5f5f5 !important;
+  }
+
+  .form-field textarea {
+    min-height: 8mm !important;
+    resize: none !important;
+  }
+
+  .form-actions {
+    display: none !important;
+  }
+
+  .tabs,
+  .tab-btn,
+  .btn,
+  .print-status,
+  h1,
+  .preview-wrap,
+  .sticker-container,
+  .forms-container,
+  .print-actions,
+  .preview-panels {
+    display: none !important;
   }
 }
 

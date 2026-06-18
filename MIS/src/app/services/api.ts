@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 export interface User {
   [key: string]: any;
+  telephoneNumber?: string;
 }
 
 export interface Computer {
@@ -88,7 +89,7 @@ export class ApiService {
   }
 
   // Update user attributes by userPrincipalName (UPN)
-  updateUserAttributes(userPrincipalName: string, payload: { department?: string; title?: string; manager?: string }): Observable<any> {
+  updateUserAttributes(userPrincipalName: string, payload: { department?: string; title?: string; manager?: string; telephoneNumber?: string }): Observable<any> {
     return this.http.put(`${this.apiUrl}/users/${encodeURIComponent(userPrincipalName)}/attributes`, payload);
   }
 
