@@ -130,15 +130,35 @@ export class NetworkMonitorService {
   }
 
   removeServer(serverId: string): void {
+    console.log('Attempting to remove server:', serverId);
+    
     this.http.delete(`${this.apiBaseUrl}/network/servers/${encodeURIComponent(serverId)}`).pipe(
+      tap((response) => {
+        console.log('Server removal successful:', response);
+        this.stopMonitoring(serverId);
+        this.stopLivePing(serverId);
+        this.servers.update((items: NetworkServer[]) => items.filter((item) => item.id !== serverId));
+      }),
       catchError((error) => {
-        console.error('Unable to remove server', error);
+        console.error('Unable to remove server:', serverId, error);
+        alert(`Failed to remove server: ${error.status} ${error.statusText || error.message}`);
         return of(null);
       })
-    ).subscribe(() => {
-      this.stopMonitoring(serverId);
-      this.stopLivePing(serverId);
-      this.servers.update((items: NetworkServer[]) => items.filter((item) => item.id !== serverId));
+    ).subscribe({
+      next: () => {
+        console.log('Remove server subscription completed');
+      },
+      error: (err) => {
+        console.error('Remove server subscription error:', err);
+      }
+    });
+  }
+
+  clearAllServers(): void {
+    console.log('Clearing all servers');
+    const serverIds = this.servers().map((s) => s.id);
+    serverIds.forEach((id) => {
+      this.removeServer(id);
     });
   }
 

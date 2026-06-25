@@ -1,30 +1,9 @@
 ﻿[
   {
-    "Id": "fbc05ac7-9c33-4300-af3c-f82cc13d539d",
-    "Name": "MyDevice",
-    "Host": "10.140.5.32",
+    "Id": "eca6a82c-b58e-4e77-952d-277256912575",
+    "Name": "MyPhone",
+    "Host": "10.140.5.5",
     "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "3a8bd3a1-aae9-4406-9ea0-28e10b825e61",
-    "Name": "1.1.1.1",
-    "Host": "1.1.1.1",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "2ff6fcd4-dba7-43a7-b87d-38a9616285f2",
-    "Name": "DBOSAP16",
-    "Host": "DBOSAP16",
-    "Maintenance": true,
-    "LastDownTime": null
-  },
-  {
-    "Id": "0b26a753-e839-44e8-8f3d-383745f1a082",
-    "Name": "DBOSAP18",
-    "Host": "DBOSAP18",
-    "Maintenance": true,
     "LastDownTime": null
   }
 ]

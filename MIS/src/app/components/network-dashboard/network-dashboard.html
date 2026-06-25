@@ -15,19 +15,39 @@
       </div>
 
       <form class="dialog-form" (ngSubmit)="addServer()">
-        <label>
-          Name
-          <input type="text" [(ngModel)]="serverName" name="serverName" placeholder="Server name" />
-        </label>
+        <div class="dialog-tabs">
+          <button type="button" class="tab-button" [class.active]="!isUploadMode" (click)="isUploadMode = false">Single Server</button>
+          <button type="button" class="tab-button" [class.active]="isUploadMode" (click)="isUploadMode = true">Upload CSV</button>
+        </div>
 
-        <label>
-          Hostname / IP
-          <input type="text" [(ngModel)]="serverHost" name="serverHost" placeholder="10.140.5.10 or example.local" />
-        </label>
+        <div *ngIf="!isUploadMode">
+          <label>
+            <span>Name</span>
+            <input type="text" [(ngModel)]="serverName" name="serverName" placeholder="Server name" autocomplete="off" />
+          </label>
 
-        <div class="dialog-actions">
-          <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
-          <button type="submit" class="primary-button">Save</button>
+          <label>
+            <span>Hostname / IP</span>
+            <input type="text" [(ngModel)]="serverHost" name="serverHost" placeholder="10.140.5.10 or example.local" autocomplete="off" />
+          </label>
+
+          <div class="dialog-actions">
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+            <button type="submit" class="primary-button">Save</button>
+          </div>
+        </div>
+
+        <div *ngIf="isUploadMode" class="csv-upload-section">
+          <p class="csv-help">Upload a CSV file with columns: <strong>Name</strong> and <strong>Hostname / IP</strong>. The first row will be treated as a header and ignored.</p>
+          <label class="csv-file-input">
+            <span>Select CSV File</span>
+            <input type="file" accept=".csv" (change)="handleCsvUpload($event)" />
+          </label>
+          <div *ngIf="csvFileName" class="csv-file-selected">📄 {{ csvFileName }}</div>
+          <div class="dialog-actions csv-actions">
+            <button type="button" class="primary-button" (click)="processCsvUpload()" [disabled]="!csvFileContent">Upload Servers</button>
+            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+          </div>
         </div>
 
         <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
@@ -64,26 +84,34 @@
         </div>
         <div class="header-right">
           <span class="status-pill small" [ngClass]="server.status">{{ getStatusLabel(server.status) }}</span>
-          <button type="button" class="remove header-remove" (click)="removeServer(server.id)">➖</button>
+          <button type="button" class="remove header-remove" (click)="removeServer(server.id); $event.stopPropagation()">➖</button>
         </div>
       </div>
 
       <div class="live-ping">
         <div class="live-ping-row">
           <div>
-            <span>Live ping</span>
+            <span>Live ping: </span>
             <strong>{{ networkMonitor.getLivePingState(server.id).status.toUpperCase() }}</strong>
           </div>
           <div class="live-ping-buttons">
-            <button type="button" class="secondary-button" (click)="networkMonitor.startLivePing(server.id)" [disabled]="networkMonitor.getLivePingState(server.id).active">
-              Ping
-            </button>
-            <button type="button" class="secondary-button" (click)="networkMonitor.stopLivePing(server.id)" [disabled]="!networkMonitor.getLivePingState(server.id).active">
-              Stop
-            </button>
-            <button type="button" class="secondary-button" (click)="networkMonitor.clearLivePing(server.id)">
-              Clear
-            </button>
+            <div>
+              <button type="button" class="secondary-button" (click)="networkMonitor.startLivePing(server.id)" [disabled]="networkMonitor.getLivePingState(server.id).active">
+                Ping
+              </button>
+              <button type="button" class="secondary-button" (click)="networkMonitor.stopLivePing(server.id)" [disabled]="!networkMonitor.getLivePingState(server.id).active">
+                Stop
+              </button>
+              <button type="button" class="secondary-button" (click)="networkMonitor.clearLivePing(server.id)">
+                Clear
+              </button>
+              <button type="button" class="secondary-button silent-button" (click)="toggleMaintenance(server.id)">
+                {{ server.maintenance ? 'Resume' : 'Silent' }}
+              </button>
+              <button type="button" class="secondary-button" (click)="openEventsModal(server.id)">
+                Events
+              </button>
+            </div>
           </div>
         </div>
         <pre
@@ -97,24 +125,22 @@
         </pre>
       </div>
 
-      <div class="actions">
-        <button type="button" class="maintenance" (click)="toggleMaintenance(server.id)">
-          {{ server.maintenance ? 'Disable maintenance' : 'Enable maintenance' }}
-        </button>
-        <button type="button" class="secondary-button event-toggle" (click)="toggleEvents(server.id)">
-          {{ isEventsExpanded(server.id) ? 'Hide events ▲' : 'Events ▼' }}
-        </button>
-      </div>
-
-      <div class="log-section" *ngIf="isEventsExpanded(server.id)">
-        <h3>Recent events</h3>
-        <ul>
-          <li *ngFor="let entry of server.logs">
-            <span class="entry-time">{{ entry.timestamp }}</span>
-            <span class="entry-text">{{ entry.message }}</span>
-          </li>
-          <li *ngIf="server.logs.length === 0" class="empty-log">No recent activity.</li>
-        </ul>
+      <div *ngIf="isEventsModalOpen(server.id)" class="dialog-overlay" (click)="closeEventsModal(server.id)">
+        <div class="dialog events-modal" (click)="$event.stopPropagation()">
+          <div class="dialog-header">
+            <h2>Recent Events - {{ server.name }}</h2>
+            <button class="dialog-close" type="button" (click)="closeEventsModal(server.id)">✕</button>
+          </div>
+          <div class="events-list">
+            <ul>
+              <li *ngFor="let entry of server.logs">
+                <span class="entry-time">{{ entry.timestamp }}</span>
+                <span class="entry-text">{{ entry.message }}</span>
+              </li>
+              <li *ngIf="server.logs.length === 0" class="empty-log">No recent activity.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </article>
   </div>
