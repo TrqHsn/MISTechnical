@@ -33,7 +33,7 @@ namespace ADApi.Controllers
         private byte[] GenerateExcel(FormDataModel model)
         {
             // Path to the template from the runtime output path
-            var templatePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "MIS", "public", "templateNRBR.xlsx");
+            var templatePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "MIS", "public", "templateNRBR2.xlsx");
             templatePath = Path.GetFullPath(templatePath);
 
             if (!System.IO.File.Exists(templatePath))
@@ -51,17 +51,15 @@ namespace ADApi.Controllers
 
             // Fill in the cells same as frontend
             worksheet.Cell("B5").Value = model.Site ?? "";
-            worksheet.Cell("E5").Value = model.Company ?? "";
             worksheet.Cell("B7").Value = GetActionTypeLabel(model.ActionType ?? "");
-            worksheet.Cell("E7").Value = model.OldComputerName ?? "";
             worksheet.Cell("B9").Value = model.NewComputerName ?? "";
-            worksheet.Cell("E9").Value = model.DeviceType ?? "";
             worksheet.Cell("B11").Value = model.Username ?? "";
-            worksheet.Cell("E11").Value = model.OperatingSystem ?? "";
             worksheet.Cell("B13").Value = model.Description ?? "";
-            worksheet.Cell("E13").Value = model.AdGroup ?? "";
-            worksheet.Cell("B15").Value = model.RaisedBy ?? "";
-            worksheet.Cell("E15").Value = FormatDate(model.RaisedDate ?? "");
+            worksheet.Cell("E5").Value = model.Company ?? "";
+            worksheet.Cell("E7").Value = model.OldComputerName ?? "";
+            worksheet.Cell("E9").Value = model.OperatingSystem ?? "";
+            worksheet.Cell("E11").Value = model.RaisedBy ?? "";
+            worksheet.Cell("E13").Value = FormatDate(model.RaisedDate ?? "");
 
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
@@ -147,7 +145,6 @@ Please process ""{filename}""<br><br>
         public string? Username { get; set; }
         public string? DeviceType { get; set; }
         public string? OperatingSystem { get; set; }
-        public string? AdGroup { get; set; }
         public string? RaisedBy { get; set; }
         public string? RaisedDate { get; set; }
         public string? Site { get; set; }

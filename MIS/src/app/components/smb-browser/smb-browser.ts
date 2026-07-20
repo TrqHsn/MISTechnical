@@ -120,7 +120,7 @@ export class SmbBrowserComponent implements OnInit, OnDestroy {
   }
 
   goToFp7(): void {
-    const path = '\\\\sdlfp7';
+    const path = '\\\\sdlmed7\\patches';
     this.uncPathInput.set(path);
     this.updateRoute(path, this.viewMode());
   }

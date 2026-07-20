@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
 using System.Drawing.Printing;
 using ADApi.Helpers;
+using System.Text;
 
 namespace ADApi.Controllers;
 
@@ -17,6 +18,72 @@ public class LabelPrintController : ControllerBase
     {
         _logger = logger;
         _environment = environment;
+    }
+
+    [HttpGet("guest-wifi")]
+    public IActionResult GetGuestWifi()
+    {
+        try
+        {
+            var filePath = GetGuestWifiFilePath();
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(new { error = "Guest Wi-Fi file not found", message = filePath });
+            }
+
+            var lines = System.IO.File.ReadAllLines(filePath);
+            var ssid = lines.Length > 0 && !string.IsNullOrWhiteSpace(lines[0]) ? lines[0].Trim() : "Guest@Dewhirst";
+            var password = lines.Length > 1 && !string.IsNullOrWhiteSpace(lines[1]) ? lines[1].Trim() : "";
+
+            return Ok(new { ssid, password });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reading guest Wi-Fi file");
+            return StatusCode(500, new { error = "Read failed", message = ex.Message });
+        }
+    }
+
+    [HttpPost("guest-wifi")]
+    public IActionResult UpdateGuestWifiPassword([FromBody] GuestWifiUpdateRequest request)
+    {
+        try
+        {
+            var filePath = GetGuestWifiFilePath();
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            var ssid = "Guest@Dewhirst";
+            var password = request?.Password ?? "";
+
+            if (System.IO.File.Exists(filePath))
+            {
+                var existingLines = System.IO.File.ReadAllLines(filePath);
+                if (existingLines.Length > 0 && !string.IsNullOrWhiteSpace(existingLines[0]))
+                {
+                    ssid = existingLines[0].Trim();
+                }
+                if (existingLines.Length > 1 && !string.IsNullOrWhiteSpace(existingLines[1]))
+                {
+                    password = request?.Password ?? existingLines[1].Trim();
+                }
+            }
+
+            var content = new StringBuilder();
+            content.AppendLine(ssid);
+            content.AppendLine(password);
+            System.IO.File.WriteAllText(filePath, content.ToString());
+
+            return Ok(new { ssid, password });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating guest Wi-Fi file");
+            return StatusCode(500, new { error = "Update failed", message = ex.Message });
+        }
     }
 
     [HttpPost("label")]
@@ -247,6 +314,27 @@ public class LabelPrintController : ControllerBase
             return StatusCode(500, new { error = "Print failed", message = ex.Message });
         }
     }
+
+    private string GetGuestWifiFilePath()
+    {
+        var candidates = new[]
+        {
+            Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "GuestWiFi", "guestWiFi.txt"),
+            Path.Combine(_environment.ContentRootPath, "MIS", "public", "GuestWiFi", "guestWiFi.txt"),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "MIS", "public", "GuestWiFi", "guestWiFi.txt")
+        };
+
+        foreach (var candidate in candidates)
+        {
+            var fullPath = Path.GetFullPath(candidate);
+            if (System.IO.File.Exists(fullPath))
+            {
+                return fullPath;
+            }
+        }
+
+        return Path.GetFullPath(candidates[1]);
+    }
 }
 
 public class LabelRequest
@@ -257,6 +345,11 @@ public class LabelRequest
     public float? FontSize { get; set; }
     public bool Bold { get; set; }
     public bool Caps { get; set; }
+}
+
+public class GuestWifiUpdateRequest
+{
+    public string? Password { get; set; }
 }
 
 public class NewUserAssignRequest

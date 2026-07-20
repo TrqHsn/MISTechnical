@@ -7,6 +7,11 @@
   </div> -->
   <button class="primary-button fab-button" type="button" (click)="openAddDialog()">➕</button>
 
+  <div *ngIf="audioUnlockNeeded()" class="audio-unlock-banner">
+    <div>{{ soundStatusMessage() }}</div>
+    <button class="banner-button" type="button" (click)="tryUnlockAudio()">Enable offline alert sound</button>
+  </div>
+
   <div *ngIf="showAddDialog" class="dialog-overlay" (click)="closeAddDialog()">
     <div class="dialog" (click)="$event.stopPropagation()">
       <div class="dialog-header">
@@ -60,7 +65,7 @@
   </div>
 
   <div class="grid" *ngIf="servers().length > 0">
-    <article class="card" [ngClass]="server.status" *ngFor="let server of servers()">
+    <article class="card" [ngClass]="server.status" *ngFor="let server of servers(); trackBy: trackByServerId">
       <div class="card-header">
         <div class="header-left">
           <div class="header-top-row">
@@ -96,7 +101,7 @@
           </div>
           <div class="live-ping-buttons">
             <div>
-              <button type="button" class="secondary-button" (click)="networkMonitor.startLivePing(server.id)" [disabled]="networkMonitor.getLivePingState(server.id).active">
+              <button type="button" class="secondary-button" (click)="startLivePing(server.id)" [disabled]="networkMonitor.getLivePingState(server.id).active">
                 Ping
               </button>
               <button type="button" class="secondary-button" (click)="networkMonitor.stopLivePing(server.id)" [disabled]="!networkMonitor.getLivePingState(server.id).active">
@@ -114,15 +119,8 @@
             </div>
           </div>
         </div>
-        <pre
-          #livePingOutput
-          class="live-ping-output ping-result cmd-style"
-          attr.data-server-id="{{ server.id }}"
-          (scroll)="onLivePingScroll(server.id, $event)"
-          *ngIf="networkMonitor.getLivePingState(server.id).visible"
-        >
-          {{ networkMonitor.getLivePingOutput(server.id) }}
-        </pre>
+        <!-- Live ping console (matches network component) -->
+        <pre class="live-ping-output ping-result cmd-style" #livePingOutput [innerHTML]="networkMonitor.getLivePingHtml(server.id)" *ngIf="networkMonitor.getLivePingState(server.id).visible"></pre>
       </div>
 
       <div *ngIf="isEventsModalOpen(server.id)" class="dialog-overlay" (click)="closeEventsModal(server.id)">

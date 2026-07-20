@@ -43,6 +43,25 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
+    /// Unlock all currently locked user accounts in AD via a simple GET endpoint.
+    /// Kept alongside the existing POST endpoint for easy bookmark access.
+    /// </summary>
+    [HttpGet("UA")]
+    public async Task<ActionResult<UnlockResultDto>> UnlockAllLockedUsersViaGet()
+    {
+        try
+        {
+            var result = await _adService.UnlockAllLockedUsersAsync();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error unlocking users via GET");
+            return StatusCode(500, new { error = "An error occurred while unlocking users", message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Get user details by SAM account name
     /// </summary>
     /// <param name="samAccountName">SAM account name (username)</param>

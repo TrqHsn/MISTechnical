@@ -1,4 +1,4 @@
-import { Component, ViewChildren, QueryList, ElementRef, effect, OnDestroy, afterNextRender } from '@angular/core';
+import { Component, effect, OnDestroy, afterNextRender, signal, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NetworkMonitorService } from '../../services/network-monitor.service';
@@ -11,16 +11,18 @@ import { NetworkMonitorService } from '../../services/network-monitor.service';
   styleUrls: ['./network-dashboard.css'],
 })
 export class NetworkDashboardComponent implements OnDestroy {
-  @ViewChildren('livePingOutput') livePingOutputs?: QueryList<ElementRef<HTMLElement>>;
-
-  private lastLivePingOutput = new Map<string, string>();
-  private livePingScrollLocked = new Map<string, boolean>();
+  @ViewChildren('livePingOutput') livePingOutputs?: QueryList<ElementRef<HTMLPreElement>>;
   private openEventModals = new Map<string, boolean>();
+  private livePingAutoScrollIntervalId: number | null = null;
   private offlineAlertIntervalId: number | null = null;
   private alertAudio: HTMLAudioElement | null = null;
   private alertAudioUnlocked = false;
   private pendingOfflineAlert = false;
+  private degradedBeepIntervalIds = new Map<string, number>();
   private autoStartedServers = new Set<string>();
+
+  audioUnlockNeeded = signal(false);
+  soundStatusMessage = signal('Offline alert sound is disabled until you enable it.');
 
   serverName = '';
   serverHost = '';
@@ -40,7 +42,9 @@ export class NetworkDashboardComponent implements OnDestroy {
       this.alertAudio = new Audio('/ping-beep.mp3');
       this.alertAudio.preload = 'auto';
       this.alertAudio.volume = 0.8;
+      this.alertAudio.load();
       this.registerAudioGestureUnlock();
+      this.registerDocumentGestureUnlock();
     }
 
     afterNextRender(() => {
@@ -53,43 +57,23 @@ export class NetworkDashboardComponent implements OnDestroy {
       });
 
       effect(() => {
-        if (!this.hydrationComplete) return;
-        const livePing = this.networkMonitor.livePing();
-        const changedServerIds = new Set<string>();
-
-        const visibleOutputs = Object.entries(livePing)
-          .filter(([, state]) => state.visible)
-          .map(([serverId, state]) => ({ serverId, output: state.output }));
-
-        visibleOutputs.forEach(({ serverId, output }) => {
-          if (this.lastLivePingOutput.get(serverId) !== output) {
-            changedServerIds.add(serverId);
-            this.lastLivePingOutput.set(serverId, output);
-          }
-        });
-
-        const activeServerIds = new Set(visibleOutputs.map((item) => item.serverId));
-        this.lastLivePingOutput.forEach((_, serverId) => {
-          if (!activeServerIds.has(serverId)) {
-            this.lastLivePingOutput.delete(serverId);
-          }
-        });
-
-        if (changedServerIds.size > 0 && typeof window !== 'undefined') {
-          setTimeout(() => this.scrollLivePingOutputsToBottom(changedServerIds), 0);
-        }
-      });
-
-      effect(() => {
         if (this.hydrationComplete) {
           this.updateOfflineAlertState();
         }
       });
+
+      this.livePingAutoScrollIntervalId = window.setInterval(() => {
+        this.scrollLivePingOutputsToBottom();
+      }, 1000);
     });
   }
 
   ngOnDestroy(): void {
     this.stopOfflineAlert();
+    if (this.livePingAutoScrollIntervalId !== null) {
+      window.clearInterval(this.livePingAutoScrollIntervalId);
+      this.livePingAutoScrollIntervalId = null;
+    }
   }
 
   private autoStartLivePing(): void {
@@ -101,6 +85,15 @@ export class NetworkDashboardComponent implements OnDestroy {
     });
   }
 
+  startLivePing(serverId: string): void {
+    this.networkMonitor.moveServerToTop(serverId);
+    this.networkMonitor.startLivePing(serverId);
+  }
+
+  trackByServerId(index: number, server: { id: string }): string {
+    return server.id;
+  }
+
   private updateOfflineAlertState(): void {
     const hasOffline = this.servers().some((server) => server.status === 'red');
     if (hasOffline) {
@@ -108,6 +101,15 @@ export class NetworkDashboardComponent implements OnDestroy {
     } else {
       this.stopOfflineAlert();
     }
+
+    // Start/stop degraded beeps per-server
+    this.servers().forEach((server) => {
+      if (server.status === 'yellow') {
+        this.startDegradedBeep(server.id);
+      } else {
+        this.stopDegradedBeep(server.id);
+      }
+    });
   }
 
   private startOfflineAlert(): void {
@@ -116,7 +118,7 @@ export class NetworkDashboardComponent implements OnDestroy {
     }
 
     this.playAlertTone();
-    this.offlineAlertIntervalId = window.setInterval(() => this.playAlertTone(), 5000);
+    this.offlineAlertIntervalId = window.setInterval(() => this.playAlertTone(), 3000);
   }
 
   private stopOfflineAlert(): void {
@@ -128,20 +130,77 @@ export class NetworkDashboardComponent implements OnDestroy {
 
   private playAlertTone(): void {
     if (!this.alertAudio) {
+      console.warn('playAlertTone called but alertAudio is not initialized');
       return;
     }
 
     if (!this.alertAudioUnlocked) {
       this.pendingOfflineAlert = true;
+      this.audioUnlockNeeded.set(true);
       return;
     }
 
     this.alertAudio.pause();
     this.alertAudio.currentTime = 0;
-    this.alertAudio.play().catch(() => {
-      // Playback may be blocked until the user interacts with the page.
+    this.alertAudio.play().then(() => {
+      console.debug('Offline alert sound played successfully');
+    }).catch((error) => {
+      console.warn('Offline alert sound failed to play:', error);
       this.pendingOfflineAlert = true;
+      this.audioUnlockNeeded.set(true);
     });
+  }
+
+  private startDegradedBeep(serverId: string): void {
+    if (this.degradedBeepIntervalIds.has(serverId)) return;
+    // Beep every 20 seconds for degraded
+    const id = window.setInterval(() => {
+      if (!this.alertAudio) return;
+      if (!this.alertAudioUnlocked) {
+        this.pendingOfflineAlert = true;
+        this.audioUnlockNeeded.set(true);
+        return;
+      }
+      this.alertAudio.pause();
+      this.alertAudio.currentTime = 0;
+      this.alertAudio.play().catch(() => {});
+    }, 20_000);
+    this.degradedBeepIntervalIds.set(serverId, id);
+  }
+
+  private stopDegradedBeep(serverId: string): void {
+    const id = this.degradedBeepIntervalIds.get(serverId);
+    if (id !== undefined) {
+      window.clearInterval(id);
+      this.degradedBeepIntervalIds.delete(serverId);
+    }
+  }
+
+  public tryUnlockAudio(): void {
+    if (!this.alertAudio || this.alertAudioUnlocked) {
+      return;
+    }
+
+    this.alertAudio.play()
+      .then(() => {
+        this.alertAudio?.pause();
+        if (this.alertAudio) {
+          this.alertAudio.currentTime = 0;
+        }
+        this.alertAudioUnlocked = true;
+        this.audioUnlockNeeded.set(false);
+        this.soundStatusMessage.set('Offline alert sound is enabled.');
+        if (this.pendingOfflineAlert) {
+          this.pendingOfflineAlert = false;
+          this.playAlertTone();
+        }
+      })
+      .catch((error) => {
+        console.warn('Audio unlock failed:', error);
+        this.pendingOfflineAlert = true;
+        this.audioUnlockNeeded.set(true);
+        this.soundStatusMessage.set('Tap the page and allow sound to enable offline alerts.');
+      });
   }
 
   private registerAudioGestureUnlock(): void {
@@ -157,6 +216,7 @@ export class NetworkDashboardComponent implements OnDestroy {
             this.alertAudio.currentTime = 0;
           }
           this.alertAudioUnlocked = true;
+          this.audioUnlockNeeded.set(false);
           if (this.pendingOfflineAlert) {
             this.pendingOfflineAlert = false;
             this.playAlertTone();
@@ -164,6 +224,7 @@ export class NetworkDashboardComponent implements OnDestroy {
         })
         .catch(() => {
           this.pendingOfflineAlert = true;
+          this.audioUnlockNeeded.set(true);
         });
     };
 
@@ -172,30 +233,27 @@ export class NetworkDashboardComponent implements OnDestroy {
     window.addEventListener('touchstart', unlock, { once: true, passive: true });
   }
 
-  onLivePingScroll(serverId: string, event: Event): void {
-    const target = event.target as HTMLElement;
-    const distanceFromBottom = target.scrollHeight - target.clientHeight - target.scrollTop;
-    const locked = distanceFromBottom > 24;
-    this.livePingScrollLocked.set(serverId, locked);
+  private registerDocumentGestureUnlock(): void {
+    const unlock = (): void => this.tryUnlockAudio();
+    document.body.addEventListener('pointerdown', unlock, { once: true, passive: true });
+    document.body.addEventListener('keydown', unlock, { once: true, passive: true });
+    document.body.addEventListener('touchstart', unlock, { once: true, passive: true });
   }
 
-  private scrollLivePingOutputsToBottom(changedServerIds: Set<string>): void {
-    this.livePingOutputs?.forEach((output) => {
-      const el = output.nativeElement;
-      const serverId = el.dataset['serverId'];
-      if (!serverId || !changedServerIds.has(serverId)) {
-        return;
-      }
-
-      const isLocked = this.livePingScrollLocked.get(serverId);
-      if (isLocked) {
-        return;
-      }
-
-      requestAnimationFrame(() => {
-        el.scrollTop = el.scrollHeight;
+  private scrollLivePingOutputsToBottom(): void {
+    try {
+      if (!this.livePingOutputs) return;
+      this.livePingOutputs.forEach((el) => {
+        try {
+          const node = el.nativeElement;
+          node.scrollTop = Math.max(0, node.scrollHeight - node.clientHeight);
+        } catch (e) {
+          // ignore per-element errors
+        }
       });
-    });
+    } catch (e) {
+      // swallow; not critical
+    }
   }
 
   openAddDialog(): void {

@@ -82,7 +82,6 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
       description: [''],
       operatingSystem: [''],
       username: ['', Validators.required],
-      adGroup: ['WEB 64 bit Client'],
       deviceType: ['Laptop', Validators.required],
       actionType: ['RB', Validators.required],
       raisedBy: ['Tareque Hasan', Validators.required],
@@ -373,7 +372,6 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
   clearAll(): void {
     this.form.reset({
       deviceType: 'Laptop',
-      adGroup: 'WEB 64 bit Client',
       raisedBy: 'Tareque Hasan',
       raisedDate: new Date().toISOString().split('T')[0],
       actionType: 'RB',
@@ -405,7 +403,6 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
         username: this.form.get('username')?.value,
         operatingSystem: this.form.get('operatingSystem')?.value,
         description: this.form.get('description')?.value,
-        adGroup: this.form.get('adGroup')?.value,
         raisedBy: this.form.get('raisedBy')?.value,
         raisedByLabel: this.raisedByPreview(),
         raisedDate: this.form.get('raisedDate')?.value,
@@ -418,11 +415,11 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
       console.log('=====================================');
 
       // Fetch the template
-      let response = await fetch('templateNRBR.xlsx');
+      let response = await fetch('templateNRBR2.xlsx');
       
       if (!response.ok) {
-        console.warn(`Failed with path 'templateNRBR.xlsx', trying '/templateNRBR.xlsx'...`);
-        response = await fetch('/templateNRBR.xlsx');
+        console.warn(`Failed with path 'templateNRBR2.xlsx', trying '/templateNRBR2.xlsx'...`);
+        response = await fetch('/templateNRBR2.xlsx');
       }
       
       if (!response.ok) {
@@ -452,21 +449,19 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
 
       // Fill in the required cells - using ExcelJS approach
       sheet.getCell('B5').value = this.sitePreview();
-      sheet.getCell('E5').value = this.divisionPreview();
       sheet.getCell('B7').value = actionTypeLabel;
-      sheet.getCell('E7').value = this.form.get('oldComputerName')?.value || '';
       sheet.getCell('B9').value = this.form.get('newComputerName')?.value || '';
-      sheet.getCell('E9').value = this.deviceTypePreview();
       sheet.getCell('B11').value = this.form.get('username')?.value || '';
-      sheet.getCell('E11').value = this.form.get('operatingSystem')?.value || '';
       sheet.getCell('B13').value = this.form.get('description')?.value || '';
-      sheet.getCell('E13').value = this.form.get('adGroup')?.value || '';
-      sheet.getCell('B15').value = this.raisedByPreview();
+      sheet.getCell('E5').value = this.divisionPreview();
+      sheet.getCell('E7').value = this.form.get('oldComputerName')?.value || '';
+      sheet.getCell('E9').value = this.form.get('operatingSystem')?.value || '';
+      sheet.getCell('E11').value = this.raisedByPreview();
 
-      // Format date for E15 (MM/DD/YYYY)
+      // Format date for E13 (MM/DD/YYYY)
       const dateStr = this.form.get('raisedDate')?.value || '';
       const formattedDate = this.formatDateToMMDDYYYY(dateStr);
-      sheet.getCell('E15').value = formattedDate;
+      sheet.getCell('E13').value = formattedDate;
 
       // Write the modified workbook to buffer
       const updatedBuffer = await workbook.xlsx.writeBuffer();

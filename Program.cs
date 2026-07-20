@@ -1,6 +1,7 @@
 using System.DirectoryServices;
 using ADApi.Services;
 using ADApi.Controllers;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,12 @@ builder.Services.AddSingleton<IKioskService, KioskService>();
 // Register SMB filesystem service
 builder.Services.AddScoped<ISmbService, SmbService>();
 
+// Register routing constraints explicitly for attribute-based routes
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.ConstraintMap.TryAdd("regex", typeof(RegexRouteConstraint));
+});
+
 // Configure CORS for Angular app on port 4200 and same-host HTTPS origins
 builder.Services.AddCors(options =>
 {
@@ -45,7 +52,10 @@ builder.Services.AddCors(options =>
             "https://10.140.5.32:4200",
             "http://10.140.5.32",
             "https://10.140.5.32",
-            "http://10.140.5.28:4200"
+            "http://10.140.5.216:4200",
+            "https://10.140.5.216:4200",
+            "http://10.140.5.216",
+            "https://10.140.5.216"
         )
               .AllowAnyHeader()
               .AllowAnyMethod()

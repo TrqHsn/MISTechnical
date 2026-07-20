@@ -20,6 +20,7 @@ export interface NetworkServer {
   logs: NetworkLogEntry[];
   redSince: number | null;
   alertCooldownUntil: number | null;
+  consecutiveFailures: number;
 }
 
 interface PingResponse {
@@ -52,9 +53,33 @@ interface LivePingState {
   status: 'starting' | 'running' | 'stopped' | 'error';
 }
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function colorizeLineHtml(line: string): string {
+  const escaped = escapeHtml(line);
+  if (line.includes('Reply from') && line.includes('bytes=') && line.includes('time=')) {
+    return `<span class="ping-success">${escaped}</span>\n`;
+  }
+
+  if (
+    line.includes('Request timed out') ||
+    line.includes('Destination host unreachable') ||
+    line.includes('could not find host') ||
+    line.includes('100% loss') ||
+    line.includes('0 received')
+  ) {
+    return `<span class="ping-fail">${escaped}</span>\n`;
+  }
+
+  return `<span>${escaped}</span>\n`;
+}
+
 const POLL_INTERVAL_MS = 8000;
 const RED_DELAY_MS = 30_000;
 const ALERT_COOLDOWN_MS = 300_000;
+const OFFLINE_CONSECUTIVE_FAILURES = 15; // 15 consecutive ping failures -> offline
 
 const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
@@ -122,6 +147,7 @@ export class NetworkMonitorService {
         logs: [],
         redSince: null,
         alertCooldownUntil: null,
+        consecutiveFailures: 0,
       };
 
       this.servers.update((items: NetworkServer[]) => [...items, newServer]);
@@ -137,6 +163,7 @@ export class NetworkMonitorService {
         console.log('Server removal successful:', response);
         this.stopMonitoring(serverId);
         this.stopLivePing(serverId);
+        // Clear any degraded beep intervals from dashboard component by updating status first
         this.servers.update((items: NetworkServer[]) => items.filter((item) => item.id !== serverId));
       }),
       catchError((error) => {
@@ -202,6 +229,14 @@ export class NetworkMonitorService {
 
   getLivePingOutput(serverId: string): string {
     return this.getLivePingState(serverId).output;
+  }
+
+  // Return an HTML-colourized version of the live ping output suitable for binding to innerHTML
+  getLivePingHtml(serverId: string): string {
+    const out = this.getLivePingOutput(serverId) || '';
+    if (!out) return '';
+    const lines = out.split('\n');
+    return lines.map((l) => colorizeLineHtml(l)).join('');
   }
 
   startLivePing(serverId: string): void {
@@ -411,6 +446,7 @@ export class NetworkMonitorService {
         logs: [],
         redSince: null,
         alertCooldownUntil: null,
+        consecutiveFailures: 0,
       }));
 
       this.servers.set(servers);
@@ -438,6 +474,18 @@ export class NetworkMonitorService {
       sub.unsubscribe();
       this.subs.delete(serverId);
     }
+  }
+
+  moveServerToTop(serverId: string): void {
+    this.servers.update((items) => {
+      const index = items.findIndex((item) => item.id === serverId);
+      if (index <= 0) {
+        return items;
+      }
+      const server = items[index];
+      const next = [...items.slice(0, index), ...items.slice(index + 1)];
+      return [server, ...next];
+    });
   }
 
   private performCycle(serverId: string) {
@@ -485,12 +533,15 @@ export class NetworkMonitorService {
         const now = Date.now();
         const successful = results.filter((result) => result.success);
         const isSuccess = successful.length > 0;
+        const consecutiveFailures = isSuccess ? 0 : (item.consecutiveFailures ?? 0) + 1;
         const redSince = !isSuccess ? item.redSince ?? now : null;
 
         const nextStatus: NetworkServer['status'] = item.maintenance
           ? 'maintenance'
-          : !isSuccess && redSince && now - redSince >= RED_DELAY_MS
+          : (!isSuccess && consecutiveFailures >= OFFLINE_CONSECUTIVE_FAILURES)
           ? 'red'
+          : !isSuccess && redSince && now - redSince >= RED_DELAY_MS
+          ? 'yellow'
           : !isSuccess
           ? 'yellow'
           : 'green';
@@ -523,6 +574,7 @@ export class NetworkMonitorService {
         return {
           ...item,
           redSince,
+          consecutiveFailures,
           lastCheckTime: new Date(now).toISOString(),
           lastDownTime,
           lastPingStatus: results[0]?.status ?? (isSuccess ? 'Success' : 'No response'),
