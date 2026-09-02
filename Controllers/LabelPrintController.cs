@@ -13,11 +13,13 @@ public class LabelPrintController : ControllerBase
 {
     private readonly ILogger<LabelPrintController> _logger;
     private readonly IWebHostEnvironment _environment;
+    private readonly string _labelPrinterName;
 
-    public LabelPrintController(ILogger<LabelPrintController> logger, IWebHostEnvironment environment)
+    public LabelPrintController(ILogger<LabelPrintController> logger, IWebHostEnvironment environment, IConfiguration configuration)
     {
         _logger = logger;
         _environment = environment;
+        _labelPrinterName = configuration["PrinterSettings:LabelPrinterName"] ?? "SEWOO Label Printer";
     }
 
     [HttpGet("guest-wifi")]
@@ -91,9 +93,19 @@ public class LabelPrintController : ControllerBase
     {
         try
         {
-            PrintDocument pd = new PrintDocument();
+            if (string.IsNullOrWhiteSpace(_labelPrinterName))
+            {
+                throw new InvalidOperationException("PrinterSettings:LabelPrinterName is not configured.");
+            }
 
-            pd.PrinterSettings.PrinterName = "SEWOO Label Printer"; // Adjust printer name as needed
+            var installedPrinters = PrinterSettings.InstalledPrinters.Cast<string>().ToList();
+            if (!installedPrinters.Contains(_labelPrinterName, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException($"Printer '{_labelPrinterName}' is not installed on this Windows server. Installed printers: {string.Join(", ", installedPrinters)}");
+            }
+
+            PrintDocument pd = new PrintDocument();
+            pd.PrinterSettings.PrinterName = _labelPrinterName;
 
             // 60x15 mm → hundredths of inch
             pd.DefaultPageSettings.PaperSize = new PaperSize("Label60x15", 236, 59);
@@ -109,6 +121,11 @@ public class LabelPrintController : ControllerBase
                 text2 = text2.ToUpper();
             }
 
+            var resolvedFontName = NormalizeWindowsFontName(request.FontFamily);
+            var resolvedFontSize = request.FontSize is > 0 ? request.FontSize.Value : 24f;
+            if (resolvedFontSize < 6) resolvedFontSize = 6;
+            if (resolvedFontSize > 72) resolvedFontSize = 72;
+
             pd.PrintPage += (s, e) =>
             {
                 if (e.Graphics == null) return;
@@ -117,8 +134,8 @@ public class LabelPrintController : ControllerBase
                 float pageWidth = e.PageBounds.Width;
 
                 using Font font = new Font(
-                    request.FontFamily ?? "Arial",
-                    request.FontSize ?? 8,
+                    resolvedFontName,
+                    resolvedFontSize,
                     request.Bold ? FontStyle.Bold : FontStyle.Regular
                 );
 
@@ -313,6 +330,25 @@ public class LabelPrintController : ControllerBase
             _logger.LogError(ex, "Error during silent print");
             return StatusCode(500, new { error = "Print failed", message = ex.Message });
         }
+    }
+
+    private static string NormalizeWindowsFontName(string? fontFamily)
+    {
+        var genericFonts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "serif", "sans-serif", "sans", "monospace", "cursive", "fantasy", "system-ui",
+            "arial", "helvetica", "times", "times new roman", "courier", "courier new"
+        };
+
+        var candidates = (fontFamily ?? "Arial")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(name => name.Trim('"', '\''))
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
+        var firstRealFont = candidates.FirstOrDefault(name => !genericFonts.Contains(name));
+        var resolved = firstRealFont ?? candidates.FirstOrDefault() ?? "Arial";
+        return resolved;
     }
 
     private string GetGuestWifiFilePath()

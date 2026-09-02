@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Introduction</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 50px 70px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #222;
+            padding-bottom: 25px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 34px;
+            color: #1f2937;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            font-size: 18px;
+            color: #666;
+        }
+
+        /* Main Sections */
+        .section {
+            margin-bottom: 45px;
+        }
+
+        .section-title {
+            font-size: 25px;
+            color: #1f2937;
+            border-bottom: 2px solid #d9dee3;
+            padding-bottom: 8px;
+            margin-bottom: 25px;
+        }
+
+        .sub-title {
+            font-size: 20px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        p {
+            margin: 8px 0;
+        }
+
+        ul {
+            margin-top: 8px;
+            padding-left: 28px;
+        }
+
+        li {
+            margin-bottom: 7px;
+        }
+
+        ol {
+            padding-left: 28px;
+        }
+
+        ol li {
+            margin-bottom: 8px;
+        }
+
+        /* Remember Box */
+        .remember {
+            background: #f1f3f5;
+            border-left: 5px solid #333;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+
+        .remember-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* Important Box */
+        .important {
+            background: #fff8e1;
+            border-left: 5px solid #e0a800;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+
+        .important-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* Warning Box */
+        .warning {
+            background: #fff1f1;
+            border-left: 5px solid #d93025;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+
+        /* Steps */
+        .steps {
+            margin: 15px 0;
+        }
+
+        /* Email */
+        .email {
+            font-weight: bold;
+            font-size: 18px;
+            word-break: break-word;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 60px;
+            padding-top: 25px;
+            border-top: 2px solid #ddd;
+            text-align: center;
+            color: #666;
+        }
+
+        /* Mobile */
+        @media (max-width: 700px) {
+            .container {
+                padding: 30px 22px;
+            }
+
+            .header h1 {
+                font-size: 27px;
+            }
+
+            .header p {
+                font-size: 16px;
+            }
+
+            .section-title {
+                font-size: 22px;
+            }
+
+            .sub-title {
+                font-size: 18px;
+            }
+        }
+
+        /* Print */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                max-width: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+        <h1>🖥️ New User IT Orientation</h1>
+        <p>Basic IT Guidelines for All Employees</p>
+    </header>
+
+
+    <!-- 1. PASSWORD & COMPUTER SECURITY -->
+    <section class="section">
+
+        <h2 class="section-title">
+            1. 🔐 Password &amp; Computer Security
+        </h2>
+
+        <h3 class="sub-title">🔑 Password Rules</h3>
+
+        <ul>
+            <li>Password must be <strong>7–10 characters</strong>.</li>
+            <li>Must contain <strong>letters and numbers</strong>.</li>
+            <li>Change your password every <strong>90 days</strong>.</li>
+            <li>You cannot reuse your <strong>last 15 passwords</strong>.</li>
+            <li>Windows will warn you <strong>15 days before your password expires</strong>.</li>
+        </ul>
+
+        <h3 class="sub-title">🔒 Account Lock</h3>
+
+        <ul>
+            <li><strong>3 wrong password attempts</strong> will lock your account.</li>
+            <li>If your account is locked, contact the <strong>MIS Team</strong>.</li>
+        </ul>
+
+        <h3 class="sub-title">🔐 Lock Your Computer</h3>
+
+        <ul>
+            <li>Your computer will automatically lock after <strong>15 minutes of inactivity</strong>.</li>
+            <li>Always lock your computer when you leave your seat.</li>
+            <li>Press <strong>Windows + L</strong> to lock your computer immediately.</li>
+        </ul>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+            <p><strong>Never share your password with anyone.</strong></p>
+            <p>Leaving your desk? → <strong>Press Windows + L</strong></p>
+        </div>
+
+    </section>
+
+
+    <!-- 2. COMPUTER SHUTDOWN & RESTART -->
+    <section class="section">
+
+        <h2 class="section-title">
+            2. 🔄 Computer Shutdown &amp; Restart
+        </h2>
+
+        <h3 class="sub-title">💻 Laptop Users</h3>
+
+        <ul>
+            <li>Do not use <strong>Sleep Mode</strong>. It is prohibited.</li>
+            <li>Shut down your laptop properly every day before leaving.</li>
+            <li>If your laptop becomes slow, <strong>restart it first</strong>.</li>
+        </ul>
+
+        <h3 class="sub-title">🖥️ Desktop Users</h3>
+
+        <p><strong>Before leaving the office:</strong></p>
+
+        <ol class="steps">
+            <li>Shut down your computer properly.</li>
+            <li>Wait until the computer is completely off.</li>
+            <li>Shut down your UPS.</li>
+            <li>Switch off the UPS power.</li>
+        </ol>
+
+        <h3 class="sub-title">❓ Why?</h3>
+
+        <p>
+            Because of frequent load shedding/power outages,
+            leaving the UPS running unnecessarily can:
+        </p>
+
+        <ul>
+            <li>Cause your computer to have power-related problems.</li>
+            <li>Sometimes prevent the computer from booting properly.</li>
+        </ul>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+
+            <p>
+                Laptop → <strong>No Sleep Mode → Shut down daily.</strong>
+            </p>
+
+            <p>
+                Desktop → <strong>Shut down PC → Shut down UPS → Switch off UPS power.</strong>
+            </p>
+
+            <p>
+                Computer slow? → <strong>Restart first.</strong>
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- 3. ONEDRIVE & FILES -->
+    <section class="section">
+
+        <h2 class="section-title">
+            3. ☁️ OneDrive &amp; Files / Folders
+        </h2>
+
+        <h3 class="sub-title">🔄 Automatic Backup</h3>
+
+        <p>
+            These folders are automatically synced to OneDrive:
+        </p>
+
+        <ul>
+            <li>Desktop</li>
+            <li>Documents</li>
+            <li>Pictures</li>
+        </ul>
+
+        <div class="important">
+            <div class="important-title">⚠️ Important</div>
+
+            <ul>
+                <li>Downloads and other folders are <strong>not automatically synced</strong>.</li>
+                <li>
+                    Do not keep important company files only in Downloads
+                    or other unsynced folders.
+                </li>
+                <li>
+                    Check that OneDrive has finished syncing before assuming
+                    your files are backed up.
+                </li>
+            </ul>
+        </div>
+
+        <h3 class="sub-title">🛠️ Before Sending Your Computer to MIS</h3>
+
+        <p>
+            Before giving your computer to MIS for repair, replacement,
+            or maintenance:
+        </p>
+
+        <p>
+            Make sure all important files are backed up and fully synced
+            to OneDrive.
+        </p>
+
+        <h3 class="sub-title">👤 Personal Files</h3>
+
+        <p>
+            Do not store personal files, photos, videos, or other personal
+            data on company computers or company OneDrive.
+        </p>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+
+            <p>
+                <strong>Desktop + Documents + Pictures → OneDrive</strong>
+            </p>
+
+            <p>
+                <strong>Downloads + Other folders → Not automatically synced</strong>
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- 4. NETWORK DRIVES -->
+    <section class="section">
+
+        <h2 class="section-title">
+            4. 📁 Network Drives / Shared Folders
+        </h2>
+
+        <h3 class="sub-title">G: Drive Missing?</h3>
+
+        <p>
+            If your G: Drive / shared network drive is missing:
+        </p>
+
+        <p>
+            → <strong>Contact the MIS Team.</strong>
+        </p>
+
+    </section>
+
+
+    <!-- 5. OUTLOOK -->
+    <section class="section">
+
+        <h2 class="section-title">
+            5. 📧 Outlook &amp; Email Storage
+        </h2>
+
+        <h3 class="sub-title">📮 Your Mailbox</h3>
+
+        <ul>
+            <li>Your Outlook mailbox has a fixed <strong>50 GB storage limit</strong>.</li>
+            <li>The 50 GB limit cannot be increased.</li>
+            <li>Clean your mailbox regularly.</li>
+            <li>Do not wait until your mailbox is full.</li>
+        </ul>
+
+        <h3 class="sub-title">🗑️ Deleted Emails</h3>
+
+        <ul>
+            <li>Most company accounts have a <strong>1-month retention period</strong> for deleted emails.</li>
+            <li>Deleted emails may remain in Deleted Items for up to 1 month before being permanently removed.</li>
+            <li>Therefore, deleting an email may not immediately free storage.</li>
+        </ul>
+
+        <h3 class="sub-title">📎 Large Emails &amp; Attachments</h3>
+
+        <ul>
+            <li>Download important large attachments/files.</li>
+            <li>Save large files to OneDrive instead of keeping them in Outlook.</li>
+            <li>You have more than <strong>1 TB of OneDrive storage</strong> available.</li>
+        </ul>
+
+        <h3 class="sub-title">⚠️ Outlook Not Responding?</h3>
+
+        <p>
+            Save your work → Close Outlook → Restart your computer → Try again.
+        </p>
+
+        <p>
+            If the problem continues → <strong>Contact MIS.</strong>
+        </p>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+
+            <p>
+                <strong>50 GB is the limit → Keep your mailbox clean.</strong>
+            </p>
+
+            <p>
+                <strong>Large file → Save it to OneDrive.</strong>
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- 6. PRINTER -->
+    <section class="section">
+
+        <h2 class="section-title">
+            6. 🖨️ Printer
+        </h2>
+
+        <h3 class="sub-title">Printer Missing?</h3>
+
+        <p>
+            If your company printer is not showing on your computer:
+        </p>
+
+        <p>
+            → <strong>Contact the MIS Team.</strong>
+        </p>
+
+    </section>
+
+
+    <!-- 7. NETWORK -->
+    <section class="section">
+
+        <h2 class="section-title">
+            7. 🌐 Network Problems
+        </h2>
+
+        <h3 class="sub-title">📡 Network Not Working?</h3>
+
+        <p>
+            If you cannot access the internet, shared folders,
+            or other network services:
+        </p>
+
+        <ol>
+            <li>Unplug the network (LAN) cable from your computer.</li>
+            <li>Unplug the other end of the cable.</li>
+            <li>Wait a few seconds.</li>
+            <li>Plug both ends back in firmly.</li>
+            <li>Check the network again.</li>
+        </ol>
+
+        <h3 class="sub-title">If It Still Doesn't Work</h3>
+
+        <ul>
+            <li>Do not change network settings.</li>
+            <li>Do not unplug other network cables.</li>
+            <li>Contact the MIS Team.</li>
+        </ul>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+
+            <p>
+                Network problem → Reconnect the LAN cable →
+                Check again → Contact MIS if still not working.
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- 8. MICROSOFT TEAMS -->
+    <section class="section">
+
+        <h2 class="section-title">
+            8. 💬 Microsoft Teams
+        </h2>
+
+        <h3 class="sub-title">📢 Official IT Communication Channel</h3>
+
+        <p>
+            Microsoft Teams is the official communication channel for IT support.
+        </p>
+
+        <ul>
+            <li>Contact the MIS Team through Microsoft Teams when required.</li>
+            <li>Do not use WhatsApp, Telegram, or other unofficial channels for IT support.</li>
+            <li>MIS will not be responsible for requests or information shared through unofficial channels.</li>
+        </ul>
+
+        <h3 class="sub-title">🖥️ How to Share Your Screen</h3>
+
+        <p>During a Teams call with MIS:</p>
+
+        <ol>
+            <li>Join the Teams call.</li>
+            <li>Click <strong>Share</strong>.</li>
+            <li>Select <strong>Screen</strong> or the required window.</li>
+        </ol>
+
+        <h3 class="sub-title">🖱️ How to Give Control</h3>
+
+        <p>
+            If an authorized MIS Team member needs to control your screen:
+        </p>
+
+        <ol>
+            <li>MIS will request control.</li>
+            <li>Click <strong>Allow</strong>.</li>
+            <li>MIS can then control your shared screen.</li>
+            <li>Control can be stopped when the work is finished.</li>
+        </ol>
+
+        <div class="warning">
+            <strong>⚠️ Only give control to authorized MIS Team members.</strong>
+        </div>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+
+            <p>
+                <strong>IT Support → Microsoft Teams</strong>
+            </p>
+
+            <p>
+                <strong>WhatsApp / Telegram → Not an official IT support channel</strong>
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- 9. PHISHING -->
+    <section class="section">
+
+        <h2 class="section-title">
+            9. 🎣 Phishing Emails
+        </h2>
+
+        <p>
+            Phishing emails are fake emails designed to trick you into
+            giving away your password, information, or access.
+        </p>
+
+        <h3 class="sub-title">⚠️ Be Careful If an Email:</h3>
+
+        <ul>
+            <li>
+                Comes from outside the company and is marked in red text:
+                <strong>“Caution: External Mail.”</strong>
+            </li>
+
+            <li>
+                Comes from an unknown or unexpected sender.
+            </li>
+
+            <li>
+                Asks for your password, login information, or sensitive data.
+            </li>
+
+            <li>
+                Contains a suspicious link or attachment.
+            </li>
+
+            <li>
+                Says <strong>“Urgent!”, “Act now!”</strong>,
+                or tries to scare you.
+            </li>
+
+            <li>
+                Asks you to send company information.
+            </li>
+
+            <li>
+                Looks unusual or different from normal company emails.
+            </li>
+        </ul>
+
+        <h3 class="sub-title">👥 Know Your Team</h3>
+
+        <p>
+            Be familiar with your team and know who normally sends you emails.
+        </p>
+
+        <p>
+            If you receive a message from someone you do not recognize
+            or would not expect to contact you, be careful.
+        </p>
+
+        <h3 class="sub-title">🚫 Do Not</h3>
+
+        <ul>
+            <li>Do not share your password or sensitive information by email.</li>
+            <li>Do not click suspicious links.</li>
+            <li>Do not open unexpected attachments.</li>
+            <li>Do not reply to unknown senders with confidential information.</li>
+            <li>Do not trust an email just because it has a company logo.</li>
+        </ul>
+
+        <h3 class="sub-title">❓ If You Are Not Sure</h3>
+
+        <div class="warning">
+            <strong>
+                STOP → Do not click → Contact the MIS Team.
+            </strong>
+        </div>
+
+        <p>
+            If you accidentally click a suspicious link or open a suspicious
+            attachment, contact MIS immediately.
+        </p>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+
+            <p>
+                <strong>When in doubt, don't click. Ask MIS first.</strong>
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- 10. CONTACT MIS -->
+    <section class="section">
+
+        <h2 class="section-title">
+            10. 📞 When &amp; How to Contact MIS
+        </h2>
+
+        <h3 class="sub-title">🆘 Official IT Support</h3>
+
+        <p>
+            For IT support, send an email to:
+        </p>
+
+        <p class="email">
+            BangladeshHelpdesk.Support@dewhirst.com
+        </p>
+
+        <p>
+            This is the official way to request IT support.
+        </p>
+
+        <h3 class="sub-title">📋 Contact MIS For:</h3>
+
+        <ul>
+            <li>Forgotten password or locked account</li>
+            <li>Network problems</li>
+            <li>Computer not powering on</li>
+            <li>Crucial key problem of keyboard</li>
+            <li>Printer is missing</li>
+            <li>G: Drive / shared drive missing</li>
+        </ul>
+
+        <h3 class="sub-title">🚫 Do Not</h3>
+
+        <ul>
+            <li>
+                Do not contact individual MIS members through
+                WhatsApp or Telegram for IT support.
+            </li>
+
+            <li>
+                Do not change settings if you do not know what they do.
+            </li>
+
+            <li>
+                Do not wait until a small problem becomes a major problem.
+            </li>
+        </ul>
+
+        <div class="remember">
+            <div class="remember-title">💡 Remember</div>
+
+            <p>
+                <strong>IT Problem → Bangladesh Helpdesk</strong>
+            </p>
+
+            <p class="email">
+                BangladeshHelpdesk.Support@dewhirst.com
+            </p>
+
+            <p>
+                Use the official support channel so your request can be
+                properly tracked and handled.
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>
+            <strong>New User IT Orientation</strong>
+        </p>
+
+        <p>
+            Basic IT Guidelines for All Employees
+        </p>
+    </footer>
+
+</div>
+
+</body>
+</html>

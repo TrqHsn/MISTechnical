@@ -7,11 +7,6 @@
   </div> -->
   <button class="primary-button fab-button" type="button" (click)="openAddDialog()">➕</button>
 
-  <div *ngIf="audioUnlockNeeded()" class="audio-unlock-banner">
-    <div>{{ soundStatusMessage() }}</div>
-    <button class="banner-button" type="button" (click)="tryUnlockAudio()">Enable offline alert sound</button>
-  </div>
-
   <div *ngIf="showAddDialog" class="dialog-overlay" (click)="closeAddDialog()">
     <div class="dialog" (click)="$event.stopPropagation()">
       <div class="dialog-header">

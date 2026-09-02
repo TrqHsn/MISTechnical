@@ -1,0 +1,117 @@
+<section class="dashboard-shell">
+  <header class="dashboard-header">
+    <div>
+      <p class="eyebrow">Personal Dashboard</p>
+      <h1>Operations overview</h1>
+    </div>
+    <div class="header-clock">
+      <span>{{ dayLabel() }}</span>
+      <strong>{{ dateLabel() }}</strong>
+      <span>{{ timeLabel() }}</span>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-card">Loading dashboard...</div>
+  }
+
+  @if (error()) {
+    <div class="error-card">{{ error() }}</div>
+  }
+
+  @if (!loading() && data()) {
+    <div class="dashboard-grid">
+      <article class="card card-wide">
+        <div class="card-title-row">
+          <h2>Daily checklist</h2>
+          <button type="button" class="ghost-button" (click)="addTask()">Add task</button>
+        </div>
+        <div class="task-input-row">
+          <input [(ngModel)]="newTask" placeholder="New task" />
+        </div>
+        <ul class="checklist">
+          @for (item of checklist; track item.id) {
+            <li class="checklist-item" draggable="true" (dragstart)="dragStart($index)" (drop)="drop($index)" (dragover)="$event.preventDefault()">
+              <label class="check-option">
+                <input type="checkbox" [checked]="item.isCompleted" (change)="toggleTask(item)" />
+                @if (editingTaskId() === item.id) {
+                  <input class="edit-input" [(ngModel)]="editingTaskValue" />
+                } @else {
+                  <span [class.completed]="item.isCompleted">{{ item.task }}</span>
+                }
+              </label>
+              <div class="task-actions">
+                @if (editingTaskId() === item.id) {
+                  <button type="button" class="ghost-button" (click)="saveEdit(item)">Save</button>
+                  <button type="button" class="ghost-button" (click)="cancelEdit()">Cancel</button>
+                } @else {
+                  <button type="button" class="ghost-button" (click)="startEdit(item)">Edit</button>
+                  <button type="button" class="ghost-button" (click)="deleteTask(item)">Delete</button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <h2>Portal bookmarks</h2>
+        </div>
+        <div class="link-list">
+          @for (link of portalBookmarks; track link.name) {
+            <button type="button" class="link-button" (click)="openLink(link.link)">{{ link.name }}</button>
+          }
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <h2>Files</h2>
+        </div>
+        <div class="link-list">
+          @for (item of fileList; track item.name) {
+            <button type="button" class="link-button" (click)="openFile(item.link)">{{ item.name }}</button>
+          }
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <h2>Important links</h2>
+        </div>
+        <div class="link-list">
+          @for (link of importantLinks; track link.name) {
+            <button type="button" class="link-button" (click)="openLink(link.link)">{{ link.name }}</button>
+          }
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <h2>Cisco Meraki</h2>
+        </div>
+        <div class="link-list">
+          @for (link of ciscoMeraki; track link.name) {
+            <button type="button" class="link-button" (click)="openLink(link.link)">{{ link.name }}</button>
+          }
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title-row">
+          <h2>PA devices</h2>
+        </div>
+        <div class="device-list">
+          @for (device of piDevices; track device.ipAddress) {
+            <div class="device-pill">
+              <strong>{{ device.plantName }}</strong>
+              <span>{{ device.ipAddress }}</span>
+              <span class="status" [style.color]="device.statusColor">{{ device.statusText }}</span>
+            </div>
+          }
+        </div>
+      </article>
+    </div>
+  }
+</section>

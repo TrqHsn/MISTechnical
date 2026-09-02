@@ -6,13 +6,13 @@ import { debounceTime, Subject } from 'rxjs';
 import { ApiService, User } from '../../services/api';
 
 @Component({
-  selector: 'app-device-assign-form',
+  selector: 'app-laptop-assign-form',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './device-assign-form.component.html',
   styleUrl: './device-assign-form.component.css',
   standalone: true,
 })
-export class DeviceAssignFormComponent {
+export class LaptopAssignFormComponent {
   form: FormGroup;
   isProcessing = false;
   message = '';

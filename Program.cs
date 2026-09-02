@@ -34,6 +34,9 @@ builder.Services.AddSingleton<IKioskService, KioskService>();
 // Register SMB filesystem service
 builder.Services.AddScoped<ISmbService, SmbService>();
 
+// Register personal dashboard service
+builder.Services.AddScoped<IPersonalDashboardService, PersonalDashboardService>();
+
 // Register routing constraints explicitly for attribute-based routes
 builder.Services.Configure<RouteOptions>(options =>
 {
@@ -55,7 +58,9 @@ builder.Services.AddCors(options =>
             "http://10.140.5.216:4200",
             "https://10.140.5.216:4200",
             "http://10.140.5.216",
-            "https://10.140.5.216"
+            "https://10.140.5.216",
+            "http://10.140.5.254:4200",
+            "https://10.140.5.254:4200"
         )
               .AllowAnyHeader()
               .AllowAnyMethod()

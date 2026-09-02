@@ -449,6 +449,10 @@ h1 {
     min-height: 2.6rem;
 }
 
+.form-field.full-width textarea {
+    min-height: 8rem;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

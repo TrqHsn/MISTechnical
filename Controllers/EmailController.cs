@@ -81,7 +81,7 @@ namespace ADApi.Controllers
             // Generate the filename like the frontend does
             var actionTypeLabel = GetActionTypeLabel(model.ActionType ?? "");
             var computerName = model.NewComputerName ?? model.OldComputerName ?? "";
-            var filename = $"IT Computer Form IT003 v2.0_{actionTypeLabel}_{computerName}";
+            var filename = $"IT Computer Form IT003 v3.0_{actionTypeLabel}_{computerName}";
 
             // Dynamic subject: subject will be file name
             var subject = filename;

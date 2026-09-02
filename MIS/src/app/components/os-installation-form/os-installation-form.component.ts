@@ -467,9 +467,9 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
       const updatedBuffer = await workbook.xlsx.writeBuffer();
 
       // Generate filename
-      const filename = `IT Computer Form IT003 v2.0_${actionTypeLabel}_${newComputerName}.xlsx`;
+      const filename = `IT Computer Form IT003 v3.0_${actionTypeLabel}_${newComputerName}.xlsx`;
 
-      // Create blob and download
+      // Create blob and downloa0
       const blob = new Blob([updatedBuffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });

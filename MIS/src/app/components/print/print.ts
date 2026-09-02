@@ -203,31 +203,35 @@ export class Print implements OnInit {
 
     const pdfBlob = pdf.output('blob');
     const url = window.URL.createObjectURL(pdfBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'guest-wifi-qr.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const printWindow = window.open(url, '_blank', 'noopener,noreferrer');
+
+    if (printWindow) {
+      printWindow.focus();
+      setTimeout(() => {
+        try {
+          printWindow.print();
+        } catch (error) {
+          console.error('Unable to open print dialog for guest Wi-Fi PDF:', error);
+        }
+      }, 500);
+    }
+
     window.URL.revokeObjectURL(url);
   }
 
   printServiceTag(): void {
     if (typeof window === 'undefined') return;
 
-    // Collect form values (use fixed IT contact string)
     const vals: any = {
       assetNumber: this.serviceTagForm.get('assetNumber')?.value || '',
       deviceTypeModel: this.serviceTagForm.get('deviceTypeModel')?.value || '',
       serialNumber: this.serviceTagForm.get('serialNumber')?.value || '',
-      username: this.serviceTagForm.get('username')?.value || '',
       sendingDate: this.formatDateDisplay(this.serviceTagForm.get('sendingDate')?.value || ''),
       diagnosis: this.serviceTagForm.get('diagnosis')?.value || '',
-      accessories: this.serviceTagForm.get('accessories')?.value || '',
       sentTo: this.serviceTagForm.get('sentTo')?.value || '',
-      itContactNumbers: this.itContactNumbersFixed,
       sentBy: this.serviceTagForm.get('sentBy')?.value || 'TH',
-      remarks: this.serviceTagForm.get('remarks')?.value || ''
+      remarks: this.serviceTagForm.get('remarks')?.value || '',
+      itContactNumbers: this.itContactNumbersFixed
     };
 
     const escape = (s: string) => this.escapeHtml(String(s || '')).replace(/\r?\n/g, '<br />');
@@ -238,33 +242,92 @@ export class Print implements OnInit {
           <meta charset="utf-8" />
           <title>Service Form</title>
           <style>
-            /* Use exact margins for print: top 0.5in, left/right 1in, bottom 1in */
-            @page { size: 148mm 210mm; margin: 0.5in 1in 1in 1in; }
-            html,body{width:148mm;height:210mm;margin:0;padding:0;font-family: Inter, -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;color:#111}
-              /* align content at top (respecting @page top margin) and center horizontally */
-              body{display:flex;align-items:flex-start;justify-content:center;-webkit-print-color-adjust:exact;color-adjust:exact}
-            .card{width:100%;border-radius:10px;overflow:hidden;box-sizing:border-box;background:#ffffff;box-shadow:0 10px 30px rgba(18,38,75,0.08);border:1px solid rgba(31,60,114,0.12)}
-            .header{background:linear-gradient(90deg,#1f3c72 0%,#2b6fb3 100%);color:#fff;padding:8px 12px;text-align:center}
-            .header h1{font-size:14pt;margin:0;font-weight:800;letter-spacing:0.4px}
-            .subheader{font-size:9pt;opacity:0.95;margin-top:4px}
-            .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:10pt;padding:10px}
-            .label{font-weight:700;font-size:8.5pt;color:#233a66;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.6px}
-            .value{font-size:10pt;color:#0b1220;padding:6px 8px;background:linear-gradient(180deg, rgba(244,247,255,0.6), rgba(255,255,255,0.6));border-radius:6px}
-            .full{grid-column:1/-1}
-            textarea{white-space:pre-wrap}
-            .small{font-size:7.5pt;color:#556070;margin-top:6px}
-            .footer{margin-top:8px;font-size:8pt;color:#556070;padding:8px 12px;text-align:center;background:linear-gradient(180deg, rgba(245,247,252,0.6), rgba(255,255,255,0.6))}
-            /* Avoid page breaks inside card */
-            .card{page-break-inside:avoid}
-            /* ensure prints keep colors and clarity */
-            img{max-width:100%;height:auto}
-              /* dashed cut border for easy trimming */
-              .card.cut-border{border-style:dashed;border-width:1pt;border-color:#cfcfcf}
+            @page { size: A4; margin: 8mm; }
+            html, body {
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              height: 100%;
+              font-family: Inter, -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              color: #111;
+              background: #fff;
+            }
+            body {
+              display: flex;
+              align-items: flex-start;
+              justify-content: center;
+              -webkit-print-color-adjust: exact;
+              color-adjust: exact;
+            }
+            .card {
+              width: 100%;
+              max-width: 180mm;
+              border-radius: 10px;
+              overflow: hidden;
+              box-sizing: border-box;
+              background: #ffffff;
+              box-shadow: 0 10px 30px rgba(18, 38, 75, 0.08);
+              border: 1px solid rgba(31, 60, 114, 0.12);
+              page-break-inside: avoid;
+            }
+            .header {
+              background: linear-gradient(90deg, #1f3c72 0%, #2b6fb3 100%);
+              color: #fff;
+              padding: 8px 12px;
+              text-align: center;
+            }
+            .header h1 {
+              font-size: 14pt;
+              margin: 0;
+              font-weight: 800;
+              letter-spacing: 0.4px;
+            }
+            .subheader {
+              font-size: 9pt;
+              opacity: 0.95;
+              margin-top: 4px;
+            }
+            .grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+              font-size: 10pt;
+              padding: 10px;
+            }
+            .label {
+              font-weight: 700;
+              font-size: 8.5pt;
+              color: #233a66;
+              margin-bottom: 4px;
+              text-transform: uppercase;
+              letter-spacing: 0.6px;
+            }
+            .value {
+              font-size: 10pt;
+              color: #0b1220;
+              padding: 6px 8px;
+              background: linear-gradient(180deg, rgba(244,247,255,0.6), rgba(255,255,255,0.6));
+              border-radius: 6px;
+              white-space: pre-wrap;
+            }
+            .full {
+              grid-column: 1 / -1;
+            }
+            .footer {
+              margin-top: 8px;
+              font-size: 8pt;
+              color: #556070;
+              padding: 8px 12px;
+              text-align: center;
+              background: linear-gradient(180deg, rgba(245,247,252,0.6), rgba(255,255,255,0.6));
+            }
           </style>
         </head>
         <body>
           <div class="card">
-            <h1>IT Device Service / Warranty Form</h1>
+            <div class="header">
+              <h1>Service Tag</h1>
+            </div>
             <div class="grid">
               <div>
                 <div class="label">Asset Number</div>
@@ -274,16 +337,10 @@ export class Print implements OnInit {
                 <div class="label">Device Type / Model</div>
                 <div class="value">${escape(vals.deviceTypeModel)}</div>
               </div>
-
               <div>
                 <div class="label">Serial Number (SN)</div>
                 <div class="value">${escape(vals.serialNumber)}</div>
               </div>
-              <div>
-                <div class="label">Username</div>
-                <div class="value">${escape(vals.username)}</div>
-              </div>
-
               <div>
                 <div class="label">Sending Date</div>
                 <div class="value">${escape(vals.sendingDate)}</div>
@@ -292,61 +349,58 @@ export class Print implements OnInit {
                 <div class="label">Sent To</div>
                 <div class="value">${escape(vals.sentTo)}</div>
               </div>
-
-              <div class="full">
+              <div>
                 <div class="label">Diagnosis / Observation</div>
                 <div class="value">${escape(vals.diagnosis)}</div>
-              </div>
-
-              <div class="full">
-                <div class="label">Accessories Included</div>
-                <div class="value">${escape(vals.accessories)}</div>
-              </div>
-
-              <div>
-                <div class="label">IT Contact Numbers</div>
-                <div class="value">${escape(vals.itContactNumbers)}</div>
               </div>
               <div>
                 <div class="label">Sent By</div>
                 <div class="value">${escape(vals.sentBy)}</div>
               </div>
-
               <div class="full">
                 <div class="label">Remarks</div>
                 <div class="value">${escape(vals.remarks)}</div>
               </div>
             </div>
-            <div class="footer">Generated by IT Department</div>
+            <div class="footer">
+              <div class="label">IT Contact Numbers</div>
+              <div class="value">${escape(vals.itContactNumbers)}</div>
+              <div>Generated by Shanta IT Department</div>
+            </div>
           </div>
         </body>
       </html>`;
 
-    let w: Window | null = null;
-    try { w = window.open('', '_blank', 'noopener'); } catch { w = null; }
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.opacity = '0';
+    iframe.style.visibility = 'hidden';
+    iframe.srcdoc = html;
+    document.body.appendChild(iframe);
 
-    if (!w) {
-      // fallback: write to current window (rare)
-      const original = document.body.innerHTML;
-      document.body.innerHTML = html;
-      window.print();
-      document.body.innerHTML = original;
-      return;
-    }
+    const printFrame = () => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } catch (e) {
+        console.error('Print failed:', e);
+      }
 
-    try {
-      w.document.open();
-      w.document.write(html);
-      w.document.close();
-      w.focus();
-      const doPrint = () => { try { w!.print(); w!.close(); } catch (e) { try { w!.close(); } catch {} } };
-      // Some browsers need onload
-      w.onload = () => setTimeout(doPrint, 50);
-      // safety timeout
-      setTimeout(doPrint, 1500);
-    } catch (e) {
-      try { w.close(); } catch {}
-    }
+      setTimeout(() => {
+        try {
+          document.body.removeChild(iframe);
+        } catch {}
+      }, 1000);
+    };
+
+    iframe.onload = () => {
+      setTimeout(printFrame, 250);
+    };
   }
 
   ngOnInit(): void {
@@ -387,6 +441,18 @@ export class Print implements OnInit {
   increaseFont() { this.fontSizePt.set(this.fontSizePt() + 1); }
   decreaseFont() { this.fontSizePt.set(Math.max(1, this.fontSizePt() - 1)); }
   toggleBold() { this.bold.set(!this.bold()); }
+
+  private normalizeFontFamily(fontFamily: string): string {
+    const genericFonts = new Set(['serif', 'sans-serif', 'sans', 'monospace', 'cursive', 'fantasy', 'system-ui', 'arial', 'helvetica', 'times', 'times new roman', 'courier', 'courier new']);
+    const candidates = (fontFamily || '')
+      .split(',')
+      .map(name => name.trim().replace(/['"]/g, ''))
+      .filter(Boolean);
+
+    const firstRealFont = candidates.find(name => !genericFonts.has(name.toLowerCase()));
+    const selected = firstRealFont || candidates[0] || 'Arial';
+    return selected.trim();
+  }
 
   private escapeHtml(s: string) {
     return s
@@ -512,11 +578,12 @@ export class Print implements OnInit {
     this.isPrinting.set(true);
     this.printStatus.set('Sending to printer...');
 
+    const fontSizePt = Math.max(6, Math.min(72, Number(this.fontSizePt()) || 24));
     const request = {
       text1: this.text1(),
       text2: this.text2(),
-      fontFamily: this.fontFamily(),
-      fontSize: this.fontSizePt(),
+      fontFamily: this.normalizeFontFamily(this.fontFamily()),
+      fontSize: fontSizePt,
       bold: this.bold(),
       caps: this.caps()
     };

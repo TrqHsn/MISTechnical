@@ -16,13 +16,9 @@ export class NetworkDashboardComponent implements OnDestroy {
   private livePingAutoScrollIntervalId: number | null = null;
   private offlineAlertIntervalId: number | null = null;
   private alertAudio: HTMLAudioElement | null = null;
-  private alertAudioUnlocked = false;
-  private pendingOfflineAlert = false;
-  private degradedBeepIntervalIds = new Map<string, number>();
   private autoStartedServers = new Set<string>();
-
-  audioUnlockNeeded = signal(false);
-  soundStatusMessage = signal('Offline alert sound is disabled until you enable it.');
+  private lastYellowAlertAt = 0;
+  private lastRedAlertAt = 0;
 
   serverName = '';
   serverHost = '';
@@ -43,8 +39,6 @@ export class NetworkDashboardComponent implements OnDestroy {
       this.alertAudio.preload = 'auto';
       this.alertAudio.volume = 0.8;
       this.alertAudio.load();
-      this.registerAudioGestureUnlock();
-      this.registerDocumentGestureUnlock();
     }
 
     afterNextRender(() => {
@@ -96,20 +90,21 @@ export class NetworkDashboardComponent implements OnDestroy {
 
   private updateOfflineAlertState(): void {
     const hasOffline = this.servers().some((server) => server.status === 'red');
+    const hasDegraded = this.servers().some((server) => server.status === 'yellow');
+
     if (hasOffline) {
       this.startOfflineAlert();
     } else {
       this.stopOfflineAlert();
     }
 
-    // Start/stop degraded beeps per-server
-    this.servers().forEach((server) => {
-      if (server.status === 'yellow') {
-        this.startDegradedBeep(server.id);
-      } else {
-        this.stopDegradedBeep(server.id);
+    if (hasDegraded && !hasOffline) {
+      const now = Date.now();
+      if (now - this.lastYellowAlertAt >= 5000) {
+        this.lastYellowAlertAt = now;
+        this.playAlertTone();
       }
-    });
+    }
   }
 
   private startOfflineAlert(): void {
@@ -117,8 +112,12 @@ export class NetworkDashboardComponent implements OnDestroy {
       return;
     }
 
+    this.lastRedAlertAt = Date.now();
     this.playAlertTone();
-    this.offlineAlertIntervalId = window.setInterval(() => this.playAlertTone(), 3000);
+    this.offlineAlertIntervalId = window.setInterval(() => {
+      this.lastRedAlertAt = Date.now();
+      this.playAlertTone();
+    }, 2000);
   }
 
   private stopOfflineAlert(): void {
@@ -134,110 +133,11 @@ export class NetworkDashboardComponent implements OnDestroy {
       return;
     }
 
-    if (!this.alertAudioUnlocked) {
-      this.pendingOfflineAlert = true;
-      this.audioUnlockNeeded.set(true);
-      return;
-    }
-
     this.alertAudio.pause();
     this.alertAudio.currentTime = 0;
-    this.alertAudio.play().then(() => {
-      console.debug('Offline alert sound played successfully');
-    }).catch((error) => {
-      console.warn('Offline alert sound failed to play:', error);
-      this.pendingOfflineAlert = true;
-      this.audioUnlockNeeded.set(true);
+    this.alertAudio.play().catch((error) => {
+      console.warn('Alert sound failed to play:', error);
     });
-  }
-
-  private startDegradedBeep(serverId: string): void {
-    if (this.degradedBeepIntervalIds.has(serverId)) return;
-    // Beep every 20 seconds for degraded
-    const id = window.setInterval(() => {
-      if (!this.alertAudio) return;
-      if (!this.alertAudioUnlocked) {
-        this.pendingOfflineAlert = true;
-        this.audioUnlockNeeded.set(true);
-        return;
-      }
-      this.alertAudio.pause();
-      this.alertAudio.currentTime = 0;
-      this.alertAudio.play().catch(() => {});
-    }, 20_000);
-    this.degradedBeepIntervalIds.set(serverId, id);
-  }
-
-  private stopDegradedBeep(serverId: string): void {
-    const id = this.degradedBeepIntervalIds.get(serverId);
-    if (id !== undefined) {
-      window.clearInterval(id);
-      this.degradedBeepIntervalIds.delete(serverId);
-    }
-  }
-
-  public tryUnlockAudio(): void {
-    if (!this.alertAudio || this.alertAudioUnlocked) {
-      return;
-    }
-
-    this.alertAudio.play()
-      .then(() => {
-        this.alertAudio?.pause();
-        if (this.alertAudio) {
-          this.alertAudio.currentTime = 0;
-        }
-        this.alertAudioUnlocked = true;
-        this.audioUnlockNeeded.set(false);
-        this.soundStatusMessage.set('Offline alert sound is enabled.');
-        if (this.pendingOfflineAlert) {
-          this.pendingOfflineAlert = false;
-          this.playAlertTone();
-        }
-      })
-      .catch((error) => {
-        console.warn('Audio unlock failed:', error);
-        this.pendingOfflineAlert = true;
-        this.audioUnlockNeeded.set(true);
-        this.soundStatusMessage.set('Tap the page and allow sound to enable offline alerts.');
-      });
-  }
-
-  private registerAudioGestureUnlock(): void {
-    const unlock = (): void => {
-      if (!this.alertAudio) {
-        return;
-      }
-
-      this.alertAudio.play()
-        .then(() => {
-          this.alertAudio?.pause();
-          if (this.alertAudio) {
-            this.alertAudio.currentTime = 0;
-          }
-          this.alertAudioUnlocked = true;
-          this.audioUnlockNeeded.set(false);
-          if (this.pendingOfflineAlert) {
-            this.pendingOfflineAlert = false;
-            this.playAlertTone();
-          }
-        })
-        .catch(() => {
-          this.pendingOfflineAlert = true;
-          this.audioUnlockNeeded.set(true);
-        });
-    };
-
-    window.addEventListener('pointerdown', unlock, { once: true, passive: true });
-    window.addEventListener('keydown', unlock, { once: true, passive: true });
-    window.addEventListener('touchstart', unlock, { once: true, passive: true });
-  }
-
-  private registerDocumentGestureUnlock(): void {
-    const unlock = (): void => this.tryUnlockAudio();
-    document.body.addEventListener('pointerdown', unlock, { once: true, passive: true });
-    document.body.addEventListener('keydown', unlock, { once: true, passive: true });
-    document.body.addEventListener('touchstart', unlock, { once: true, passive: true });
   }
 
   private scrollLivePingOutputsToBottom(): void {

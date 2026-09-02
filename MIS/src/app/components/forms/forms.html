@@ -4,10 +4,10 @@
   <!-- Tab Navigation -->
   <div class="tabs">
     <button class="tab-btn" [class.active]="activeTab() === 'os-form'" (click)="activeTab.set('os-form')">
-      OS Form
+      Build Form
     </button>
     <button class="tab-btn" [class.active]="activeTab() === 'device-form'" (click)="activeTab.set('device-form')">
-      Device Form
+      Laptop Assign Form
     </button>
     <button class="tab-btn" [class.active]="activeTab() === 'jobsheet'" (click)="activeTab.set('jobsheet')">
       JobSheet
@@ -24,7 +24,7 @@
   <!-- Device Form Tab -->
   @if (activeTab() === 'device-form') {
     <div class="tab-content">
-      <app-device-assign-form></app-device-assign-form>
+      <app-laptop-assign-form></app-laptop-assign-form>
     </div>
   }
 

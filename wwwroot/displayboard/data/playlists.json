@@ -5,15 +5,6 @@
     "Description": null,
     "CreatedAt": "2026-05-01T21:08:45.4720097Z",
     "UpdatedAt": null,
-    "Items": [
-      {
-        "Id": 0,
-        "PlaylistId": 0,
-        "MediaId": 32,
-        "DurationSeconds": 5,
-        "Order": 1,
-        "Media": null
-      }
-    ]
+    "Items": []
   }
 ]

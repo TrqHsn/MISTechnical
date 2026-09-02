@@ -17,15 +17,16 @@ export class App {
   @ViewChild(UniversalSearchComponent) universalSearch?: UniversalSearchComponent;
 
   buttons = [
-    { name: 'AD Tools', id: 'testapi' },
+    { name: 'ActiveDirectory', id: 'testapi' },
     { name: 'Print', id: 'print' },
     { name: 'Forms', id: 'oif' },
-    { name: 'Device Tool', id: 'devicetool' },
-    { name: 'search', id: 'inventory' },
+    { name: 'Tools', id: 'devicetool' },
+    { name: 'Search', id: 'inventory' },
     { name: 'Network', id: 'network' },
     { name: 'Sinage', id: 'kiosk' },
-    { name: 'Links', id: 'links' },
+    // { name: 'Links', id: 'links' },
     { name: 'Files', id: 'files' },
+    { name: 'Others', id: 'others' },
     { name: 'Unlock', id: 'unlock' }
   ];
 

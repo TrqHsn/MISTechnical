@@ -29,18 +29,24 @@
             />
           </div>
 
-          <div class="sound-toggle-container">
-            <label class="toggle-switch sound-toggle">
-              <input 
-                type="checkbox" 
-                [(ngModel)]="soundOnFailure"
-                (ngModelChange)="soundOnFailure.set($event)"
-              />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label-text">
-                {{ soundOnFailure() ? '🔊 Sound on Failure' : '🔊 Sound on Success' }}
-              </span>
-            </label>
+          <div class="ping-actions">
+            <div class="sound-toggle-container">
+              <label class="toggle-switch sound-toggle">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="soundOnFailure"
+                  (ngModelChange)="soundOnFailure.set($event)"
+                />
+                <span class="toggle-slider"></span>
+                <span class="toggle-label-text">
+                  {{ soundOnFailure() ? '🔊 Sound on Failure' : '🔊 Sound on Success' }}
+                </span>
+              </label>
+            </div>
+
+            <button class="btn secondary monitor-btn" type="button" (click)="openMonitorInNewTab()">
+              Monitor
+            </button>
           </div>
         </div>
 

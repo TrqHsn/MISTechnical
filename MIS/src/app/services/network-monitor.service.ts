@@ -21,6 +21,7 @@ export interface NetworkServer {
   redSince: number | null;
   alertCooldownUntil: number | null;
   consecutiveFailures: number;
+  consecutiveSuccesses: number;
 }
 
 interface PingResponse {
@@ -148,6 +149,7 @@ export class NetworkMonitorService {
         redSince: null,
         alertCooldownUntil: null,
         consecutiveFailures: 0,
+        consecutiveSuccesses: 0,
       };
 
       this.servers.update((items: NetworkServer[]) => [...items, newServer]);
@@ -447,6 +449,7 @@ export class NetworkMonitorService {
         redSince: null,
         alertCooldownUntil: null,
         consecutiveFailures: 0,
+        consecutiveSuccesses: 0,
       }));
 
       this.servers.set(servers);
@@ -534,17 +537,21 @@ export class NetworkMonitorService {
         const successful = results.filter((result) => result.success);
         const isSuccess = successful.length > 0;
         const consecutiveFailures = isSuccess ? 0 : (item.consecutiveFailures ?? 0) + 1;
+        const consecutiveSuccesses = isSuccess ? (item.consecutiveSuccesses ?? 0) + 1 : 0;
         const redSince = !isSuccess ? item.redSince ?? now : null;
 
-        const nextStatus: NetworkServer['status'] = item.maintenance
-          ? 'maintenance'
-          : (!isSuccess && consecutiveFailures >= OFFLINE_CONSECUTIVE_FAILURES)
-          ? 'red'
-          : !isSuccess && redSince && now - redSince >= RED_DELAY_MS
-          ? 'yellow'
-          : !isSuccess
-          ? 'yellow'
-          : 'green';
+        let nextStatus: NetworkServer['status'];
+        if (item.maintenance) {
+          nextStatus = 'maintenance';
+        } else if (!isSuccess && consecutiveFailures >= 5) {
+          nextStatus = 'red';
+        } else if (!isSuccess) {
+          nextStatus = 'yellow';
+        } else if (item.status === 'yellow' || item.status === 'red') {
+          nextStatus = consecutiveSuccesses >= 5 ? 'green' : 'yellow';
+        } else {
+          nextStatus = 'green';
+        }
 
         const logs = [...item.logs];
         let lastDownTime = item.lastDownTime;
@@ -575,6 +582,7 @@ export class NetworkMonitorService {
           ...item,
           redSince,
           consecutiveFailures,
+          consecutiveSuccesses,
           lastCheckTime: new Date(now).toISOString(),
           lastDownTime,
           lastPingStatus: results[0]?.status ?? (isSuccess ? 'Success' : 'No response'),

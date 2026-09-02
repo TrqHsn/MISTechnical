@@ -1,0 +1,73 @@
+.others-page {
+  padding: 24px;
+  color: #e5ecff;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw, 2.25rem);
+  color: #ffffff;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.big-button {
+  min-height: 140px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+  color: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 16px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.big-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(96, 165, 250, 0.9);
+  box-shadow: 0 18px 36px rgba(59, 130, 246, 0.18);
+}
+
+.label {
+  font-size: clamp(1.05rem, 1.5vw, 1.5rem);
+  font-weight: 700;
+}
+
+.description {
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #bfd1ff;
+  opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .button-grid {
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .others-page {
+    padding: 16px;
+  }
+
+  .button-grid {
+    grid-template-columns: 1fr;
+  }
+}

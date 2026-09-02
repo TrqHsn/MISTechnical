@@ -26,6 +26,7 @@ export class NavigationService {
     'newuser': '/device-assign',
     'links': '/important-links',
     'files': '/files',
+    'others': '/others',
     'unlock': '', // Action, not a route
   };
 
@@ -41,6 +42,7 @@ export class NavigationService {
     'newuser': { icon: '📋', description: 'Assign devices to new users', keywords: ['assign', 'new user', 'device', 'assignment'] },
     'links': { icon: '🔗', description: 'Quick access to important resources', keywords: ['links', 'resources', 'bookmarks'] },
     'files': { icon: '📁', description: 'Browse SMB/UNC network files and folders', keywords: ['files', 'smb', 'unc', 'network share', 'browse'] },
+    'others': { icon: '📦', description: 'Additional utility shortcuts and quick actions', keywords: ['others', 'extra', 'utility', 'buttons'] },
     'unlock': { icon: '🔓', description: 'Unlock all locked Active Directory user accounts', keywords: ['unlock', 'ad', 'accounts', 'locked', 'users'] },
   };
 

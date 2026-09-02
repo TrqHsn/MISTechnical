@@ -77,6 +77,12 @@ export class NetworkComponent implements OnDestroy {
     this.stopPing();
   }
 
+  openMonitorInNewTab() {
+    if (this.isBrowser) {
+      window.open('/network-dashboard', '_blank', 'noopener,noreferrer');
+    }
+  }
+
   executePing() {
     const address = this.pingAddress().trim();
     if (!address) {

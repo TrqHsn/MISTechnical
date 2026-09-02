@@ -45,7 +45,7 @@ export const routes: Routes = [
   ,
   {
     path: 'device-assign',
-    loadComponent: () => import('./components/device-assign-form/device-assign-form.component').then(m => m.DeviceAssignFormComponent)
+    loadComponent: () => import('./components/device-assign-form/device-assign-form.component').then(m => m.LaptopAssignFormComponent)
   }
   ,
   {
@@ -72,12 +72,21 @@ export const routes: Routes = [
     loadComponent: () => import('./components/smb-browser/smb-browser').then(m => m.SmbBrowserComponent)
   },
   {
+    path: 'others',
+    loadComponent: () => import('./components/others/others').then(m => m.OthersComponent)
+  },
+  {
     path: 'cam-mic-speaker',
     loadComponent: () => import('./components/cam-mic-speaker/cam-mic-speaker.component').then(m => m.CamMicSpeakerComponent)
   },
   {
     path: 'display-test',
     loadComponent: () => import('./components/display-test/display-test.component').then(m => m.DisplayTestComponent)
+  }
+  ,
+  {
+    path: 'personal-dashboard',
+    loadComponent: () => import('./components/personal-dashboard/personal-dashboard').then(m => m.PersonalDashboardComponent)
   }
   ,
   // ...existing code...

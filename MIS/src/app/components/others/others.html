@@ -1,0 +1,14 @@
+<section class="others-page">
+  <div class="section-header">
+    <h2>Others</h2>
+  </div>
+
+  <div class="button-grid">
+    @for (button of buttons; track button.label) {
+      <button type="button" class="big-button" (click)="openButton(button.action)">
+        <span class="label">{{ button.label }}</span>
+        <span class="description">{{ button.description }}</span>
+      </button>
+    }
+  </div>
+</section>
