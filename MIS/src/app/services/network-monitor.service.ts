@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { catchError, exhaustMap, interval, map, of, startWith, Subject, Subscription, tap } from 'rxjs';
+import { catchError, exhaustMap, interval, of, startWith, Subject, Subscription, tap } from 'rxjs';
 
 export interface NetworkLogEntry {
   timestamp: string;
@@ -24,18 +24,15 @@ export interface NetworkServer {
   consecutiveSuccesses: number;
 }
 
-interface PingResponse {
-  success: boolean;
-  latency: number | null;
-  status?: string;
-}
-
 interface StoredNetworkServer {
   id: string;
   name: string;
   host: string;
   maintenance: boolean;
   lastDownTime: string | null;
+  lastCheckTime?: string | null;
+  lastPingStatus?: string | null;
+  status?: 'green' | 'yellow' | 'red' | 'maintenance' | 'unknown';
 }
 
 interface CreateServerRequest {
@@ -77,10 +74,8 @@ function colorizeLineHtml(line: string): string {
   return `<span>${escaped}</span>\n`;
 }
 
-const POLL_INTERVAL_MS = 8000;
-const RED_DELAY_MS = 30_000;
+const POLL_INTERVAL_MS = 1000;
 const ALERT_COOLDOWN_MS = 300_000;
-const OFFLINE_CONSECUTIVE_FAILURES = 15; // 15 consecutive ping failures -> offline
 
 const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
@@ -107,17 +102,18 @@ export class NetworkMonitorService {
   private readonly apiBaseUrl = getApiBaseUrl();
   private readonly isBrowser = typeof window !== 'undefined';
   private readonly destroy$ = new Subject<void>();
-  private readonly subs = new Map<string, Subscription>();
+  private statusRefreshSubscription: Subscription | null = null;
+  private monitoringStarted = false;
 
   constructor(private http: HttpClient) {
-    this.loadServers();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    this.subs.forEach((sub) => sub.unsubscribe());
-    this.subs.clear();
+    this.statusRefreshSubscription?.unsubscribe();
+    this.statusRefreshSubscription = null;
+    this.stopAllLivePings();
   }
 
   addServer(name: string, host: string): void {
@@ -153,7 +149,6 @@ export class NetworkMonitorService {
       };
 
       this.servers.update((items: NetworkServer[]) => [...items, newServer]);
-      this.startMonitoring(newServer.id);
     });
   }
 
@@ -163,7 +158,6 @@ export class NetworkMonitorService {
     this.http.delete(`${this.apiBaseUrl}/network/servers/${encodeURIComponent(serverId)}`).pipe(
       tap((response) => {
         console.log('Server removal successful:', response);
-        this.stopMonitoring(serverId);
         this.stopLivePing(serverId);
         // Clear any degraded beep intervals from dashboard component by updating status first
         this.servers.update((items: NetworkServer[]) => items.filter((item) => item.id !== serverId));
@@ -347,6 +341,10 @@ export class NetworkMonitorService {
     this.setLivePingState(serverId, { active: false, status: 'stopped' });
   }
 
+  private stopAllLivePings(): void {
+    [...this.livePingControllers.keys()].forEach((serverId) => this.stopLivePing(serverId));
+  }
+
   clearLivePing(serverId: string): void {
     const state = this.getLivePingState(serverId);
     if (!state.active && !state.visible) {
@@ -441,10 +439,10 @@ export class NetworkMonitorService {
         name: item.name,
         host: item.host,
         maintenance: item.maintenance,
-        status: 'unknown' as const,
-        lastCheckTime: null,
+        status: item.status ?? 'unknown',
+        lastCheckTime: item.lastCheckTime ?? null,
         lastDownTime: item.lastDownTime ?? null,
-        lastPingStatus: null,
+        lastPingStatus: item.lastPingStatus ?? null,
         logs: [],
         redSince: null,
         alertCooldownUntil: null,
@@ -453,30 +451,20 @@ export class NetworkMonitorService {
       }));
 
       this.servers.set(servers);
-      servers.forEach((server) => this.startMonitoring(server.id));
     });
   }
 
-  private startMonitoring(serverId: string): void {
-    if (this.subs.has(serverId)) {
+  startMonitoring(): void {
+    if (this.monitoringStarted) {
       return;
     }
 
-    const sub = interval(POLL_INTERVAL_MS)
-      .pipe(startWith(0), exhaustMap(() => this.performCycle(serverId)))
+    this.monitoringStarted = true;
+    this.statusRefreshSubscription = interval(POLL_INTERVAL_MS)
+      .pipe(startWith(0), exhaustMap(() => this.refreshServers()))
       .subscribe({
         error: (error) => console.error('Network monitor error', error),
       });
-
-    this.subs.set(serverId, sub);
-  }
-
-  private stopMonitoring(serverId: string): void {
-    const sub = this.subs.get(serverId);
-    if (sub) {
-      sub.unsubscribe();
-      this.subs.delete(serverId);
-    }
   }
 
   moveServerToTop(serverId: string): void {
@@ -491,113 +479,34 @@ export class NetworkMonitorService {
     });
   }
 
-  private performCycle(serverId: string) {
-    const livePingState = this.getLivePingState(serverId);
-    if (livePingState.active) {
-      return of(void 0);
-    }
+  private refreshServers() {
+    return this.http.get<StoredNetworkServer[]>(`${this.apiBaseUrl}/network/servers`).pipe(
+      tap((saved) => {
+        const currentServers = new Map(this.servers().map((server) => [server.id, server]));
+        const servers = saved.map((item) => ({
+          ...(currentServers.get(item.id) ?? {
+            logs: [],
+            redSince: null,
+            alertCooldownUntil: null,
+            consecutiveFailures: 0,
+            consecutiveSuccesses: 0,
+          }),
+          id: item.id,
+          name: item.name,
+          host: item.host,
+          maintenance: item.maintenance,
+          status: item.status ?? 'unknown',
+          lastCheckTime: item.lastCheckTime ?? null,
+          lastDownTime: item.lastDownTime ?? null,
+          lastPingStatus: item.lastPingStatus ?? null,
+        }));
 
-    const server = this.servers().find((item) => item.id === serverId);
-    if (!server) {
-      return of(void 0);
-    }
-
-    if (server.maintenance) {
-      this.updateServer(serverId, {
-        lastCheckTime: new Date().toISOString(),
-        status: 'maintenance',
-      });
-      return of(void 0);
-    }
-
-    const request = this.http.get<PingResponse>(`${this.apiBaseUrl}/network/ping?host=${encodeURIComponent(server.host)}`).pipe(
+        this.servers.set(servers);
+      }),
       catchError((error) => {
-        console.error('Ping request failed for', server.host, error);
-        return of({ success: false, latency: null, status: 'Error' });
-      })
-    );
-
-    return request.pipe(
-      map((result) => this.applyPingResults(serverId, [result])),
-      catchError((error) => {
-        console.error('Ping cycle failed', error);
+        console.error('Unable to refresh server statuses', error);
         return of(void 0);
       })
-    );
-  }
-
-  private applyPingResults(serverId: string, results: PingResponse[]): void {
-    this.servers.update((items: NetworkServer[]) =>
-      items.map((item: NetworkServer) => {
-        if (item.id !== serverId) {
-          return item;
-        }
-
-        const now = Date.now();
-        const successful = results.filter((result) => result.success);
-        const isSuccess = successful.length > 0;
-        const consecutiveFailures = isSuccess ? 0 : (item.consecutiveFailures ?? 0) + 1;
-        const consecutiveSuccesses = isSuccess ? (item.consecutiveSuccesses ?? 0) + 1 : 0;
-        const redSince = !isSuccess ? item.redSince ?? now : null;
-
-        let nextStatus: NetworkServer['status'];
-        if (item.maintenance) {
-          nextStatus = 'maintenance';
-        } else if (!isSuccess && consecutiveFailures >= 5) {
-          nextStatus = 'red';
-        } else if (!isSuccess) {
-          nextStatus = 'yellow';
-        } else if (item.status === 'yellow' || item.status === 'red') {
-          nextStatus = consecutiveSuccesses >= 5 ? 'green' : 'yellow';
-        } else {
-          nextStatus = 'green';
-        }
-
-        const logs = [...item.logs];
-        let lastDownTime = item.lastDownTime;
-        if (nextStatus === 'red' && item.status !== 'red') {
-          lastDownTime = item.lastDownTime ?? new Date(now).toISOString();
-          logs.unshift({
-            timestamp: new Date(now).toLocaleString(),
-            message: 'Server is DOWN',
-            type: 'alert' as const,
-          });
-          this.sendAlert(item, `DOWN: ${item.name} (${item.host})`, 'Server entered RED state');
-        }
-
-        if (nextStatus === 'green' && item.status !== 'green') {
-          logs.unshift({
-            timestamp: new Date(now).toLocaleString(),
-            message: 'Server recovered to GREEN',
-            type: 'info' as const,
-          });
-          this.sendAlert(item, `RECOVERED: ${item.name}`, 'Server returned to GREEN');
-        }
-
-        if (logs.length > 10) {
-          logs.length = 10;
-        }
-
-        return {
-          ...item,
-          redSince,
-          consecutiveFailures,
-          consecutiveSuccesses,
-          lastCheckTime: new Date(now).toISOString(),
-          lastDownTime,
-          lastPingStatus: results[0]?.status ?? (isSuccess ? 'Success' : 'No response'),
-          status: nextStatus,
-          logs,
-        };
-      })
-    );
-  }
-
-  private updateServer(serverId: string, changes: Partial<NetworkServer>): void {
-    this.servers.update((items: NetworkServer[]) =>
-      items.map((item: NetworkServer) =>
-        item.id === serverId ? { ...item, ...changes } : item
-      )
     );
   }
 

@@ -85,6 +85,35 @@
   transform: translateY(-1px);
 }
 
+.fab-menu {
+  position: fixed;
+  right: clamp(16px, 4vw, 24px);
+  bottom: clamp(16px, 4vw, 24px);
+  z-index: 1050;
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.fab-menu .fab-button {
+  position: static;
+}
+
+.fab-menu-options {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.fab-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 9px 15px;
+  white-space: nowrap;
+}
+
 .audio-unlock-banner {
   position: fixed;
   left: 50%;
@@ -852,4 +881,35 @@
 .empty-log {
   color: #94a3b8;
   font-style: italic;
+}
+
+.audio-mode-overlay {
+  z-index: 1200;
+}
+
+.audio-mode-dialog {
+  text-align: center;
+}
+
+.audio-mode-dialog .dialog-header {
+  justify-content: center;
+}
+
+.audio-mode-description {
+  margin: -8px 0 22px;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.audio-mode-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.audio-mode-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }

@@ -15,10 +15,16 @@ export class NetworkDashboardComponent implements OnDestroy {
   private openEventModals = new Map<string, boolean>();
   private livePingAutoScrollIntervalId: number | null = null;
   private offlineAlertIntervalId: number | null = null;
-  private alertAudio: HTMLAudioElement | null = null;
-  private autoStartedServers = new Set<string>();
+  private yellowAlertAudio: HTMLAudioElement | null = null;
+  private redAlertAudio: HTMLAudioElement | null = null;
   private lastYellowAlertAt = 0;
   private lastRedAlertAt = 0;
+  private audioInteractionHandler: (() => void) | null = null;
+  private latchedAlertLevels = new Map<string, 'yellow' | 'red'>();
+  private monitoringStarted = signal(false);
+  menuOpen = false;
+  showAudioModeDialog = true;
+  alertMode: 'ringer' | 'silent' | null = null;
 
   serverName = '';
   serverHost = '';
@@ -27,7 +33,7 @@ export class NetworkDashboardComponent implements OnDestroy {
   isUploadMode = false;
   csvFileContent = '';
   csvFileName = '';
-  private hydrationComplete = false;
+  private hydrationComplete = signal(false);
 
   get servers() {
     return this.networkMonitor.servers;
@@ -35,26 +41,21 @@ export class NetworkDashboardComponent implements OnDestroy {
 
   constructor(public networkMonitor: NetworkMonitorService) {
     if (typeof window !== 'undefined') {
-      this.alertAudio = new Audio('/ping-beep.mp3');
-      this.alertAudio.preload = 'auto';
-      this.alertAudio.volume = 0.8;
-      this.alertAudio.load();
+      this.yellowAlertAudio = this.createAlertAudio('/Sounds/yellow%20warning.mp3');
+      this.redAlertAudio = this.createAlertAudio('/Sounds/red%20warning.mp3');
+      this.audioInteractionHandler = () => this.primeAlertAudio();
+      window.addEventListener('pointerdown', this.audioInteractionHandler, { once: true });
+      window.addEventListener('keydown', this.audioInteractionHandler, { once: true });
     }
 
+    effect(() => {
+      if (this.hydrationComplete()) {
+        this.updateOfflineAlertState();
+      }
+    });
+
     afterNextRender(() => {
-      this.hydrationComplete = true;
-
-      effect(() => {
-        if (this.hydrationComplete) {
-          this.autoStartLivePing();
-        }
-      });
-
-      effect(() => {
-        if (this.hydrationComplete) {
-          this.updateOfflineAlertState();
-        }
-      });
+      this.hydrationComplete.set(true);
 
       this.livePingAutoScrollIntervalId = window.setInterval(() => {
         this.scrollLivePingOutputsToBottom();
@@ -64,19 +65,26 @@ export class NetworkDashboardComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopOfflineAlert();
+    this.yellowAlertAudio?.pause();
+    this.redAlertAudio?.pause();
+    if (this.audioInteractionHandler !== null) {
+      window.removeEventListener('pointerdown', this.audioInteractionHandler);
+      window.removeEventListener('keydown', this.audioInteractionHandler);
+      this.audioInteractionHandler = null;
+    }
     if (this.livePingAutoScrollIntervalId !== null) {
       window.clearInterval(this.livePingAutoScrollIntervalId);
       this.livePingAutoScrollIntervalId = null;
     }
   }
 
-  private autoStartLivePing(): void {
-    this.servers().forEach((server) => {
-      if (!this.autoStartedServers.has(server.id) && !server.maintenance) {
-        this.autoStartedServers.add(server.id);
-        this.networkMonitor.startLivePing(server.id);
-      }
-    });
+  private startMonitoringAfterAudioChoice(): void {
+    if (this.monitoringStarted()) {
+      return;
+    }
+
+    this.monitoringStarted.set(true);
+    this.networkMonitor.startMonitoring();
   }
 
   startLivePing(serverId: string): void {
@@ -89,21 +97,37 @@ export class NetworkDashboardComponent implements OnDestroy {
   }
 
   private updateOfflineAlertState(): void {
-    const hasOffline = this.servers().some((server) => server.status === 'red');
-    const hasDegraded = this.servers().some((server) => server.status === 'yellow');
+    this.servers().forEach((server) => {
+      if (!server.maintenance && (server.status === 'yellow' || server.status === 'red')) {
+        this.latchedAlertLevels.set(server.id, server.status === 'red' ? 'red' : 'yellow');
+      } else {
+        this.latchedAlertLevels.delete(server.id);
+      }
+    });
+
+    const hasOffline = [...this.latchedAlertLevels.values()].some((level) => level === 'red');
+    const hasDegraded = [...this.latchedAlertLevels.values()].some((level) => level === 'yellow');
+
+    if (this.alertMode !== 'ringer') {
+      this.stopOfflineAlert();
+      return;
+    }
 
     if (hasOffline) {
       this.startOfflineAlert();
-    } else {
-      this.stopOfflineAlert();
+      return;
     }
 
-    if (hasDegraded && !hasOffline) {
+    this.stopOfflineAlert();
+
+    if (hasDegraded) {
       const now = Date.now();
       if (now - this.lastYellowAlertAt >= 5000) {
         this.lastYellowAlertAt = now;
-        this.playAlertTone();
+        this.playAlertTone('yellow');
       }
+    } else {
+      this.stopOfflineAlert();
     }
   }
 
@@ -113,10 +137,10 @@ export class NetworkDashboardComponent implements OnDestroy {
     }
 
     this.lastRedAlertAt = Date.now();
-    this.playAlertTone();
+    this.playAlertTone('red');
     this.offlineAlertIntervalId = window.setInterval(() => {
       this.lastRedAlertAt = Date.now();
-      this.playAlertTone();
+      this.playAlertTone('red');
     }, 2000);
   }
 
@@ -125,19 +149,100 @@ export class NetworkDashboardComponent implements OnDestroy {
       window.clearInterval(this.offlineAlertIntervalId);
       this.offlineAlertIntervalId = null;
     }
+
+    [this.yellowAlertAudio, this.redAlertAudio].forEach((audio) => {
+      audio?.pause();
+      if (audio) {
+        audio.currentTime = 0;
+      }
+    });
   }
 
-  private playAlertTone(): void {
-    if (!this.alertAudio) {
-      console.warn('playAlertTone called but alertAudio is not initialized');
+  private createAlertAudio(source: string): HTMLAudioElement {
+    const audio = new Audio(source);
+    audio.preload = 'auto';
+    audio.volume = 0.8;
+    audio.load();
+    return audio;
+  }
+
+  private playAlertTone(level: 'yellow' | 'red'): void {
+    if (this.alertMode !== 'ringer') {
       return;
     }
 
-    this.alertAudio.pause();
-    this.alertAudio.currentTime = 0;
-    this.alertAudio.play().catch((error) => {
-      console.warn('Alert sound failed to play:', error);
+    const audio = level === 'red' ? this.redAlertAudio : this.yellowAlertAudio;
+    const otherAudio = level === 'red' ? this.yellowAlertAudio : this.redAlertAudio;
+    if (!audio) {
+      console.warn(`${level} alert audio is not initialized`);
+      return;
+    }
+
+    otherAudio?.pause();
+    audio.pause();
+    audio.currentTime = 0;
+    audio.play().catch((error) => {
+      console.warn(`${level} alert sound failed to play:`, error);
     });
+  }
+
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  openAddServerDialog(): void {
+    this.menuOpen = false;
+    this.openAddDialog();
+  }
+
+  async toggleMute(): Promise<void> {
+    this.menuOpen = false;
+    if (this.alertMode === 'ringer') {
+      this.alertMode = 'silent';
+      this.stopOfflineAlert();
+      this.yellowAlertAudio?.pause();
+      this.redAlertAudio?.pause();
+      return;
+    }
+
+    this.alertMode = 'ringer';
+    await this.primeAlertAudio();
+    this.updateOfflineAlertState();
+  }
+
+  async selectAlertMode(mode: 'ringer' | 'silent'): Promise<void> {
+    this.alertMode = mode;
+    this.showAudioModeDialog = false;
+    this.startMonitoringAfterAudioChoice();
+
+    if (mode === 'silent') {
+      this.stopOfflineAlert();
+      return;
+    }
+
+    await this.primeAlertAudio();
+    this.updateOfflineAlertState();
+  }
+
+  private async primeAlertAudio(): Promise<void> {
+    const priming = [this.yellowAlertAudio, this.redAlertAudio]
+      .filter((audio): audio is HTMLAudioElement => audio !== null)
+      .map(async (audio) => {
+        audio.muted = true;
+        audio.currentTime = 0;
+
+        try {
+          await audio.play();
+        } catch {
+          return;
+        } finally {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.muted = false;
+        }
+      });
+
+    await Promise.all(priming);
   }
 
   private scrollLivePingOutputsToBottom(): void {
@@ -191,6 +296,12 @@ export class NetworkDashboardComponent implements OnDestroy {
   }
 
   toggleMaintenance(serverId: string): void {
+    const server = this.servers().find((item) => item.id === serverId);
+    if (server && !server.maintenance) {
+      this.latchedAlertLevels.delete(serverId);
+      this.stopOfflineAlert();
+    }
+
     this.networkMonitor.toggleMaintenance(serverId);
   }
 

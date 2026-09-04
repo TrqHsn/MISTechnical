@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ADApi.Services;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -22,23 +23,19 @@ namespace ADApi.Controllers
         private readonly ILogger<NetworkController> _logger;
         private static readonly ConcurrentDictionary<string, Process> _activeProcesses = new();
         private static readonly ConcurrentDictionary<string, CancellationTokenSource> _activeScanners = new();
-        private static readonly ConcurrentDictionary<string, MonitoredServer> _monitoredServers = new();
-        private static readonly SemaphoreSlim _serverStorageLock = new(1, 1);
+        private readonly NetworkMonitoringService _networkMonitoring;
         private readonly string _attendanceDeviceCsvPath;
 
-        public sealed record MonitoredServer(string Id, string Name, string Host, bool Maintenance, string? LastDownTime);
         public sealed record CreateServerRequest(string Name, string Host);
         public sealed record UpdateMaintenanceRequest(bool maintenance);
-        private readonly string _serverStoragePath;
 
-        public NetworkController(ILogger<NetworkController> logger, IWebHostEnvironment env)
+        public NetworkController(ILogger<NetworkController> logger, IWebHostEnvironment env, NetworkMonitoringService networkMonitoring)
         {
             _logger = logger;
+            _networkMonitoring = networkMonitoring;
             var csvDirectory = Path.Combine(env.ContentRootPath, "MIS", "public", "Attendance device IP");
             Directory.CreateDirectory(csvDirectory);
             _attendanceDeviceCsvPath = Path.Combine(csvDirectory, "Attendance device IP.csv");
-            _serverStoragePath = Path.Combine(env.ContentRootPath, "network-servers.json");
-            LoadStoredServers();
             
             // Initialize CSV with headers if it doesn't exist
             if (!System.IO.File.Exists(_attendanceDeviceCsvPath))
@@ -47,60 +44,10 @@ namespace ADApi.Controllers
             }
         }
 
-        private void LoadStoredServers()
-        {
-            try
-            {
-                if (!System.IO.File.Exists(_serverStoragePath))
-                {
-                    return;
-                }
-
-                var raw = System.IO.File.ReadAllText(_serverStoragePath, Encoding.UTF8);
-                var saved = JsonSerializer.Deserialize<List<MonitoredServer>>(raw, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                });
-
-                if (saved is null)
-                {
-                    return;
-                }
-
-                foreach (var server in saved)
-                {
-                    _monitoredServers[server.Id] = server;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Unable to load stored network servers");
-            }
-        }
-
-        private async Task SaveStoredServersAsync()
-        {
-            await _serverStorageLock.WaitAsync();
-            try
-            {
-                var payload = _monitoredServers.Values;
-                var serialized = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
-                await System.IO.File.WriteAllTextAsync(_serverStoragePath, serialized, Encoding.UTF8);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Unable to save stored network servers");
-            }
-            finally
-            {
-                _serverStorageLock.Release();
-            }
-        }
-
         [HttpGet("servers")]
         public IActionResult GetServers()
         {
-            return Ok(_monitoredServers.Values);
+            return Ok(_networkMonitoring.GetServers());
         }
 
         [HttpPost("servers")]
@@ -111,42 +58,30 @@ namespace ADApi.Controllers
                 return BadRequest(new { success = false, message = "Name and host are required" });
             }
 
-            var server = new MonitoredServer(
-                Guid.NewGuid().ToString(),
-                request.Name.Trim(),
-                request.Host.Trim(),
-                false,
-                null
-            );
-
-            _monitoredServers[server.Id] = server;
-            await SaveStoredServersAsync();
+            var server = await _networkMonitoring.AddServerAsync(request.Name, request.Host);
             return Ok(server);
         }
 
         [HttpDelete("servers/{id}")]
         public async Task<IActionResult> RemoveServer(string id)
         {
-            if (!_monitoredServers.TryRemove(id, out _))
+            if (!await _networkMonitoring.RemoveServerAsync(id))
             {
                 return NotFound(new { success = false, message = "Server not found" });
             }
 
-            await SaveStoredServersAsync();
             return Ok(new { success = true });
         }
 
         [HttpPatch("servers/{id}/maintenance")]
         public async Task<IActionResult> UpdateServerMaintenance(string id, [FromBody] UpdateMaintenanceRequest request)
         {
-            if (!_monitoredServers.TryGetValue(id, out var existing))
+            var updated = await _networkMonitoring.UpdateMaintenanceAsync(id, request.maintenance);
+            if (updated is null)
             {
                 return NotFound(new { success = false, message = "Server not found" });
             }
 
-            var updated = existing with { Maintenance = request.maintenance };
-            _monitoredServers[id] = updated;
-            await SaveStoredServersAsync();
             return Ok(updated);
         }
 

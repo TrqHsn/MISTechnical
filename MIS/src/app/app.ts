@@ -17,17 +17,17 @@ export class App {
   @ViewChild(UniversalSearchComponent) universalSearch?: UniversalSearchComponent;
 
   buttons = [
-    { name: 'ActiveDirectory', id: 'testapi' },
-    { name: 'Print', id: 'print' },
+    { name: '【ＡＤ】', id: 'testapi' },
+    { name: '🖨️', id: 'print' },
     { name: 'Forms', id: 'oif' },
-    { name: 'Tools', id: 'devicetool' },
-    { name: 'Search', id: 'inventory' },
-    { name: 'Network', id: 'network' },
-    { name: 'Sinage', id: 'kiosk' },
+    { name: '🛠️', id: 'devicetool' },
+    { name: '🔍', id: 'inventory' },
+    { name: '🌐', id: 'network' },
+    { name: '🖥️', id: 'kiosk' },
     // { name: 'Links', id: 'links' },
-    { name: 'Files', id: 'files' },
+    { name: '📁', id: 'files' },
     { name: 'Others', id: 'others' },
-    { name: 'Unlock', id: 'unlock' }
+    { name: '🔓', id: 'unlock' }
   ];
 
   // Work timer (7:30 -> 16:30 local time)

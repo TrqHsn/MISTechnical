@@ -5,7 +5,45 @@
       <p>Monitor servers continuously and keep the page open on a dedicated display.</p>
     </div>
   </div> -->
-  <button class="primary-button fab-button" type="button" (click)="openAddDialog()">➕</button>
+  <div class="fab-menu">
+    <div class="fab-menu-options" *ngIf="menuOpen">
+      <button class="secondary-button fab-menu-item" type="button" (click)="openAddServerDialog()">
+        <span aria-hidden="true">➕</span>
+      </button>
+      <button class="secondary-button fab-menu-item" type="button" (click)="toggleMute()">
+        <span aria-hidden="true">{{ alertMode === 'ringer' ? '🔇' : '🔊' }}</span>
+        <span>{{ alertMode === 'ringer' ? 'Mute' : 'Unmute' }}</span>
+      </button>
+    </div>
+    <button
+      class="primary-button fab-button"
+      type="button"
+      aria-label="Open network dashboard menu"
+      [attr.aria-expanded]="menuOpen"
+      (click)="toggleMenu()"
+    >
+      •••
+    </button>
+  </div>
+
+  <div class="dialog-overlay audio-mode-overlay" *ngIf="showAudioModeDialog">
+    <div class="dialog audio-mode-dialog" role="dialog" aria-modal="true" aria-labelledby="audio-mode-title">
+      <div class="dialog-header">
+        <h2 id="audio-mode-title">Alert mode</h2>
+      </div>
+      <!-- <p class="audio-mode-description">Choose how this monitoring page should handle alert sounds.</p> -->
+      <div class="audio-mode-actions">
+        <button type="button" class="primary-button" (click)="selectAlertMode('ringer')">
+          <span aria-hidden="true">🔔</span>
+          <span>Ringer mode</span>
+        </button>
+        <button type="button" class="secondary-button" (click)="selectAlertMode('silent')">
+          <span aria-hidden="true">🔕</span>
+          <span>Silent mode</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div *ngIf="showAddDialog" class="dialog-overlay" (click)="closeAddDialog()">
     <div class="dialog" (click)="$event.stopPropagation()">

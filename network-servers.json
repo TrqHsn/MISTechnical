@@ -1,120 +1,22 @@
 ﻿[
   {
-    "Id": "a8dd0173-8656-436a-aadf-117f3dfcce8d",
-    "Name": "SAP",
-    "Host": "DBOSAP16",
+    "Id": "8cac9d9e-734f-4703-9304-a6b9e07b2eb9",
+    "Name": "CloudFlare",
+    "Host": "1.1.1.1",
     "Maintenance": false,
     "LastDownTime": null
   },
   {
-    "Id": "cc7dfb04-8ec1-45c4-ba70-1e9d932b81ab",
-    "Name": "Kormee",
-    "Host": "SDLAP23",
+    "Id": "e57f600f-dea0-4ee8-9376-e81e7620f0b5",
+    "Name": "TQ",
+    "Host": "10.140.5.85",
     "Maintenance": false,
     "LastDownTime": null
   },
   {
-    "Id": "555d257a-777c-454a-9672-c9229728ea74",
-    "Name": "Race DBO",
-    "Host": "103.85.159.106",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "ee987202-7626-48ab-9ab6-a3ad4695bc40",
-    "Name": "Race SDL",
-    "Host": "103.85.159.162",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "116c1451-4628-411c-9356-8b4968c2c9ee",
-    "Name": "FastReact",
-    "Host": "SDLAP22",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "17f2fdb8-f5e3-4242-adce-46d794f2d0d0",
-    "Name": "Nester Production",
-    "Host": "SDLD560A",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "cf658c41-5a9e-4880-bccf-e65a0ccf36b9",
-    "Name": "TH",
-    "Host": "10.110.0.9",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "05ea3afa-7338-440c-bf33-9de91feaccce",
-    "Name": "Nester 1 Costing",
-    "Host": "SDLD557B",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "2553609c-aee0-4f8f-b2fc-eeb05ecf6177",
-    "Name": "CN SDL",
-    "Host": "103.18.204.118",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "c9ccd28b-2025-47a4-aaf3-4aca17fa275e",
-    "Name": "CN SIL",
-    "Host": "103.133.205.58",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "f2236bda-4cc4-4241-b35e-e1424620ff88",
-    "Name": "568",
-    "Host": "SDLD568B",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "f08b7dff-6a92-4fd1-9382-33ebc5c4ffba",
-    "Name": "Nester 2 Costing",
-    "Host": "SDLD561B",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "b68150b5-df86-467f-9782-429fb0d35c6a",
-    "Name": "DBOMS10",
-    "Host": "10.139.2.10",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "81d513b1-e314-4825-a601-2092af8cf0f6",
-    "Name": "Race SDL",
-    "Host": "103.85.159.198",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "310fcd83-0bd9-4878-bb7d-12204cadd8d9",
-    "Name": "CN DBO",
-    "Host": "103.18.205.214",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "7f047a9f-db02-4131-a176-4c83656613af",
-    "Name": "Race SIL",
-    "Host": "103.85.159.162",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "5331809a-6cfc-4979-8c15-16daff15e37a",
-    "Name": "NM",
-    "Host": "10.110.6.32",
+    "Id": "60bd5c8c-fe29-4f68-86c0-9ccb18a965b4",
+    "Name": "Google",
+    "Host": "8.8.8.8",
     "Maintenance": false,
     "LastDownTime": null
   }

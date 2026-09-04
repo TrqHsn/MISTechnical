@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
   KioskApiService,
   MediaItem,
@@ -23,6 +24,7 @@ import { ToastService } from '../../services/toast.service';
 })
 export class SinageComponent implements OnInit {
   private toast = inject(ToastService);
+  private sanitizer = inject(DomSanitizer);
   // Tab state
   activeTab = signal<'media' | 'playlists' | 'schedules' | 'settings' | 'preview'>('media');
 
@@ -239,9 +241,13 @@ export class SinageComponent implements OnInit {
   getMediaUrl(fileName: string): string {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
-      return `http://${hostname}:5001/displayboard/${fileName}`;
+      return `http://${hostname}:5001/displayboard/${encodeURIComponent(fileName)}`;
     }
-    return `http://localhost:5001/displayboard/${fileName}`;
+    return `http://localhost:5001/displayboard/${encodeURIComponent(fileName)}`;
+  }
+
+  getSafeMediaUrl(fileName: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.getMediaUrl(fileName));
   }
 
   // Playlist management

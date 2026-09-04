@@ -30,6 +30,8 @@ builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
 
 // Register Kiosk/Digital Signage service
 builder.Services.AddSingleton<IKioskService, KioskService>();
+builder.Services.AddSingleton<NetworkMonitoringService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<NetworkMonitoringService>());
 
 // Register SMB filesystem service
 builder.Services.AddScoped<ISmbService, SmbService>();

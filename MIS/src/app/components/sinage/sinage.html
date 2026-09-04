@@ -78,7 +78,7 @@
         } @else if (media.type === MediaType.Video) {
         <video [src]="getMediaUrl(media.fileName)" controls></video>
         } @else if (media.type === MediaType.PDF) {
-        <iframe [src]="getMediaUrl(media.fileName)" style="width: 100%; height: 200px; border: none;"></iframe>
+        <iframe [src]="getSafeMediaUrl(media.fileName)" style="width: 100%; height: 200px; border: none;"></iframe>
         }
         <div class="media-info">
           <strong>{{ media.originalFileName }}</strong>
