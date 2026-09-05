@@ -23,6 +23,15 @@ interface ContactRow {
   [key: string]: any;
 }
 
+interface DeviceRow {
+  AssetName: string;
+  Category: string;
+  IP: string;
+  Plant: string;
+  Location: string;
+  [key: string]: any;
+}
+
 @Component({
   selector: 'app-search',
   standalone: true,
@@ -31,7 +40,7 @@ interface ContactRow {
   styleUrl: './search.component.css'
 })
 export class SearchComponent {
-  activeTab = signal<'inventory' | 'contacts'>('inventory');
+  activeTab = signal<'inventory' | 'contacts' | 'devices'>('inventory');
 
   // Dynamically generate API URL based on environment
   private getApiUrl(): string {
@@ -95,6 +104,20 @@ export class SearchComponent {
   contactQrCodeUrl = signal('');
   private contactsSearchSubject = new Subject<string>();
 
+  // Device tab state
+  devicesLoading = signal(false);
+  devicesLoaded = signal(false);
+  devicesError = signal('');
+  private devicesData = signal<DeviceRow[]>([]);
+  deviceSearchTerm = signal('');
+  deviceSelectedCategory = signal('All');
+  deviceCategoryOptions = signal<string[]>([]);
+  deviceSearchResults = signal<DeviceRow[]>([]);
+  deviceSearching = signal(false);
+  deviceShowDropdown = signal(false);
+  selectedDevice = signal<DeviceRow | null>(null);
+  private deviceSearchSubject = new Subject<string>();
+
   // AD edit modal state
   adEditModalOpen = signal(false);
   adUserSearch = signal('');
@@ -130,7 +153,7 @@ export class SearchComponent {
     void this.loadFromServer();
   }
 
-  onTabChange(tab: 'inventory' | 'contacts'): void {
+  onTabChange(tab: 'inventory' | 'contacts' | 'devices'): void {
     this.activeTab.set(tab);
 
     if (tab === 'inventory' && !this.isLoadingFromServer()) {
@@ -139,6 +162,10 @@ export class SearchComponent {
 
     if (tab === 'contacts' && !this.contactsLoaded() && !this.contactsLoading()) {
       void this.loadContactsFromPublic();
+    }
+
+    if (tab === 'devices' && !this.devicesLoaded() && !this.devicesLoading()) {
+      void this.loadDevicesFromPublic();
     }
   }
 
@@ -435,6 +462,216 @@ export class SearchComponent {
 
   getContactResultDisplay(row: ContactRow): string {
     return `${row.EmployeeName || '-'} • ${row.Email || '-'}`;
+  }
+
+  async loadDevicesFromPublic(): Promise<void> {
+    this.devicesLoading.set(true);
+    this.devicesError.set('');
+
+    try {
+      const response = await fetch('/DeviceDetails/AssetInfo.csv');
+      if (!response.ok) {
+        throw new Error(`Could not load device file (${response.status})`);
+      }
+
+      const csvText = await response.text();
+      const workbook = XLSX.read(csvText, { type: 'string', raw: true });
+      const rows = this.parseDeviceRows(workbook);
+
+      if (!rows.length) {
+        throw new Error('Device file is empty or has no usable rows');
+      }
+
+      this.devicesData.set(rows);
+      this.deviceCategoryOptions.set(this.getDeviceCategories(rows));
+      this.deviceSelectedCategory.set('All');
+      this.deviceSearchResults.set(rows.slice(0, 10));
+      this.deviceShowDropdown.set(false);
+      this.selectedDevice.set(null);
+      this.devicesLoaded.set(true);
+    } catch (error) {
+      this.devicesLoaded.set(false);
+      this.devicesData.set([]);
+      this.deviceCategoryOptions.set([]);
+      this.deviceSearchResults.set([]);
+      this.selectedDevice.set(null);
+      this.devicesError.set(error instanceof Error ? error.message : 'Failed to load device data');
+    } finally {
+      this.devicesLoading.set(false);
+    }
+  }
+
+  onDeviceSearchInput(value: string): void {
+    this.deviceSearchTerm.set(value);
+    this.selectedDevice.set(null);
+
+    if (!value.trim()) {
+      this.deviceSearchResults.set(this.filterDeviceRows());
+      this.deviceShowDropdown.set(false);
+      this.deviceSearching.set(false);
+      return;
+    }
+
+    this.performDeviceSearch(value);
+    this.deviceShowDropdown.set(true);
+  }
+
+  onDeviceSearchKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const results = this.deviceSearchResults();
+      if (results.length > 0) {
+        this.selectDevice(results[0]);
+      }
+    }
+  }
+
+  onDeviceCategoryChange(value: string): void {
+    this.deviceSelectedCategory.set(value);
+    this.selectedDevice.set(null);
+    this.deviceSearchResults.set(this.filterDeviceRows());
+    this.deviceShowDropdown.set(false);
+    this.deviceSearchTerm.set(this.deviceSearchTerm());
+    if (this.deviceSearchTerm().trim()) {
+      this.performDeviceSearch(this.deviceSearchTerm());
+    }
+  }
+
+  private performDeviceSearch(term: string): void {
+    const trimmed = term.trim();
+    const results = this.filterDeviceRows(trimmed);
+    this.deviceSearchResults.set(results.slice(0, 10));
+    this.deviceSearching.set(false);
+    this.deviceShowDropdown.set(Boolean(trimmed));
+  }
+
+  private filterDeviceRows(searchTerm?: string): DeviceRow[] {
+    const rows = this.devicesData();
+    const category = this.deviceSelectedCategory();
+    const query = (searchTerm ?? this.deviceSearchTerm()).trim().toLowerCase();
+
+    return rows.filter((row) => {
+      const matchesCategory = category === 'All' || String(row.Category || '').trim().toLowerCase() === category.toLowerCase();
+      if (!matchesCategory) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      const asset = String(row.AssetName || '').toLowerCase();
+      const ip = String(row.IP || '').toLowerCase();
+      const location = String(row.Location || '').toLowerCase();
+      return asset.includes(query) || ip.includes(query) || location.includes(query);
+    });
+  }
+
+  selectDevice(device: DeviceRow): void {
+    this.selectedDevice.set(device);
+    this.deviceShowDropdown.set(false);
+  }
+
+  getDeviceResultDisplay(row: DeviceRow): string {
+    const asset = row.AssetName || '-';
+    const ip = row.IP || '-';
+    const plant = row.Plant || '-';
+    const location = row.Location || '-';
+    return `${asset} • ${ip} • ${plant} • ${location}`;
+  }
+
+  getDeviceField(value: any): string {
+    if (value === null || value === undefined || `${value}`.trim() === '') {
+      return '-';
+    }
+    return `${value}`;
+  }
+
+  private parseDeviceRows(workbook: XLSX.WorkBook): DeviceRow[] {
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rawRows: any[][] = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1,
+      raw: false,
+      defval: ''
+    });
+
+    if (!rawRows.length) {
+      return [];
+    }
+
+    const normalizedValues = rawRows.map((row) =>
+      (Array.isArray(row) ? row.map((cell) => String(cell ?? '').trim()) : [])
+    );
+
+    const headerRow = normalizedValues.find((row) =>
+      row.some((cell) => /assetname|category|ip|plant|location/i.test(cell))
+    );
+
+    if (!headerRow) {
+      return [];
+    }
+
+    const rowKeys = this.getDeviceHeaderMap(headerRow);
+    if (
+      rowKeys['AssetName'] === undefined ||
+      rowKeys['Category'] === undefined ||
+      rowKeys['IP'] === undefined ||
+      rowKeys['Location'] === undefined
+    ) {
+      return [];
+    }
+
+    return normalizedValues
+      .slice(normalizedValues.indexOf(headerRow) + 1)
+      .filter((row) => row.some((cell) => cell))
+      .map((row) => {
+        const plantIndex = rowKeys['Plant'] ?? rowKeys['Location'];
+        return {
+          AssetName: row[rowKeys['AssetName'] as number] || '',
+          Category: row[rowKeys['Category'] as number] || '',
+          IP: row[rowKeys['IP'] as number] || '',
+          Plant: plantIndex !== undefined ? row[plantIndex] || '' : '',
+          Location: row[rowKeys['Location'] as number] || ''
+        };
+      })
+      .filter((row) => row.AssetName || row.Category || row.IP || row.Location);
+  }
+
+  private getDeviceHeaderMap(headerRow: string[]): Record<string, number | undefined> {
+    const map: Record<string, number | undefined> = {};
+    headerRow.forEach((cell, index) => {
+      const normalized = cell.trim();
+      if (!normalized) {
+        return;
+      }
+
+      const key = normalized.toLowerCase();
+      if (key === 'assetname' || key === 'asset name') {
+        map['AssetName'] = index;
+      } else if (key === 'category') {
+        map['Category'] = index;
+      } else if (key === 'ip' || key === 'ip address') {
+        map['IP'] = index;
+      } else if (key === 'plant') {
+        map['Plant'] = index;
+      } else if (key === 'location') {
+        map['Location'] = index;
+      }
+    });
+
+    return map;
+  }
+
+  private getDeviceCategories(rows: DeviceRow[]): string[] {
+    const categories = new Set<string>();
+    rows.forEach((row) => {
+      const category = String(row.Category || '').trim();
+      if (category) {
+        categories.add(category);
+      }
+    });
+
+    return Array.from(categories).sort((a, b) => a.localeCompare(b));
   }
 
   /**

@@ -7,6 +7,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'contacts'" (click)="onTabChange('contacts')">
       Contacts
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'devices'" (click)="onTabChange('devices')">
+      Devices
+    </button>
   </div>
 
   @if (activeTab() === 'inventory') {
@@ -267,5 +270,85 @@
       </div>
     }
   </div>
+  }
+
+  @if (activeTab() === 'devices') {
+    <div class="tab-content">
+      @if (devicesError()) {
+        <div class="error-message">❌ {{ devicesError() }}</div>
+      }
+
+      <div class="search-section" [class.disabled]="!devicesLoaded()">
+        <div class="device-toolbar">
+          <div class="search-input-wrapper device-search-wrapper">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search by asset, IP or location"
+              [value]="deviceSearchTerm()"
+              (input)="onDeviceSearchInput($any($event.target).value)"
+              (keydown)="onDeviceSearchKeydown($event)"
+              [disabled]="!devicesLoaded()"
+            />
+
+            @if (deviceSearching()) {
+              <div class="searching-indicator">Searching...</div>
+            }
+
+            @if (deviceShowDropdown() && deviceSearchResults().length > 0) {
+              <div class="results-dropdown device-results-dropdown">
+                @for (result of deviceSearchResults(); track $index) {
+                  <div class="result-item" (click)="selectDevice(result)">
+                    <div class="device-result-main">
+                      <strong>{{ getDeviceField(result.AssetName) }}</strong>
+                      <span class="device-result-ip">IP: {{ getDeviceField(result.IP) }}</span>
+                    </div>
+                    <div class="device-result-location">
+                      {{ getDeviceField(result.Plant) }} • {{ getDeviceField(result.Location) }}
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (deviceShowDropdown() && deviceSearchResults().length === 0 && !deviceSearching() && deviceSearchTerm()) {
+              <div class="results-dropdown device-results-dropdown">
+                <div class="no-results">No device found</div>
+              </div>
+            }
+          </div>
+
+          <select
+            class="device-filter-select"
+            [value]="deviceSelectedCategory()"
+            (change)="onDeviceCategoryChange($any($event.target).value)"
+            [disabled]="!devicesLoaded() || deviceCategoryOptions().length === 0"
+          >
+            <option value="All">All categories</option>
+            @for (category of deviceCategoryOptions(); track category) {
+              <option [value]="category">{{ category }}</option>
+            }
+          </select>
+        </div>
+
+      </div>
+
+      @if (selectedDevice()) {
+        <div class="device-card">
+          <div class="device-header">
+            <h2>{{ getDeviceField(selectedDevice()?.AssetName) }}</h2>
+            <span class="device-category-badge">{{ getDeviceField(selectedDevice()?.Category) }}</span>
+          </div>
+
+          <div class="device-grid">
+            <div class="device-item"><strong>Asset Name:</strong> {{ getDeviceField(selectedDevice()?.AssetName) }}</div>
+            <div class="device-item"><strong>Category:</strong> {{ getDeviceField(selectedDevice()?.Category) }}</div>
+            <div class="device-item"><strong>IP:</strong> {{ getDeviceField(selectedDevice()?.IP) }}</div>
+            <div class="device-item"><strong>Plant:</strong> {{ getDeviceField(selectedDevice()?.Plant) }}</div>
+            <div class="device-item"><strong>Location:</strong> {{ getDeviceField(selectedDevice()?.Location) }}</div>
+          </div>
+        </div>
+      }
+    </div>
   }
 </div>
