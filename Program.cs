@@ -24,6 +24,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Register HttpClient for making HTTP requests
 builder.Services.AddHttpClient();
+builder.Services.AddHostedService<InventoryCacheService>();
 
 // Register Active Directory service
 builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
@@ -32,6 +33,7 @@ builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
 builder.Services.AddSingleton<IKioskService, KioskService>();
 builder.Services.AddSingleton<NetworkMonitoringService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<NetworkMonitoringService>());
+builder.Services.AddSingleton<WakeOnLanService>();
 
 // Register SMB filesystem service
 builder.Services.AddScoped<ISmbService, SmbService>();

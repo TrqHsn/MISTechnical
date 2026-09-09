@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using ADApi.Models;
 
 // For SNMP test endpoint
 using Lextm.SharpSnmpLib;
@@ -24,15 +25,21 @@ namespace ADApi.Controllers
         private static readonly ConcurrentDictionary<string, Process> _activeProcesses = new();
         private static readonly ConcurrentDictionary<string, CancellationTokenSource> _activeScanners = new();
         private readonly NetworkMonitoringService _networkMonitoring;
+        private readonly WakeOnLanService _wakeOnLan;
         private readonly string _attendanceDeviceCsvPath;
 
         public sealed record CreateServerRequest(string Name, string Host);
         public sealed record UpdateMaintenanceRequest(bool maintenance);
 
-        public NetworkController(ILogger<NetworkController> logger, IWebHostEnvironment env, NetworkMonitoringService networkMonitoring)
+        public NetworkController(
+            ILogger<NetworkController> logger,
+            IWebHostEnvironment env,
+            NetworkMonitoringService networkMonitoring,
+            WakeOnLanService wakeOnLan)
         {
             _logger = logger;
             _networkMonitoring = networkMonitoring;
+            _wakeOnLan = wakeOnLan;
             var csvDirectory = Path.Combine(env.ContentRootPath, "MIS", "public", "Attendance device IP");
             Directory.CreateDirectory(csvDirectory);
             _attendanceDeviceCsvPath = Path.Combine(csvDirectory, "Attendance device IP.csv");
@@ -193,6 +200,61 @@ namespace ADApi.Controllers
             {
                 _logger.LogWarning(ex, "Ping failed for {Host}", host);
                 return Ok(new { success = false, status = "Error" });
+            }
+        }
+
+        [HttpGet("wol")]
+        public async Task<IActionResult> GetWakeOnLanDevices()
+        {
+            return Ok(await _wakeOnLan.GetDevicesAsync());
+        }
+
+        [HttpPost("wol")]
+        public async Task<IActionResult> AddWakeOnLanDevice([FromBody] CreateWakeOnLanDeviceRequest request)
+        {
+            if (request is null || string.IsNullOrWhiteSpace(request.HostName))
+            {
+                return BadRequest(new { success = false, message = "Host name is required." });
+            }
+
+            try
+            {
+                return Ok(await _wakeOnLan.AddDeviceAsync(request.HostName, request.MacAddress));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpDelete("wol/{id}")]
+        public async Task<IActionResult> DeleteWakeOnLanDevice(string id)
+        {
+            return await _wakeOnLan.DeleteDeviceAsync(id)
+                ? Ok(new { success = true })
+                : NotFound(new { success = false, message = "Wake-on-LAN device not found." });
+        }
+
+        [HttpPost("wol/{id}/wake")]
+        public async Task<IActionResult> WakeOnLanDevice(string id)
+        {
+            try
+            {
+                await _wakeOnLan.WakeDeviceAsync(id);
+                return Ok(new { success = true, message = "Wake-on-LAN packet sent." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (SocketException ex)
+            {
+                _logger.LogError(ex, "Failed to send Wake-on-LAN packet for {Id}", id);
+                return StatusCode(500, new { success = false, message = "Failed to send Wake-on-LAN packet." });
             }
         }
 

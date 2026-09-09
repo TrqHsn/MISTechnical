@@ -6,35 +6,45 @@ namespace ADApi.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IWebHostEnvironment _environment;
     private readonly ILogger<InventoryController> _logger;
 
-    public InventoryController(IHttpClientFactory httpClientFactory, ILogger<InventoryController> logger)
+    public InventoryController(IWebHostEnvironment environment, ILogger<InventoryController> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _environment = environment;
         _logger = logger;
     }
 
     [HttpGet("csv")]
     public async Task<IActionResult> GetInventoryCsv()
     {
+        var inventoryPath = Path.Combine(
+            _environment.ContentRootPath,
+            "wwwroot",
+            "inventory",
+            "inventory.csv");
+
         try
         {
-            var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync("http://sdlportal.dewhirst.grp/inventory/csv.php?type=all");
-            
-            if (!response.IsSuccessStatusCode)
+            if (!System.IO.File.Exists(inventoryPath))
             {
-                _logger.LogError("Failed to fetch CSV from portal: {StatusCode}", response.StatusCode);
-                return StatusCode((int)response.StatusCode, new { error = "Failed to fetch CSV from portal" });
+                _logger.LogWarning("Inventory cache file was not found at {InventoryPath}", inventoryPath);
+                return NotFound(new { error = "Inventory cache is not available" });
             }
 
-            var csvContent = await response.Content.ReadAsStringAsync();
-            return Content(csvContent, "text/csv");
+            var stream = new FileStream(
+                inventoryPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 81920,
+                useAsync: true);
+
+            return File(stream, "text/csv", enableRangeProcessing: true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching inventory CSV");
+            _logger.LogError(ex, "Error reading cached inventory CSV");
             return StatusCode(500, new { error = "Internal server error", message = ex.Message });
         }
     }

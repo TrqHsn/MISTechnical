@@ -3,11 +3,14 @@
 
   <!-- Tab Navigation -->
   <div class="tabs">
-    <button class="tab-btn" [class.active]="activeTab() === 'ping'" (click)="activeTab.set('ping')">
+    <button class="tab-btn" [class.active]="activeTab() === 'ping'" (click)="selectTab('ping')">
       Ping
     </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'activeip'" (click)="activeTab.set('activeip')">
+    <button class="tab-btn" [class.active]="activeTab() === 'activeip'" (click)="selectTab('activeip')">
       ActiveIP Scanner
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'wol'" (click)="selectTab('wol')">
+      Wake-on-LAN
     </button>
   </div>
 
@@ -154,6 +157,111 @@
                 </li>
               }
             </ul>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Wake-on-LAN Tab -->
+  @if (activeTab() === 'wol') {
+    <div class="tab-content">
+      <div class="wol-section">
+        <div class="wol-header">
+          <div>
+            <h2>Wake-on-LAN</h2>
+            <p class="help-text">Send a magic packet to a saved device.</p>
+          </div>
+          <button class="btn primary" type="button" (click)="openWakeOnLanForm()">
+            + Add device
+          </button>
+        </div>
+
+        @if (showWakeOnLanForm()) {
+          <form class="wol-form" (ngSubmit)="addWakeOnLanDevice()">
+            <div class="input-row">
+              <div class="input-group">
+                <label for="wakeOnLanHostName">Host name</label>
+                <input
+                  type="text"
+                  id="wakeOnLanHostName"
+                  class="text-input"
+                  placeholder="e.g., Office-PC-01"
+                  [ngModel]="wakeOnLanHostName()"
+                  (ngModelChange)="wakeOnLanHostName.set($event)"
+                  name="wakeOnLanHostName"
+                  required
+                />
+              </div>
+              <div class="input-group">
+                <label for="wakeOnLanMacAddress">MAC address</label>
+                <input
+                  type="text"
+                  id="wakeOnLanMacAddress"
+                  class="text-input"
+                  placeholder="e.g., AA:BB:CC:DD:EE:FF"
+                  [ngModel]="wakeOnLanMacAddress()"
+                  (ngModelChange)="wakeOnLanMacAddress.set($event)"
+                  name="wakeOnLanMacAddress"
+                  required
+                />
+              </div>
+            </div>
+            @if (wakeOnLanError()) {
+              <div class="status-message wol-error">{{ wakeOnLanError() }}</div>
+            }
+            <div class="button-row">
+              <button class="btn primary" type="submit" [disabled]="isSavingWakeOnLan()">
+                {{ isSavingWakeOnLan() ? 'Adding...' : 'Add device' }}
+              </button>
+              <button class="btn secondary" type="button" (click)="closeWakeOnLanForm()" [disabled]="isSavingWakeOnLan()">
+                Cancel
+              </button>
+            </div>
+          </form>
+        }
+
+        @if (isLoadingWakeOnLan()) {
+          <div class="status-message">Loading saved devices...</div>
+        } @else if (wakeOnLanError() && !showWakeOnLanForm()) {
+          <div class="status-message wol-error">
+            {{ wakeOnLanError() }}
+            <button class="btn secondary" type="button" (click)="loadWakeOnLanDevices()">Retry</button>
+          </div>
+        } @else if (wakeOnLanDevices().length === 0) {
+          <div class="wol-empty">
+            <strong>No devices saved</strong>
+            <span>Add a host name and MAC address to wake it remotely.</span>
+          </div>
+        } @else {
+          <div class="wol-list" aria-label="Saved Wake-on-LAN devices">
+            @for (device of wakeOnLanDevices(); track device.id) {
+              <div class="wol-item">
+                <div class="wol-device-details">
+                  <strong>{{ device.hostName }}</strong>
+                  <span>{{ device.macAddress }}</span>
+                </div>
+                <div class="wol-actions">
+                  <button
+                    class="btn primary"
+                    type="button"
+                    (click)="wakeOnLanDevice(device)"
+                    [disabled]="isWakeOnLanActionRunning(device)"
+                  >
+                    {{ isWakeOnLanActionRunning(device) ? 'Waking...' : 'Wake' }}
+                  </button>
+                  <button
+                    class="btn danger"
+                    type="button"
+                    (click)="deleteWakeOnLanDevice(device)"
+                    [disabled]="isWakeOnLanActionRunning(device)"
+                    aria-label="Delete {{ device.hostName }}"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            }
           </div>
         }
       </div>

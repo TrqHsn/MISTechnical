@@ -461,6 +461,122 @@
   font-size: 1.1rem;
 }
 
+/* Wake-on-LAN */
+.wol-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.wol-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.wol-header h2 {
+  margin: 0 0 0.35rem;
+  color: #fff;
+  font-size: 1.35rem;
+}
+
+.wol-form,
+.wol-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wol-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.wol-form {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.wol-form .input-row {
+  width: 100%;
+  min-width: 0;
+}
+
+.wol-form .input-group {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.wol-form .text-input {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.wol-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.wol-device-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.wol-device-details strong {
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.wol-device-details span {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.wol-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.wol-actions .btn {
+  flex: 1;
+}
+
+.wol-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.wol-empty strong {
+  color: #fff;
+}
+
+.wol-error {
+  background: rgba(244, 67, 54, 0.15);
+  border-color: rgba(244, 67, 54, 0.35);
+  color: #ff8a80;
+}
+
 .ip-list {
   list-style: none;
   padding: 0;
@@ -558,6 +674,20 @@
     height: 330px;
   }
 
+  .wol-header,
+  .wol-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wol-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wol-actions .btn {
+    flex: 1;
+  }
+
 }
 
 
@@ -591,6 +721,10 @@
 
   .result-header h3 {
     font-size: 0.9rem;
+  }
+
+  .wol-list {
+    grid-template-columns: 1fr;
   }
 
   .status-light {

@@ -5,6 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 
+interface WakeOnLanDevice {
+  id: string;
+  hostName: string;
+  macAddress: string;
+}
+
 @Component({
   selector: 'app-network',
   imports: [CommonModule, FormsModule],
@@ -23,7 +29,7 @@ export class NetworkComponent implements OnDestroy {
   }
 
   // Tab management
-  activeTab = signal<'ping' | 'activeip'>('ping');
+  activeTab = signal<'ping' | 'activeip' | 'wol'>('ping');
 
   // Ping tab
   pingAddress = signal('10.140.');
@@ -57,9 +63,9 @@ export class NetworkComponent implements OnDestroy {
     // Listen for tab query parameter
     this.route.queryParams.subscribe(params => {
       if (params['tab']) {
-        const tab = params['tab'] as 'ping' | 'activeip';
-        if (tab === 'ping' || tab === 'activeip') {
-          this.activeTab.set(tab);
+        const tab = params['tab'] as 'ping' | 'activeip' | 'wol';
+        if (tab === 'ping' || tab === 'activeip' || tab === 'wol') {
+          this.selectTab(tab);
         }
       }
     });
@@ -345,6 +351,108 @@ export class NetworkComponent implements OnDestroy {
     this.scanBaseIp.set('');
     this.activeIps.set([]);
     this.scanStatus.set('');
+  }
+
+  // Wake-on-LAN tab
+  wakeOnLanDevices = signal<WakeOnLanDevice[]>([]);
+  wakeOnLanHostName = signal('');
+  wakeOnLanMacAddress = signal('');
+  showWakeOnLanForm = signal(false);
+  isLoadingWakeOnLan = signal(false);
+  isSavingWakeOnLan = signal(false);
+  wakeOnLanError = signal('');
+  private wakeOnLanActionId = signal<string | null>(null);
+
+  selectTab(tab: 'ping' | 'activeip' | 'wol') {
+    this.activeTab.set(tab);
+    if (tab === 'wol' && this.wakeOnLanDevices().length === 0) {
+      this.loadWakeOnLanDevices();
+    }
+  }
+
+  loadWakeOnLanDevices() {
+    this.isLoadingWakeOnLan.set(true);
+    this.wakeOnLanError.set('');
+    this.http.get<WakeOnLanDevice[]>(`${this.getApiBaseUrl()}/api/network/wol`).subscribe({
+      next: devices => {
+        this.wakeOnLanDevices.set(devices);
+        this.isLoadingWakeOnLan.set(false);
+      },
+      error: err => {
+        this.isLoadingWakeOnLan.set(false);
+        this.wakeOnLanError.set(err.error?.message || 'Failed to load Wake-on-LAN devices.');
+      }
+    });
+  }
+
+  openWakeOnLanForm() {
+    this.wakeOnLanHostName.set('');
+    this.wakeOnLanMacAddress.set('');
+    this.wakeOnLanError.set('');
+    this.showWakeOnLanForm.set(true);
+  }
+
+  closeWakeOnLanForm() {
+    if (!this.isSavingWakeOnLan()) {
+      this.showWakeOnLanForm.set(false);
+    }
+  }
+
+  addWakeOnLanDevice() {
+    const hostName = this.wakeOnLanHostName().trim();
+    const macAddress = this.wakeOnLanMacAddress().trim();
+    if (!hostName || !macAddress) {
+      this.wakeOnLanError.set('Host name and MAC address are required.');
+      return;
+    }
+
+    this.isSavingWakeOnLan.set(true);
+    this.wakeOnLanError.set('');
+    this.http.post<WakeOnLanDevice>(`${this.getApiBaseUrl()}/api/network/wol`, { hostName, macAddress }).subscribe({
+      next: device => {
+        this.wakeOnLanDevices.update(devices => [...devices, device]);
+        this.showWakeOnLanForm.set(false);
+        this.isSavingWakeOnLan.set(false);
+        this.toastService.success(`${device.hostName} was added.`);
+      },
+      error: err => {
+        this.isSavingWakeOnLan.set(false);
+        this.wakeOnLanError.set(err.error?.message || 'Failed to add Wake-on-LAN device.');
+      }
+    });
+  }
+
+  wakeOnLanDevice(device: WakeOnLanDevice) {
+    this.wakeOnLanActionId.set(device.id);
+    this.http.post<{ message: string }>(`${this.getApiBaseUrl()}/api/network/wol/${device.id}/wake`, {}).subscribe({
+      next: response => {
+        this.wakeOnLanActionId.set(null);
+        this.toastService.success(response.message || `Wake packet sent to ${device.hostName}.`);
+      },
+      error: err => {
+        this.wakeOnLanActionId.set(null);
+        this.toastService.error(err.error?.message || `Failed to wake ${device.hostName}.`);
+      }
+    });
+  }
+
+  deleteWakeOnLanDevice(device: WakeOnLanDevice) {
+    this.wakeOnLanActionId.set(device.id);
+    this.http.delete(`${this.getApiBaseUrl()}/api/network/wol/${device.id}`).subscribe({
+      next: () => {
+        this.wakeOnLanDevices.update(devices => devices.filter(item => item.id !== device.id));
+        this.wakeOnLanActionId.set(null);
+        this.toastService.success(`${device.hostName} was deleted.`);
+      },
+      error: err => {
+        this.wakeOnLanActionId.set(null);
+        this.toastService.error(err.error?.message || `Failed to delete ${device.hostName}.`);
+      }
+    });
+  }
+
+  isWakeOnLanActionRunning(device: WakeOnLanDevice) {
+    return this.wakeOnLanActionId() === device.id;
   }
 
   openIp(ip: string) {

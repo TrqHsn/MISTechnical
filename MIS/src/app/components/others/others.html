@@ -12,3 +12,44 @@
     }
   </div>
 </section>
+
+@if (guestWifiModalOpen()) {
+  <div class="guest-wifi-modal-backdrop" (click)="closeGuestWifiModal()">
+    <div class="guest-wifi-modal" (click)="$event.stopPropagation()">
+      <div class="guest-wifi-modal-header">
+        <h3>Guest Wi-Fi QR</h3>
+        <div class="guest-wifi-modal-actions">
+          <button type="button" class="guest-wifi-icon-btn" (click)="toggleGuestWifiEdit()" title="Edit password">✎</button>
+          <button type="button" class="guest-wifi-icon-btn guest-wifi-print-btn" (click)="printGuestWifiCards()" title="Print QR cards">🖨</button>
+        </div>
+      </div>
+
+      @if (guestWifiLoading()) {
+        <div class="guest-wifi-loading">Loading guest Wi-Fi settings...</div>
+      } @else {
+        @if (guestWifiError()) {
+          <div class="guest-wifi-error">{{ guestWifiError() }}</div>
+        }
+
+        <div class="guest-wifi-content">
+          @if (guestWifiQrCodeUrl()) {
+            <img class="guest-wifi-qr" [src]="guestWifiQrCodeUrl()" alt="Guest Wi-Fi QR code" />
+          }
+          <div class="guest-wifi-details">
+            <div class="guest-wifi-label">SSID</div>
+            <div class="guest-wifi-value">{{ guestWifiData().ssid }}</div>
+
+            @if (guestWifiEditing()) {
+              <label class="guest-wifi-label" for="guestWifiPassword">Password</label>
+              <input id="guestWifiPassword" class="guest-wifi-input" type="text" [value]="guestWifiPasswordInput()" (input)="guestWifiPasswordInput.set($any($event).target.value)" />
+              <button type="button" class="guest-wifi-save-btn" (click)="saveGuestWifiPassword()">Save Password</button>
+            } @else {
+              <div class="guest-wifi-label">Password</div>
+              <div class="guest-wifi-value">{{ guestWifiData().password }}</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

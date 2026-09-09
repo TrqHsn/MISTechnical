@@ -19,3 +19,48 @@ BD-02579,TA,10.140.8.93,SIL,Sewing Floor Infront of Line 9/10
 BD-02426,TA,10.140.8.94,SIL,Reception Area
 BD-02429,TA,10.140.8.41,SWL,Reception Area
 BD-02473,TA,10.140.8.43,SWL,HRM Exit Area 1
+SDLP003,Printer,10.140.7.03,SDL1,Packing - Ground floor - HP4250
+SDLP006,Printer,10.140.7.06,SIL,Packing - Second floor - HP4250
+SDLP007,Printer,10.140.7.07,SWL,HR - Ground floor - LJ2035
+SDLP008,Printer,10.140.7.08,SDL1,QA VCP - Ground floor - HPP2055
+SDLP009,Printer,10.140.7.09,SDL1,Quality - Ground floor - HP2035
+SDLP010,Printer,10.140.7.10,SDL1,IE - Ground floor - P2055
+SDLP011,Printer,10.140.7.11,SDL2,Store - Ground floor - HP2015
+SDLP013,Printer,10.140.7.13,SWL,Production - Ground floor - HP2055
+SDLP014,Printer,10.140.7.14,SIL,HR - Ground floor - HP2055
+SDLP016,Printer,10.140.7.16,SWL,Planning - Second floor - HP2055
+SDLP017,Printer,10.140.7.17,SDL2,Cutting - 1st floor - HP4250
+SDLP018,Printer,10.140.7.18,SIL,Quality - Ground floor - HP2035
+SDLP019,Printer,10.140.7.19,SIL,VCP area printer
+SDLP020,Printer,10.140.7.20,SDL2,Ground floor - IE - HP P2055
+SDLP023,Printer,10.140.7.23,SIL,Cutting - HP4250
+SDLP024,Printer,10.140.7.24,SDL2,Packing - HP2055
+SDLP026,Printer,10.140.7.26,SIL,Store - Ground floor - HP400M401
+SDLP031,Printer,10.140.7.31,,
+SDLP032,Printer,10.140.7.32,,
+SDLP041,Printer,10.140.7.41,,
+SDLP043,Printer,10.140.7.43,,
+SDLP044,Printer,10.140.7.44,,
+SDLP048,Printer,10.140.7.48,SIL,Marchant area - 1st floor - HP4250
+SDLP049,Printer,10.140.7.49,,
+SDLP050,Printer,10.140.7.50,,
+SDLP052,Printer,10.140.7.52,,
+SDLP053,Printer,10.140.7.53,,
+SDLP054,Printer,10.140.7.54,,
+SDLP055,Printer,10.140.7.55,,
+SDLP056,Printer,10.140.7.56,,
+SDLP057,Printer,10.140.7.57,,
+SDLP060,Printer,10.140.7.60,,
+SDLP061,Printer,10.140.7.61,,
+SDLP062,Printer,10.140.7.62,,
+SDLP063,Printer,10.140.7.63,,
+SDLP065,Printer,10.140.7.65,SIL,2nd floor - Sample - HP2035n
+BD-0000,PA,10.140.3.127,SIL,HR - ER room
+BD-0001,PA,10.140.3.129,SWL,HR room
+BD-0002,PA,10.140.3.126,SDL1,HR room
+BD-0003,PA,10.140.3.128,SDL2,HR room
+BD-04830,AP,10.140.25.10,SIL,Marchant area - MR10
+BD-04831,AP,10.140.25.11,SIL,Costing area - MR11
+BD-04836,AP,10.140.25.12,SIL,Ground Floor VCP Area -  MR12
+BD-04837,AP,10.140.25.13,SIL,Ground Floor Cutting Area - MR13
+BD-04838,AP,10.140.25.14,SIL,1st floor Sample Room Meeting room - MR14

@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import * as QRCode from 'qrcode';
-import { jsPDF } from 'jspdf';
+import * as XLSX from 'xlsx';
+
+interface InventoryRow {
+  [key: string]: unknown;
+}
 
 @Component({
   selector: 'app-print',
@@ -20,20 +22,11 @@ export class Print implements OnInit {
 
   // Forms Tab - PDF list
   pdfForms = [
-    { name: 'Guest QR', file: 'guest-wifi' },
     { name: 'Asset Transfer Form', file: 'Asset Transfar Form.pdf' },
     { name: 'Desktop User Policy', file: 'Desktop User Policy.pdf' },
     { name: 'Laptop User Policy', file: 'Laptop User Policy.pdf' },
     { name: 'Mobile WiFi Access', file: 'Mobile WiFi Access.pdf' }
   ];
-
-  guestWifiModalOpen = signal(false);
-  guestWifiEditing = signal(false);
-  guestWifiLoading = signal(false);
-  guestWifiError = signal('');
-  guestWifiData = signal({ ssid: 'Guest@Dewhirst', password: '' });
-  guestWifiPasswordInput = signal('');
-  guestWifiQrCodeUrl = signal('');
 
   // Label Print Tab - properties
   text1 = signal('');
@@ -46,8 +39,11 @@ export class Print implements OnInit {
   // Print status for server-side printing
   printStatus = signal('');
   isPrinting = signal(false);
+  inventoryLoading = signal(false);
+  inventoryError = signal('');
 
   serviceTagForm: FormGroup;
+  private inventoryRows: InventoryRow[] = [];
   sentByOptions = ['TH', 'NM', 'PM'];
   itContactNumbersFixed = 'Piyer Mollah - +8801752800084, Ridoan Zahan - +8801712158121';
 
@@ -91,132 +87,6 @@ export class Print implements OnInit {
     } catch {
       return dateString;
     }
-  }
-
-  async openGuestWifiModal(): Promise<void> {
-    if (typeof window === 'undefined') return;
-
-    this.guestWifiModalOpen.set(true);
-    this.guestWifiEditing.set(false);
-    this.guestWifiLoading.set(true);
-    this.guestWifiError.set('');
-
-    try {
-      const data = await firstValueFrom(this.http.get<{ ssid: string; password: string }>(`${this.getApiBaseUrl()}/api/print/guest-wifi`));
-      const ssid = data?.ssid || 'Guest@Dewhirst';
-      const password = data?.password || '';
-      this.guestWifiData.set({ ssid, password });
-      this.guestWifiPasswordInput.set(password);
-      const wifiString = this.buildGuestWifiString(ssid, password);
-      this.guestWifiQrCodeUrl.set(await QRCode.toDataURL(wifiString));
-    } catch (error) {
-      console.error('Unable to load guest Wi-Fi settings:', error);
-      this.guestWifiError.set('Unable to load guest Wi-Fi settings.');
-      this.guestWifiData.set({ ssid: 'Guest@Dewhirst', password: '' });
-      this.guestWifiPasswordInput.set('');
-      this.guestWifiQrCodeUrl.set('');
-    } finally {
-      this.guestWifiLoading.set(false);
-    }
-  }
-
-  closeGuestWifiModal(): void {
-    this.guestWifiModalOpen.set(false);
-    this.guestWifiEditing.set(false);
-    this.guestWifiError.set('');
-  }
-
-  toggleGuestWifiEdit(): void {
-    this.guestWifiEditing.set(!this.guestWifiEditing());
-    if (!this.guestWifiEditing()) {
-      this.guestWifiPasswordInput.set(this.guestWifiData().password);
-    }
-  }
-
-  async saveGuestWifiPassword(): Promise<void> {
-    this.guestWifiLoading.set(true);
-    this.guestWifiError.set('');
-
-    try {
-      const password = this.guestWifiPasswordInput().trim();
-      const data = await firstValueFrom(this.http.post<{ ssid: string; password: string }>(`${this.getApiBaseUrl()}/api/print/guest-wifi`, { password }));
-      const ssid = data?.ssid || this.guestWifiData().ssid;
-      this.guestWifiData.set({ ssid, password: data?.password || password });
-      this.guestWifiPasswordInput.set(data?.password || password);
-      const wifiString = this.buildGuestWifiString(ssid, data?.password || password);
-      this.guestWifiQrCodeUrl.set(await QRCode.toDataURL(wifiString));
-      this.guestWifiEditing.set(false);
-    } catch (error) {
-      console.error('Unable to save guest Wi-Fi password:', error);
-      this.guestWifiError.set('Unable to update guest Wi-Fi password.');
-    } finally {
-      this.guestWifiLoading.set(false);
-    }
-  }
-
-  async printGuestWifiCards(): Promise<void> {
-    if (typeof window === 'undefined') return;
-
-    const ssid = this.guestWifiData().ssid || 'Guest@Dewhirst';
-    const password = this.guestWifiPasswordInput() || this.guestWifiData().password || '';
-    const wifiString = this.buildGuestWifiString(ssid, password);
-    const qrCodeUrl = this.guestWifiQrCodeUrl() || await QRCode.toDataURL(wifiString);
-
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 12.7;
-    const marginRight = 12.7;
-    const marginTop = 12.7;
-    const marginBottom = 12.7;
-    const gapX = 6;
-    const gapY = 6;
-    const cardWidth = (pageWidth - marginLeft - marginRight - gapX) / 2;
-    const cardHeight = (pageHeight - marginTop - marginBottom - gapY * 2) / 3;
-    const qrSize = cardHeight * 0.62;
-
-    const addCard = (x: number, y: number, index: number) => {
-      pdf.setDrawColor(200);
-      pdf.setLineWidth(0.4);
-      pdf.roundedRect(x, y, cardWidth, cardHeight, 3, 3);
-
-      pdf.addImage(qrCodeUrl, 'PNG', x + (cardWidth - qrSize) / 2, y + 6, qrSize, qrSize);
-
-      pdf.setFontSize(9);
-      pdf.setTextColor(0, 0, 0);
-      const textY = y + qrSize + 14;
-      const centerX = x + cardWidth / 2;
-      pdf.text(`SSID: ${ssid}`, centerX, textY, { align: 'center' });
-      pdf.text(`Password: ${password}`, centerX, textY + 5, { align: 'center' });
-    };
-
-    const positions = [
-      { x: marginLeft, y: marginTop },
-      { x: marginLeft + cardWidth + gapX, y: marginTop },
-      { x: marginLeft, y: marginTop + cardHeight + gapY },
-      { x: marginLeft + cardWidth + gapX, y: marginTop + cardHeight + gapY },
-      { x: marginLeft, y: marginTop + (cardHeight + gapY) * 2 },
-      { x: marginLeft + cardWidth + gapX, y: marginTop + (cardHeight + gapY) * 2 },
-    ];
-
-    positions.forEach((pos, index) => addCard(pos.x, pos.y, index));
-
-    const pdfBlob = pdf.output('blob');
-    const url = window.URL.createObjectURL(pdfBlob);
-    const printWindow = window.open(url, '_blank', 'noopener,noreferrer');
-
-    if (printWindow) {
-      printWindow.focus();
-      setTimeout(() => {
-        try {
-          printWindow.print();
-        } catch (error) {
-          console.error('Unable to open print dialog for guest Wi-Fi PDF:', error);
-        }
-      }, 500);
-    }
-
-    window.URL.revokeObjectURL(url);
   }
 
   printServiceTag(): void {
@@ -365,7 +235,7 @@ export class Print implements OnInit {
             <div class="footer">
               <div class="label">IT Contact Numbers</div>
               <div class="value">${escape(vals.itContactNumbers)}</div>
-              <div>Generated by Shanta IT Department</div>
+              <div>Generated by <b>Shanta Denims</b> IT Department</div>
             </div>
           </div>
         </body>
@@ -404,12 +274,65 @@ export class Print implements OnInit {
   }
 
   ngOnInit(): void {
+    this.serviceTagForm.get('assetNumber')?.valueChanges.subscribe(value => {
+      this.populateServiceTagFromInventory(String(value ?? ''));
+    });
+    void this.loadInventory();
+
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'] as 'label' | 'service-tag' | 'forms' | undefined;
       if (tab === 'label' || tab === 'service-tag' || tab === 'forms') {
         this.activeTab.set(tab);
       }
     });
+  }
+
+  private async loadInventory(): Promise<void> {
+    this.inventoryLoading.set(true);
+    this.inventoryError.set('');
+
+    try {
+      const response = await fetch(`${this.getApiBaseUrl()}/api/inventory/csv`);
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+
+      const csvText = await response.text();
+      const workbook = XLSX.read(csvText, { type: 'string', raw: true });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      this.inventoryRows = XLSX.utils.sheet_to_json<InventoryRow>(worksheet, {
+        header: 'A',
+        defval: ''
+      }).slice(1);
+
+      this.populateServiceTagFromInventory(String(this.assetNumber?.value ?? ''));
+    } catch (error) {
+      console.error('Error loading inventory for service tag:', error);
+      this.inventoryError.set('Inventory data is unavailable.');
+    } finally {
+      this.inventoryLoading.set(false);
+    }
+  }
+
+  onAssetNumberInput(value: string): void {
+    this.populateServiceTagFromInventory(value);
+  }
+
+  private populateServiceTagFromInventory(assetNumber: string): void {
+    const normalizedAssetNumber = assetNumber.trim().toLowerCase();
+    const match = normalizedAssetNumber
+      ? this.inventoryRows.find(row => this.normalizeInventoryValue(row['A']) === normalizedAssetNumber)
+      : undefined;
+
+    this.serviceTagForm.patchValue({
+      deviceTypeModel: this.normalizeInventoryValue(match?.['J']),
+      serialNumber: this.normalizeInventoryValue(match?.['H']),
+      sentTo: this.normalizeInventoryValue(match?.['M'])
+    }, { emitEvent: false });
+  }
+
+  private normalizeInventoryValue(value: unknown): string {
+    return value === null || value === undefined ? '' : String(value).trim();
   }
 
   private getApiBaseUrl(): string {
@@ -607,17 +530,8 @@ export class Print implements OnInit {
   clearAll(): void {
     this.serviceTagForm.reset();
   }
-  private buildGuestWifiString(ssid: string, password: string): string {
-    return `WIFI:T:WPA;S:${ssid};P:${password};;`;
-  }
-
   // Forms Tab - Print PDF method
   openFormItem(form: { name: string; file: string }) {
-    if (form.file === 'guest-wifi') {
-      void this.openGuestWifiModal();
-      return;
-    }
-
     this.printPdf(form.file);
   }
 

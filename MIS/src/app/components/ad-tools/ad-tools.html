@@ -45,19 +45,16 @@
 
     <!-- Selected User Card -->
     @if (selectedUser()) {
-    <div class="result-card">
-      <div class="card-header">
+    <div class="result-card selected-user-card">
+      <div class="card-header user-card-header">
         <h3>User Details</h3>
         <button class="close-btn" (click)="clearUserSelection()">✕</button>
       </div>
-      <div class="card-content">
+      <div class="card-content user-card-content">
         @for (key of getObjectKeys(selectedUser()); track key) {
-        <div class="property-btn">
+        <div class="property-btn user-property">
           <strong>{{ key }}:</strong>
           <span>{{ selectedUser()?.[key] }}</span>
-          <button type="button" class="copy-btn" (click)="copyText(selectedUser()?.[key])">
-            Copy
-          </button>
         </div>
         }
       </div>
@@ -91,19 +88,16 @@
 
     <!-- Selected Computer Card -->
     @if (selectedComputer()) {
-    <div class="result-card">
-      <div class="card-header">
+    <div class="result-card selected-computer-card">
+      <div class="card-header computer-card-header">
         <h3>Computer Details</h3>
         <button class="close-btn" (click)="clearComputerSelection()">✕</button>
       </div>
-      <div class="card-content">
+      <div class="card-content computer-card-content">
         @for (key of getObjectKeys(selectedComputer()); track key) {
-        <div class="property-btn">
+        <div class="property-btn computer-property">
           <strong>{{ key }}:</strong>
           <span>{{ selectedComputer()?.[key] }}</span>
-          <button type="button" class="copy-btn" (click)="copyText(selectedComputer()?.[key])">
-            Copy
-          </button>
         </div>
         }
       </div>
