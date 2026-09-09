@@ -19,7 +19,7 @@
   <div class="load-upload-section">
     <button 
       class="server-load-button"
-      (click)="loadFromServer()"
+      (click)="loadFromServer(true)"
       [disabled]="isLoadingFromServer()"
     >
       {{ isLoadingFromServer() ? '⏳ Loading...' : '🌐 Load Latest' }}
@@ -38,7 +38,7 @@
     </label>
 
     @if (dataSource() === 'server') {
-      <span class="data-source-indicator">✅ Server</span>
+      <span class="data-source-indicator">✅ {{ inventorySourceLabel() }}</span>
     }
     @if (dataSource() === 'upload') {
       <span class="data-source-indicator">✅ {{ fileName() }}</span>

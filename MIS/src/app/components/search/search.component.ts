@@ -43,12 +43,16 @@ export class SearchComponent {
   activeTab = signal<'inventory' | 'contacts' | 'devices'>('inventory');
 
   // Dynamically generate API URL based on environment
-  private getApiUrl(): string {
+  private getApiBaseUrl(): string {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
-      return `http://${hostname}:5001/api/inventory/csv`;
+      return `http://${hostname}:5001`;
     }
-    return 'http://localhost:5001/api/inventory/csv';
+    return 'http://localhost:5001';
+  }
+
+  private getApiUrl(): string {
+    return `${this.getApiBaseUrl()}/api/inventory/csv`;
   }
 
   private apiUrl = this.getApiUrl();
@@ -61,6 +65,7 @@ export class SearchComponent {
   // Server fetch state
   isLoadingFromServer = signal(false);
   dataSource = signal<'server' | 'upload' | null>(null);
+  inventorySourceLabel = signal('Server');
 
   // Excel data
   private excelData = signal<ExcelRow[]>([]);
@@ -677,44 +682,61 @@ export class SearchComponent {
   /**
    * Load data from server CSV
    */
-  async loadFromServer(): Promise<void> {
+  async loadFromServer(forceRefresh = false): Promise<void> {
     this.isLoadingFromServer.set(true);
     this.fileError.set('');
     this.resetFileState();
 
     try {
+      if (forceRefresh) {
+        const refreshResponse = await fetch(`${this.getApiBaseUrl()}/api/inventory/refresh`, {
+          method: 'POST'
+        });
+
+        if (!refreshResponse.ok) {
+          throw new Error(`Refresh returned ${refreshResponse.status}: ${refreshResponse.statusText}`);
+        }
+      }
+
+      const statusResponse = await fetch(`${this.getApiBaseUrl()}/api/inventory/status`);
+      const status = statusResponse.ok ? await statusResponse.json() : null;
+      const sourceLabel = status?.source === 'cache' ? 'Previous Cache' : 'Server';
+      this.inventorySourceLabel.set(sourceLabel);
+
       const response = await fetch(this.apiUrl);
-      
+
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }
 
       const csvText = await response.text();
-      
+
       if (!csvText || csvText.trim().length === 0) {
         throw new Error('Server returned empty file');
       }
 
-      // Parse CSV using SheetJS
       const workbook = XLSX.read(csvText, { type: 'string', raw: true });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      
-      // Convert to JSON with column letters as keys
-      const jsonData: ExcelRow[] = XLSX.utils.sheet_to_json(worksheet, { 
+
+      const jsonData: ExcelRow[] = XLSX.utils.sheet_to_json(worksheet, {
         header: 'A',
         defval: ''
       });
 
       this.processData(jsonData);
       this.dataSource.set('server');
-      this.fileName.set('Server Data (Latest)');
-      
+      this.fileName.set(
+        status?.source === 'cache'
+          ? 'Server Data (Previous Cache)'
+          : 'Server Data (Latest)'
+      );
+
     } catch (error) {
       console.error('Error loading from server:', error);
       this.fileError.set(
-        error instanceof Error 
-          ? `Failed to load from server: ${error.message}` 
+        error instanceof Error
+          ? `Failed to load from server: ${error.message}`
           : 'Failed to load from server. Try uploading a file instead.'
       );
     } finally {

@@ -1,3 +1,4 @@
+using ADApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ADApi.Controllers;
@@ -7,11 +8,16 @@ namespace ADApi.Controllers;
 public class InventoryController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;
+    private readonly InventoryCacheService _inventoryCacheService;
     private readonly ILogger<InventoryController> _logger;
 
-    public InventoryController(IWebHostEnvironment environment, ILogger<InventoryController> logger)
+    public InventoryController(
+        IWebHostEnvironment environment,
+        InventoryCacheService inventoryCacheService,
+        ILogger<InventoryController> logger)
     {
         _environment = environment;
+        _inventoryCacheService = inventoryCacheService;
         _logger = logger;
     }
 
@@ -19,8 +25,7 @@ public class InventoryController : ControllerBase
     public async Task<IActionResult> GetInventoryCsv()
     {
         var inventoryPath = Path.Combine(
-            _environment.ContentRootPath,
-            "wwwroot",
+            _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot"),
             "inventory",
             "inventory.csv");
 
@@ -47,5 +52,18 @@ public class InventoryController : ControllerBase
             _logger.LogError(ex, "Error reading cached inventory CSV");
             return StatusCode(500, new { error = "Internal server error", message = ex.Message });
         }
+    }
+
+    [HttpGet("status")]
+    public ActionResult<InventoryCacheStatus> GetInventoryStatus()
+    {
+        return Ok(_inventoryCacheService.GetStatus());
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<InventoryCacheStatus>> RefreshInventory()
+    {
+        var status = await _inventoryCacheService.RefreshAsync(HttpContext.RequestAborted);
+        return Ok(status);
     }
 }

@@ -24,7 +24,8 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Register HttpClient for making HTTP requests
 builder.Services.AddHttpClient();
-builder.Services.AddHostedService<InventoryCacheService>();
+builder.Services.AddSingleton<InventoryCacheService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<InventoryCacheService>());
 
 // Register Active Directory service
 builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
@@ -37,9 +38,6 @@ builder.Services.AddSingleton<WakeOnLanService>();
 
 // Register SMB filesystem service
 builder.Services.AddScoped<ISmbService, SmbService>();
-
-// Register personal dashboard service
-builder.Services.AddScoped<IPersonalDashboardService, PersonalDashboardService>();
 
 // Register routing constraints explicitly for attribute-based routes
 builder.Services.Configure<RouteOptions>(options =>
@@ -100,5 +98,4 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
-
 

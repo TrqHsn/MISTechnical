@@ -301,9 +301,8 @@ export class Print implements OnInit {
       const workbook = XLSX.read(csvText, { type: 'string', raw: true });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       this.inventoryRows = XLSX.utils.sheet_to_json<InventoryRow>(worksheet, {
-        header: 'A',
         defval: ''
-      }).slice(1);
+      });
 
       this.populateServiceTagFromInventory(String(this.assetNumber?.value ?? ''));
     } catch (error) {
@@ -321,14 +320,36 @@ export class Print implements OnInit {
   private populateServiceTagFromInventory(assetNumber: string): void {
     const normalizedAssetNumber = assetNumber.trim().toLowerCase();
     const match = normalizedAssetNumber
-      ? this.inventoryRows.find(row => this.normalizeInventoryValue(row['A']) === normalizedAssetNumber)
+      ? this.inventoryRows.find(row => this.getInventoryField(row, ['Asset No', 'asset no'])
+          .toLowerCase() === normalizedAssetNumber)
       : undefined;
 
     this.serviceTagForm.patchValue({
-      deviceTypeModel: this.normalizeInventoryValue(match?.['J']),
-      serialNumber: this.normalizeInventoryValue(match?.['H']),
-      sentTo: this.normalizeInventoryValue(match?.['M'])
+      deviceTypeModel: this.getInventoryField(match, ['Model', 'model']),
+      serialNumber: this.getInventoryField(match, ['Serial No', 'serial no']),
+      sentTo: this.getInventoryField(match, ['Pur From', 'pur from'])
     }, { emitEvent: false });
+  }
+
+  private getInventoryField(row: InventoryRow | undefined, fieldNames: string[]): string {
+    if (!row) {
+      return '';
+    }
+
+    const lookup = new Map<string, unknown>();
+    for (const [key, value] of Object.entries(row)) {
+      lookup.set(String(key).trim().toLowerCase(), value);
+    }
+
+    for (const fieldName of fieldNames) {
+      const fieldKey = String(fieldName).trim().toLowerCase();
+      const value = lookup.get(fieldKey);
+      if (value !== null && value !== undefined && String(value).trim() !== '') {
+        return String(value).trim();
+      }
+    }
+
+    return '';
   }
 
   private normalizeInventoryValue(value: unknown): string {
