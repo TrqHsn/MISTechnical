@@ -18,8 +18,9 @@ export class NetworkDashboardComponent implements OnDestroy {
   private yellowAlertAudio: HTMLAudioElement | null = null;
   private redAlertAudio: HTMLAudioElement | null = null;
   private lastYellowAlertAt = 0;
-  private lastRedAlertAt = 0;
+  private alertModeTimeoutId: number | null = null;
   private audioInteractionHandler: (() => void) | null = null;
+  private audioUnlocked = false;
   private latchedAlertLevels = new Map<string, 'yellow' | 'red'>();
   private monitoringStarted = signal(false);
   menuOpen = false;
@@ -30,9 +31,6 @@ export class NetworkDashboardComponent implements OnDestroy {
   serverHost = '';
   errorMessage = '';
   showAddDialog = false;
-  isUploadMode = false;
-  csvFileContent = '';
-  csvFileName = '';
   private hydrationComplete = signal(false);
 
   get servers() {
@@ -41,8 +39,8 @@ export class NetworkDashboardComponent implements OnDestroy {
 
   constructor(public networkMonitor: NetworkMonitorService) {
     if (typeof window !== 'undefined') {
-      this.yellowAlertAudio = this.createAlertAudio('/Sounds/yellow%20warning.mp3');
-      this.redAlertAudio = this.createAlertAudio('/Sounds/red%20warning.mp3');
+      this.yellowAlertAudio = this.createAlertAudio('/Sounds/degrade_warning.mp3');
+      this.redAlertAudio = this.createAlertAudio('/Sounds/ofline_warning.mp3');
       this.audioInteractionHandler = () => this.primeAlertAudio();
       window.addEventListener('pointerdown', this.audioInteractionHandler, { once: true });
       window.addEventListener('keydown', this.audioInteractionHandler, { once: true });
@@ -56,10 +54,15 @@ export class NetworkDashboardComponent implements OnDestroy {
 
     afterNextRender(() => {
       this.hydrationComplete.set(true);
-
       this.livePingAutoScrollIntervalId = window.setInterval(() => {
         this.scrollLivePingOutputsToBottom();
       }, 1000);
+
+      this.alertModeTimeoutId = window.setTimeout(() => {
+        if (this.alertMode === null) {
+          this.selectAlertMode('ringer');
+        }
+      }, 5000);
     });
   }
 
@@ -75,6 +78,10 @@ export class NetworkDashboardComponent implements OnDestroy {
     if (this.livePingAutoScrollIntervalId !== null) {
       window.clearInterval(this.livePingAutoScrollIntervalId);
       this.livePingAutoScrollIntervalId = null;
+    }
+    if (this.alertModeTimeoutId !== null) {
+      window.clearTimeout(this.alertModeTimeoutId);
+      this.alertModeTimeoutId = null;
     }
   }
 
@@ -97,11 +104,17 @@ export class NetworkDashboardComponent implements OnDestroy {
   }
 
   private updateOfflineAlertState(): void {
+    this.latchedAlertLevels.clear();
+
     this.servers().forEach((server) => {
-      if (!server.maintenance && (server.status === 'yellow' || server.status === 'red')) {
-        this.latchedAlertLevels.set(server.id, server.status === 'red' ? 'red' : 'yellow');
-      } else {
-        this.latchedAlertLevels.delete(server.id);
+      if (server.silent) {
+        return;
+      }
+
+      if (server.status === 'OFFLINE') {
+        this.latchedAlertLevels.set(server.id, 'red');
+      } else if (server.status === 'DEGRADE') {
+        this.latchedAlertLevels.set(server.id, 'yellow');
       }
     });
 
@@ -126,8 +139,6 @@ export class NetworkDashboardComponent implements OnDestroy {
         this.lastYellowAlertAt = now;
         this.playAlertTone('yellow');
       }
-    } else {
-      this.stopOfflineAlert();
     }
   }
 
@@ -136,10 +147,8 @@ export class NetworkDashboardComponent implements OnDestroy {
       return;
     }
 
-    this.lastRedAlertAt = Date.now();
     this.playAlertTone('red');
     this.offlineAlertIntervalId = window.setInterval(() => {
-      this.lastRedAlertAt = Date.now();
       this.playAlertTone('red');
     }, 2000);
   }
@@ -166,6 +175,32 @@ export class NetworkDashboardComponent implements OnDestroy {
     return audio;
   }
 
+  private async ensureAudioUnlocked(): Promise<void> {
+    if (this.audioUnlocked) {
+      return;
+    }
+
+    const audios = [this.yellowAlertAudio, this.redAlertAudio].filter(
+      (audio): audio is HTMLAudioElement => audio !== null
+    );
+
+    for (const audio of audios) {
+      audio.muted = true;
+      audio.currentTime = 0;
+      try {
+        await audio.play();
+      } catch {
+        continue;
+      } finally {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.muted = false;
+      }
+    }
+
+    this.audioUnlocked = true;
+  }
+
   private playAlertTone(level: 'yellow' | 'red'): void {
     if (this.alertMode !== 'ringer') {
       return;
@@ -181,6 +216,11 @@ export class NetworkDashboardComponent implements OnDestroy {
     otherAudio?.pause();
     audio.pause();
     audio.currentTime = 0;
+
+    if (!this.audioUnlocked) {
+      this.ensureAudioUnlocked().catch(() => undefined);
+    }
+
     audio.play().catch((error) => {
       console.warn(`${level} alert sound failed to play:`, error);
     });
@@ -211,6 +251,11 @@ export class NetworkDashboardComponent implements OnDestroy {
   }
 
   async selectAlertMode(mode: 'ringer' | 'silent'): Promise<void> {
+    if (this.alertModeTimeoutId !== null) {
+      window.clearTimeout(this.alertModeTimeoutId);
+      this.alertModeTimeoutId = null;
+    }
+
     this.alertMode = mode;
     this.showAudioModeDialog = false;
     this.startMonitoringAfterAudioChoice();
@@ -225,24 +270,7 @@ export class NetworkDashboardComponent implements OnDestroy {
   }
 
   private async primeAlertAudio(): Promise<void> {
-    const priming = [this.yellowAlertAudio, this.redAlertAudio]
-      .filter((audio): audio is HTMLAudioElement => audio !== null)
-      .map(async (audio) => {
-        audio.muted = true;
-        audio.currentTime = 0;
-
-        try {
-          await audio.play();
-        } catch {
-          return;
-        } finally {
-          audio.pause();
-          audio.currentTime = 0;
-          audio.muted = false;
-        }
-      });
-
-    await Promise.all(priming);
+    await this.ensureAudioUnlocked();
   }
 
   private scrollLivePingOutputsToBottom(): void {
@@ -252,11 +280,11 @@ export class NetworkDashboardComponent implements OnDestroy {
         try {
           const node = el.nativeElement;
           node.scrollTop = Math.max(0, node.scrollHeight - node.clientHeight);
-        } catch (e) {
+        } catch {
           // ignore per-element errors
         }
       });
-    } catch (e) {
+    } catch {
       // swallow; not critical
     }
   }
@@ -265,9 +293,6 @@ export class NetworkDashboardComponent implements OnDestroy {
     this.errorMessage = '';
     this.serverName = '';
     this.serverHost = '';
-    this.isUploadMode = false;
-    this.csvFileContent = '';
-    this.csvFileName = '';
     this.showAddDialog = true;
   }
 
@@ -295,14 +320,8 @@ export class NetworkDashboardComponent implements OnDestroy {
     this.networkMonitor.removeServer(serverId);
   }
 
-  toggleMaintenance(serverId: string): void {
-    const server = this.servers().find((item) => item.id === serverId);
-    if (server && !server.maintenance) {
-      this.latchedAlertLevels.delete(serverId);
-      this.stopOfflineAlert();
-    }
-
-    this.networkMonitor.toggleMaintenance(serverId);
+  toggleSilent(serverId: string): void {
+    this.networkMonitor.toggleSilent(serverId);
   }
 
   openEventsModal(serverId: string): void {
@@ -317,95 +336,37 @@ export class NetworkDashboardComponent implements OnDestroy {
     return this.openEventModals.has(serverId);
   }
 
-  handleCsvUpload(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    // Clear previous file data
-    this.csvFileContent = '';
-    this.csvFileName = '';
-    this.errorMessage = '';
-
-    this.csvFileName = file.name;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.csvFileContent = e.target?.result as string;
-    };
-    reader.readAsText(file);
-  }
-
-  processCsvUpload(): void {
-    if (!this.csvFileContent) {
-      this.errorMessage = 'Please select a CSV file.';
-      return;
-    }
-
-    const lines = this.csvFileContent.trim().split('\n');
-    if (lines.length < 2) {
-      this.errorMessage = 'CSV file must have at least a header row and one data row.';
-      return;
-    }
-
-    // Clear all existing servers before loading CSV
-    this.networkMonitor.clearAllServers();
-
-    // Skip the first row (header)
-    const dataRows = lines.slice(1);
-    const addedServers: string[] = [];
-    const failedRows: string[] = [];
-
-    dataRows.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) {
-        return; // Skip empty lines
-      }
-
-      const columns = trimmedLine.split(',').map((col) => col.trim());
-      if (columns.length < 2) {
-        failedRows.push(`Row ${index + 2}: Missing hostname/IP`);
-        return;
-      }
-
-      const name = columns[0];
-      const host = columns[1];
-
-      if (!name || !host) {
-        failedRows.push(`Row ${index + 2}: Name or hostname/IP is empty`);
-        return;
-      }
-
-      this.networkMonitor.addServer(name, host);
-      addedServers.push(`${name} (${host})`);
-    });
-
-    if (failedRows.length > 0) {
-      this.errorMessage = `Added ${addedServers.length} server(s). Failed rows: ${failedRows.join('; ')}`;
-    } else {
-      this.errorMessage = '';
-    }
-
-    // Reset and close
-    this.csvFileContent = '';
-    this.csvFileName = '';
-    this.isUploadMode = false;
-    this.showAddDialog = false;
-  }
-
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'green':
+      case 'ONLINE':
         return 'ONLINE';
-      case 'yellow':
+      case 'DEGRADE':
         return 'DEGRADED';
-      case 'red':
+      case 'OFFLINE':
         return 'OFFLINE';
-      case 'maintenance':
-        return 'MAINTENANCE';
+      case 'CHECKING':
+        return 'CHECKING';
       default:
         return 'UNKNOWN';
     }
+  }
+
+  getStatusCss(status: string): string {
+    switch (status) {
+      case 'ONLINE':
+        return 'green';
+      case 'DEGRADE':
+        return 'yellow';
+      case 'OFFLINE':
+        return 'red';
+      case 'CHECKING':
+        return 'unknown';
+      default:
+        return 'unknown';
+    }
+  }
+
+  getCardCssClass(server: { status: string; silent: boolean }): string {
+    return [server.status, server.silent ? 'silent' : ''].filter(Boolean).join(' ');
   }
 }

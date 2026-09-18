@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { catchError, exhaustMap, interval, of, startWith, Subject, Subscription, tap } from 'rxjs';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { catchError, of, tap } from 'rxjs';
 
 export interface NetworkLogEntry {
   timestamp: string;
@@ -12,8 +13,7 @@ export interface NetworkServer {
   id: string;
   name: string;
   host: string;
-  maintenance: boolean;
-  status: 'green' | 'yellow' | 'red' | 'maintenance' | 'unknown';
+  status: 'CHECKING' | 'ONLINE' | 'DEGRADE' | 'OFFLINE' | 'unknown';
   lastCheckTime: string | null;
   lastDownTime: string | null;
   lastPingStatus: string | null;
@@ -22,26 +22,22 @@ export interface NetworkServer {
   alertCooldownUntil: number | null;
   consecutiveFailures: number;
   consecutiveSuccesses: number;
+  silent: boolean;
 }
 
 interface StoredNetworkServer {
-  id: string;
+  id: number | string;
   name: string;
   host: string;
-  maintenance: boolean;
-  lastDownTime: string | null;
+  status?: 'CHECKING' | 'ONLINE' | 'DEGRADE' | 'OFFLINE' | 'unknown';
+  lastDownTime?: string | null;
   lastCheckTime?: string | null;
   lastPingStatus?: string | null;
-  status?: 'green' | 'yellow' | 'red' | 'maintenance' | 'unknown';
 }
 
 interface CreateServerRequest {
   name: string;
   host: string;
-}
-
-interface UpdateMaintenanceRequest {
-  maintenance: boolean;
 }
 
 interface LivePingState {
@@ -74,7 +70,6 @@ function colorizeLineHtml(line: string): string {
   return `<span>${escaped}</span>\n`;
 }
 
-const POLL_INTERVAL_MS = 1000;
 const ALERT_COOLDOWN_MS = 300_000;
 
 const getApiBaseUrl = (): string => {
@@ -85,11 +80,12 @@ const getApiBaseUrl = (): string => {
   return 'http://localhost:5001/api';
 };
 
-const generateId = (): string => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
+const getHubUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    return `http://${hostname}:5001/hubs/network-dashboard`;
   }
-  return `server-${Math.random().toString(36).slice(2, 10)}-${Date.now()}`;
+  return 'http://localhost:5001/hubs/network-dashboard';
 };
 
 @Injectable({
@@ -100,27 +96,45 @@ export class NetworkMonitorService {
   readonly livePing = signal<Record<string, LivePingState>>({});
   private readonly livePingControllers = new Map<string, { controller: AbortController; sessionId: string }>();
   private readonly apiBaseUrl = getApiBaseUrl();
+  private readonly hubUrl = getHubUrl();
   private readonly isBrowser = typeof window !== 'undefined';
-  private readonly destroy$ = new Subject<void>();
-  private statusRefreshSubscription: Subscription | null = null;
+  private hubConnection: HubConnection | null = null;
   private monitoringStarted = false;
+  private readonly localSilentMap = new Map<string, boolean>();
 
   constructor(private http: HttpClient) {
+    this.connectRealtimeMonitoring();
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.statusRefreshSubscription?.unsubscribe();
-    this.statusRefreshSubscription = null;
+    this.hubConnection?.stop().catch(() => undefined);
     this.stopAllLivePings();
   }
 
+  private connectRealtimeMonitoring(): void {
+    if (!this.isBrowser || this.hubConnection) {
+      return;
+    }
+
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl(this.hubUrl, { withCredentials: true })
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Warning)
+      .build();
+
+    this.hubConnection.on('ServersUpdated', (snapshot: StoredNetworkServer[]) => {
+      this.applyServerSnapshot(snapshot);
+    });
+
+    this.hubConnection.start()
+      .then(() => this.refreshServers().subscribe())
+      .catch((error) => {
+        console.error('Unable to connect to network dashboard hub', error);
+      });
+  }
+
   addServer(name: string, host: string): void {
-    const request: CreateServerRequest = {
-      name,
-      host,
-    };
+    const request: CreateServerRequest = { name, host };
 
     this.http.post<StoredNetworkServer>(`${this.apiBaseUrl}/network/servers`, request).pipe(
       catchError((error) => {
@@ -132,91 +146,44 @@ export class NetworkMonitorService {
         return;
       }
 
-      const newServer: NetworkServer = {
-        id: server.id,
-        name: server.name,
-        host: server.host,
-        maintenance: server.maintenance,
-        status: 'unknown',
-        lastCheckTime: null,
-        lastDownTime: server.lastDownTime,
-        lastPingStatus: null,
-        logs: [],
-        redSince: null,
-        alertCooldownUntil: null,
-        consecutiveFailures: 0,
-        consecutiveSuccesses: 0,
-      };
-
-      this.servers.update((items: NetworkServer[]) => [...items, newServer]);
+      this.refreshServers().subscribe();
     });
   }
 
   removeServer(serverId: string): void {
-    console.log('Attempting to remove server:', serverId);
-    
     this.http.delete(`${this.apiBaseUrl}/network/servers/${encodeURIComponent(serverId)}`).pipe(
-      tap((response) => {
-        console.log('Server removal successful:', response);
-        this.stopLivePing(serverId);
-        // Clear any degraded beep intervals from dashboard component by updating status first
-        this.servers.update((items: NetworkServer[]) => items.filter((item) => item.id !== serverId));
-      }),
       catchError((error) => {
         console.error('Unable to remove server:', serverId, error);
         alert(`Failed to remove server: ${error.status} ${error.statusText || error.message}`);
         return of(null);
       })
-    ).subscribe({
-      next: () => {
-        console.log('Remove server subscription completed');
-      },
-      error: (err) => {
-        console.error('Remove server subscription error:', err);
-      }
+    ).subscribe(() => {
+      this.localSilentMap.delete(serverId);
+      this.stopLivePing(serverId);
+      this.refreshServers().subscribe();
     });
   }
 
   clearAllServers(): void {
-    console.log('Clearing all servers');
-    const serverIds = this.servers().map((s) => s.id);
-    serverIds.forEach((id) => {
-      this.removeServer(id);
-    });
+    const serverIds = this.servers().map((server) => server.id);
+    serverIds.forEach((id) => this.removeServer(id));
   }
 
-  toggleMaintenance(serverId: string): void {
-    const server = this.servers().find((item) => item.id === serverId);
-    if (!server) {
-      return;
-    }
+  toggleSilent(serverId: string): void {
+    const current = this.localSilentMap.get(serverId) ?? false;
+    const next = !current;
+    this.localSilentMap.set(serverId, next);
 
-    const request: UpdateMaintenanceRequest = {
-      maintenance: !server.maintenance,
-    };
-
-    this.http.patch<StoredNetworkServer>(`${this.apiBaseUrl}/network/servers/${encodeURIComponent(serverId)}/maintenance`, request).pipe(
-      catchError((error) => {
-        console.error('Unable to update maintenance', error);
-        return of(null);
-      })
-    ).subscribe((updated) => {
-      if (!updated) {
-        return;
-      }
-
-      this.servers.update((items: NetworkServer[]) =>
-        items.map((item: NetworkServer) =>
-          item.id !== serverId
-            ? item
-            : {
-                ...item,
-                maintenance: updated.maintenance,
-                status: updated.maintenance ? 'maintenance' : 'unknown',
-              }
-        )
-      );
-    });
+    this.servers.update((items) =>
+      items.map((item) =>
+        item.id !== serverId
+          ? item
+          : {
+              ...item,
+              silent: next,
+            }
+      )
+    );
   }
 
   getLivePingState(serverId: string): LivePingState {
@@ -227,12 +194,11 @@ export class NetworkMonitorService {
     return this.getLivePingState(serverId).output;
   }
 
-  // Return an HTML-colourized version of the live ping output suitable for binding to innerHTML
   getLivePingHtml(serverId: string): string {
     const out = this.getLivePingOutput(serverId) || '';
     if (!out) return '';
     const lines = out.split('\n');
-    return lines.map((l) => colorizeLineHtml(l)).join('');
+    return lines.map((line) => colorizeLineHtml(line)).join('');
   }
 
   startLivePing(serverId: string): void {
@@ -251,9 +217,7 @@ export class NetworkMonitorService {
 
     fetch(`${this.apiBaseUrl}/network/ping/start`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: server.host }),
       signal: controller.signal,
     })
@@ -410,61 +374,13 @@ export class NetworkMonitorService {
     });
   }
 
-  formatUtcOffset(value: string | null): string {
-    const date = this.parseTimestamp(value);
-    if (!date) {
-      return '—';
-    }
-    const offset = -date.getTimezoneOffset();
-    const sign = offset >= 0 ? '+' : '-';
-    const hours = Math.floor(Math.abs(offset) / 60);
-    const minutes = Math.abs(offset) % 60;
-    return `UTC${sign}${hours}${minutes ? `:${String(minutes).padStart(2, '0')}` : ''}`;
-  }
-
-  private loadServers(): void {
-    if (!this.isBrowser) {
-      this.servers.set([]);
-      return;
-    }
-
-    this.http.get<StoredNetworkServer[]>(`${this.apiBaseUrl}/network/servers`).pipe(
-      catchError((error) => {
-        console.error('Unable to load server list from backend', error);
-        return of([] as StoredNetworkServer[]);
-      })
-    ).subscribe((saved) => {
-      const servers = saved.map((item) => ({
-        id: item.id,
-        name: item.name,
-        host: item.host,
-        maintenance: item.maintenance,
-        status: item.status ?? 'unknown',
-        lastCheckTime: item.lastCheckTime ?? null,
-        lastDownTime: item.lastDownTime ?? null,
-        lastPingStatus: item.lastPingStatus ?? null,
-        logs: [],
-        redSince: null,
-        alertCooldownUntil: null,
-        consecutiveFailures: 0,
-        consecutiveSuccesses: 0,
-      }));
-
-      this.servers.set(servers);
-    });
-  }
-
   startMonitoring(): void {
     if (this.monitoringStarted) {
       return;
     }
 
     this.monitoringStarted = true;
-    this.statusRefreshSubscription = interval(POLL_INTERVAL_MS)
-      .pipe(startWith(0), exhaustMap(() => this.refreshServers()))
-      .subscribe({
-        error: (error) => console.error('Network monitor error', error),
-      });
+    this.refreshServers().subscribe();
   }
 
   moveServerToTop(serverId: string): void {
@@ -479,35 +395,46 @@ export class NetworkMonitorService {
     });
   }
 
-  private refreshServers() {
+  refreshServers() {
     return this.http.get<StoredNetworkServer[]>(`${this.apiBaseUrl}/network/servers`).pipe(
-      tap((saved) => {
-        const currentServers = new Map(this.servers().map((server) => [server.id, server]));
-        const servers = saved.map((item) => ({
-          ...(currentServers.get(item.id) ?? {
-            logs: [],
-            redSince: null,
-            alertCooldownUntil: null,
-            consecutiveFailures: 0,
-            consecutiveSuccesses: 0,
-          }),
-          id: item.id,
-          name: item.name,
-          host: item.host,
-          maintenance: item.maintenance,
-          status: item.status ?? 'unknown',
-          lastCheckTime: item.lastCheckTime ?? null,
-          lastDownTime: item.lastDownTime ?? null,
-          lastPingStatus: item.lastPingStatus ?? null,
-        }));
-
-        this.servers.set(servers);
-      }),
+      tap((saved) => this.applyServerSnapshot(saved)),
       catchError((error) => {
         console.error('Unable to refresh server statuses', error);
-        return of(void 0);
+        return of([] as StoredNetworkServer[]);
       })
     );
+  }
+
+  private applyServerSnapshot(snapshot: StoredNetworkServer[]): void {
+    const currentServers = new Map(this.servers().map((server) => [server.id, server]));
+    const servers = snapshot.map((item) => {
+      const existing = currentServers.get(String(item.id)) ?? {
+        logs: [],
+        redSince: null,
+        alertCooldownUntil: null,
+        consecutiveFailures: 0,
+        consecutiveSuccesses: 0,
+        silent: false,
+      };
+
+      return {
+        id: String(item.id),
+        name: item.name,
+        host: item.host,
+        status: item.status ?? 'unknown',
+        lastCheckTime: item.lastCheckTime ?? null,
+        lastDownTime: item.lastDownTime ?? null,
+        lastPingStatus: item.lastPingStatus ?? null,
+        logs: existing.logs,
+        redSince: existing.redSince,
+        alertCooldownUntil: existing.alertCooldownUntil,
+        consecutiveFailures: existing.consecutiveFailures,
+        consecutiveSuccesses: existing.consecutiveSuccesses,
+        silent: this.localSilentMap.get(String(item.id)) ?? existing.silent ?? false,
+      } satisfies NetworkServer;
+    });
+
+    this.servers.set(servers);
   }
 
   private sendAlert(server: NetworkServer, title: string, body: string): void {

@@ -264,94 +264,6 @@
   margin-top: 4px;
 }
 
-.csv-actions {
-  justify-content: space-between;
-}
-
-.dialog-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.tab-button {
-  padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 16px);
-  border: none;
-  background: transparent;
-  color: rgba(226, 232, 240, 0.6);
-  cursor: pointer;
-  font-weight: 600;
-  font-size: clamp(0.85rem, 1vw, 0.95rem);
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.tab-button.active {
-  color: #38bdf8;
-  border-bottom-color: #38bdf8;
-}
-
-.tab-button:hover {
-  color: #e2e8f0;
-}
-
-.csv-upload-section {
-  display: grid;
-  gap: 16px;
-}
-
-.csv-help {
-  margin: 0;
-  font-size: clamp(0.8rem, 0.9vw, 0.88rem);
-  color: rgba(226, 232, 240, 0.8);
-  line-height: 1.5;
-}
-
-.csv-file-input {
-  display: grid;
-  gap: 8px;
-  color: #e2e8f0;
-  font-size: clamp(0.85rem, 1vw, 0.95rem);
-  font-weight: 600;
-}
-
-.csv-file-input input[type="file"] {
-  padding: clamp(8px, 2vw, 10px);
-  border: 2px dashed rgba(56, 189, 248, 0.4);
-  border-radius: clamp(12px, 2vw, 16px);
-  background: rgba(56, 189, 248, 0.08);
-  color: #f8fafc;
-  cursor: pointer;
-  font-size: clamp(0.85rem, 1vw, 0.95rem);
-}
-
-.csv-file-input input[type="file"]::file-selector-button {
-  padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 12px);
-  border: none;
-  border-radius: 999px;
-  background: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: clamp(0.8rem, 0.9vw, 0.88rem);
-  margin-right: 8px;
-}
-
-.csv-file-input input[type="file"]::file-selector-button:hover {
-  background: rgba(56, 189, 248, 0.3);
-}
-
-.csv-file-selected {
-  padding: clamp(10px, 2vw, 12px);
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  border-radius: clamp(12px, 2vw, 16px);
-  color: #86efac;
-  font-size: clamp(0.85rem, 1vw, 0.95rem);
-  font-weight: 500;
-}
-
 .server-form {
   display: grid;
   gap: 10px;
@@ -487,7 +399,6 @@
 }
 
 .card.green,
-.card.maintenance,
 .card.unknown {
   background: none;
 }
@@ -504,6 +415,12 @@
   border: 1px solid rgba(239, 68, 68, 0.24);
   box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), 0 0 20px rgba(239, 68, 68, 0.08), 0 20px 50px rgba(0, 0, 0, 0.18);
   animation: glow-red 4s ease-in-out infinite alternate;
+}
+
+.card.silent {
+  border: 1px solid rgba(168, 85, 247, 0.75);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.35), 0 0 22px rgba(168, 85, 247, 0.12), 0 20px 50px rgba(0, 0, 0, 0.18);
+  background: rgba(168, 85, 247, 0.08);
 }
 
 @keyframes glow-yellow {
@@ -697,10 +614,11 @@
   border-color: rgba(239, 68, 68, 0.6);
 }
 
-.status-pill.maintenance {
-  background: rgba(100, 116, 139, 0.16);
-  color: #cbd5e1;
-  border-color: rgba(100, 116, 139, 0.3);
+.status-pill.silent {
+  background: rgba(168, 85, 247, 0.22);
+  color: #f3e8ff;
+  border-color: rgba(168, 85, 247, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.4);
 }
 
 .status-pill.unknown {

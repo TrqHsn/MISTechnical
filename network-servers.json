@@ -1,100 +1,80 @@
 ﻿[
   {
-    "Id": "fef91686-f305-49d3-ba0d-b66ff1fff2b4",
-    "Name": "Nester 1 Costing",
-    "Host": "SDLD557B",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "d0c41ed3-5aae-49b5-9909-fb229b904a59",
-    "Name": "CN DBO",
-    "Host": "103.18.205.214",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "b9e3d47b-b22b-4900-950b-e5086894c23c",
-    "Name": "CN SIL",
-    "Host": "103.133.205.58",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "1bccefc2-c493-459e-889a-f47bffce7f37",
-    "Name": "Race SDL",
-    "Host": "103.85.159.198",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "c6bface9-ed04-4362-b24f-62978a4f47d6",
+    "Id": 2,
     "Name": "DBOMS10",
     "Host": "10.139.2.10",
-    "Maintenance": false,
     "LastDownTime": null
   },
   {
-    "Id": "c2aca4db-45d5-4450-a647-1b91969b232e",
-    "Name": "CN SDL",
-    "Host": "103.18.204.118",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "2938dbc8-e9e3-4021-911c-f87ee1f10e7c",
-    "Name": "Nester Production",
-    "Host": "SDLD560A",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "61488c2a-feeb-4a08-b89a-65d3bbf4ffd1",
-    "Name": "SAP",
-    "Host": "DBOSAP16",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "a770db01-110e-483c-9f32-b134fdca36bb",
-    "Name": "Race SDL",
-    "Host": "103.85.159.162",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "07728d09-3165-487b-adc4-9b78ef4eb3cd",
-    "Name": "568",
-    "Host": "SDLD568B",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "a809dd95-06a9-494f-8983-0f9935b1ee83",
-    "Name": "Nester 2 Costing",
-    "Host": "SDLD561B",
-    "Maintenance": false,
-    "LastDownTime": null
-  },
-  {
-    "Id": "6705b443-1e16-496b-bcbf-713851038bf6",
+    "Id": 3,
     "Name": "FastReact",
     "Host": "SDLAP22",
-    "Maintenance": false,
     "LastDownTime": null
   },
   {
-    "Id": "6240a491-ecc0-4c1c-81b8-74ae98b0ade3",
+    "Id": 4,
     "Name": "Kormee",
     "Host": "SDLAP23",
-    "Maintenance": false,
     "LastDownTime": null
   },
   {
-    "Id": "89240dec-25ad-45e7-84c1-6f52efd74f1c",
+    "Id": 5,
+    "Name": "SAP",
+    "Host": "DBOSAP16",
+    "LastDownTime": null
+  },
+  {
+    "Id": 6,
+    "Name": "568",
+    "Host": "SDLD568B",
+    "LastDownTime": null
+  },
+  {
+    "Id": 7,
     "Name": "Race SIL",
     "Host": "103.85.159.162",
-    "Maintenance": false,
+    "LastDownTime": null
+  },
+  {
+    "Id": 8,
+    "Name": "CN SIL",
+    "Host": "103.133.205.58",
+    "LastDownTime": null
+  },
+  {
+    "Id": 9,
+    "Name": "Nester Production",
+    "Host": "SDLD560A",
+    "LastDownTime": null
+  },
+  {
+    "Id": 10,
+    "Name": "Nester 2 Costing",
+    "Host": "SDLD561B",
+    "LastDownTime": null
+  },
+  {
+    "Id": 11,
+    "Name": "Race SDL",
+    "Host": "103.85.159.198",
+    "LastDownTime": null
+  },
+  {
+    "Id": 12,
+    "Name": "CN DBO",
+    "Host": "103.18.205.214",
+    "LastDownTime": null
+  },
+  {
+    "Id": 13,
+    "Name": "Nester 1 Costing",
+    "Host": "SDLD557B",
+    "LastDownTime": null
+  },
+  {
+    "Id": 14,
+    "Name": "CN SDL",
+    "Host": "103.18.204.118",
     "LastDownTime": null
   }
 ]

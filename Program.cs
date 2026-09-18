@@ -1,4 +1,5 @@
 using System.DirectoryServices;
+using ADApi.Hubs;
 using ADApi.Services;
 using ADApi.Controllers;
 using Microsoft.AspNetCore.Routing.Constraints;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 builder.WebHost.UseUrls("http://0.0.0.0:5001");
 
 // Configure Kestrel to allow large file uploads (5GB for videos)
@@ -53,6 +55,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
             "http://localhost:4200",
             "https://localhost:4200",
+            "http://127.0.0.1:4200",
             "http://10.140.5.32:4200",
             "https://10.140.5.32:4200",
             "http://10.140.5.32",
@@ -92,10 +95,10 @@ app.UseAuthorization();
 app.UseDefaultFiles(); // Serve index.html by default
 app.UseStaticFiles(); // Serve static files
 
+app.MapHub<NetworkDashboardHub>("/hubs/network-dashboard");
 app.MapControllers();
 
 // fallback for angular routing
 app.MapFallbackToFile("index.html");
 
 app.Run();
-

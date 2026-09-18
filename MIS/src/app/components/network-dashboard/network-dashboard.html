@@ -53,39 +53,19 @@
       </div>
 
       <form class="dialog-form" (ngSubmit)="addServer()">
-        <div class="dialog-tabs">
-          <button type="button" class="tab-button" [class.active]="!isUploadMode" (click)="isUploadMode = false">Single Server</button>
-          <button type="button" class="tab-button" [class.active]="isUploadMode" (click)="isUploadMode = true">Upload CSV</button>
-        </div>
+        <label>
+          <span>Name</span>
+          <input type="text" [(ngModel)]="serverName" name="serverName" placeholder="Server name" autocomplete="off" />
+        </label>
 
-        <div *ngIf="!isUploadMode">
-          <label>
-            <span>Name</span>
-            <input type="text" [(ngModel)]="serverName" name="serverName" placeholder="Server name" autocomplete="off" />
-          </label>
+        <label>
+          <span>Hostname / IP</span>
+          <input type="text" [(ngModel)]="serverHost" name="serverHost" placeholder="10.140.5.10 or example.local" autocomplete="off" />
+        </label>
 
-          <label>
-            <span>Hostname / IP</span>
-            <input type="text" [(ngModel)]="serverHost" name="serverHost" placeholder="10.140.5.10 or example.local" autocomplete="off" />
-          </label>
-
-          <div class="dialog-actions">
-            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
-            <button type="submit" class="primary-button">Save</button>
-          </div>
-        </div>
-
-        <div *ngIf="isUploadMode" class="csv-upload-section">
-          <p class="csv-help">Upload a CSV file with columns: <strong>Name</strong> and <strong>Hostname / IP</strong>. The first row will be treated as a header and ignored.</p>
-          <label class="csv-file-input">
-            <span>Select CSV File</span>
-            <input type="file" accept=".csv" (change)="handleCsvUpload($event)" />
-          </label>
-          <div *ngIf="csvFileName" class="csv-file-selected">📄 {{ csvFileName }}</div>
-          <div class="dialog-actions csv-actions">
-            <button type="button" class="primary-button" (click)="processCsvUpload()" [disabled]="!csvFileContent">Upload Servers</button>
-            <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
-          </div>
+        <div class="dialog-actions">
+          <button type="button" class="secondary-button" (click)="closeAddDialog()">Cancel</button>
+          <button type="submit" class="primary-button">Save</button>
         </div>
 
         <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
@@ -98,7 +78,7 @@
   </div>
 
   <div class="grid" *ngIf="servers().length > 0">
-    <article class="card" [ngClass]="server.status" *ngFor="let server of servers(); trackBy: trackByServerId">
+    <article class="card" [ngClass]="getCardCssClass(server)" *ngFor="let server of servers(); trackBy: trackByServerId">
       <div class="card-header">
         <div class="header-left">
           <div class="header-top-row">
@@ -121,7 +101,7 @@
           </div>
         </div>
         <div class="header-right">
-          <span class="status-pill small" [ngClass]="server.status">{{ getStatusLabel(server.status) }}</span>
+          <span class="status-pill small" [ngClass]="[getStatusCss(server.status), server.silent ? 'silent' : '']">{{ getStatusLabel(server.status) }}</span>
           <button type="button" class="remove header-remove" (click)="removeServer(server.id); $event.stopPropagation()">➖</button>
         </div>
       </div>
@@ -143,8 +123,8 @@
               <button type="button" class="secondary-button" (click)="networkMonitor.clearLivePing(server.id)">
                 Clear
               </button>
-              <button type="button" class="secondary-button silent-button" (click)="toggleMaintenance(server.id)">
-                {{ server.maintenance ? 'Resume' : 'Silent' }}
+              <button type="button" class="secondary-button silent-button" (click)="toggleSilent(server.id)">
+                {{ server.silent ? 'Unsilent' : 'Silent' }}
               </button>
               <button type="button" class="secondary-button" (click)="openEventsModal(server.id)">
                 Events

@@ -3,14 +3,17 @@
 
   <!-- Tab Navigation -->
   <div class="tabs">
-    <button class="tab-btn" [class.active]="activeTab() === 'label'" (click)="activeTab.set('label')">
+    <button class="tab-btn" [class.active]="activeTab() === 'label'" (click)="selectTab('label')">
       Label
     </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'service-tag'" (click)="activeTab.set('service-tag')">
+    <button class="tab-btn" [class.active]="activeTab() === 'service-tag'" (click)="selectTab('service-tag')">
       Service Tag
     </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'forms'" (click)="activeTab.set('forms')">
+    <button class="tab-btn" [class.active]="activeTab() === 'forms'" (click)="selectTab('forms')">
       Forms
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'printers'" (click)="selectTab('printers')">
+      Printers
     </button>
   </div>
 
@@ -194,5 +197,73 @@
     </div>
   </div>
   }
-</div>
 
+  @if (activeTab() === 'printers') {
+  <div class="tab-content">
+    <div class="printer-container">
+      <h2>PDF Printing</h2>
+
+      <div class="printer-field">
+        <label for="pdf-file">PDF File</label>
+        <input id="pdf-file" type="file" accept="application/pdf,.pdf" (change)="onPdfSelected($event)" />
+        @if (selectedPdf(); as pdf) {
+          <span class="selected-file">{{ pdf.name }}</span>
+        }
+        <button type="button" class="btn btn-secondary test-pdf-button" (click)="useTestPdf()">
+          Use Mobile WiFi Access.pdf
+        </button>
+      </div>
+
+      <div class="printer-field">
+        <label for="printer-search">Printer</label>
+        <div class="printer-picker">
+          <input
+            id="printer-search"
+            type="search"
+            autocomplete="off"
+            placeholder="Search printer..."
+            [value]="printerSearch()"
+            (input)="setPrinterSearch($any($event.target).value)"
+          />
+          @if (printerSearch().trim() && filteredPrinters().length > 0 && !selectedPrinter()) {
+            <div class="printer-results" role="listbox">
+              @for (printer of filteredPrinters(); track printer) {
+                <button
+                  type="button"
+                  class="printer-result"
+                  role="option"
+                  (click)="selectPrinter(printer)"
+                >
+                  {{ printer }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+        @if (printerLoading()) {
+          <span class="printer-help">Loading printers...</span>
+        }
+        @if (!printerLoading() && printers().length === 0 && !printerError()) {
+          <span class="printer-help">No printers found.</span>
+        }
+      </div>
+
+      @if (printerError()) {
+        <p class="printer-error">{{ printerError() }}</p>
+      }
+      @if (printerStatus()) {
+        <p class="printer-status">{{ printerStatus() }}</p>
+      }
+
+      <button
+        type="button"
+        class="btn btn-primary printer-submit"
+        (click)="printSelectedPdf()"
+        [disabled]="printerPrinting()"
+      >
+        {{ printerPrinting() ? 'Printing...' : 'Print' }}
+      </button>
+    </div>
+  </div>
+  }
+</div>

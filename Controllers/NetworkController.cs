@@ -29,7 +29,6 @@ namespace ADApi.Controllers
         private readonly string _attendanceDeviceCsvPath;
 
         public sealed record CreateServerRequest(string Name, string Host);
-        public sealed record UpdateMaintenanceRequest(bool maintenance);
 
         public NetworkController(
             ILogger<NetworkController> logger,
@@ -65,12 +64,23 @@ namespace ADApi.Controllers
                 return BadRequest(new { success = false, message = "Name and host are required" });
             }
 
-            var server = await _networkMonitoring.AddServerAsync(request.Name, request.Host);
-            return Ok(server);
+            try
+            {
+                var server = await _networkMonitoring.AddServerAsync(request.Name, request.Host);
+                return Ok(server);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { success = false, message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        [HttpDelete("servers/{id}")]
-        public async Task<IActionResult> RemoveServer(string id)
+        [HttpDelete("servers/{id:int}")]
+        public async Task<IActionResult> RemoveServer(int id)
         {
             if (!await _networkMonitoring.RemoveServerAsync(id))
             {
@@ -78,18 +88,6 @@ namespace ADApi.Controllers
             }
 
             return Ok(new { success = true });
-        }
-
-        [HttpPatch("servers/{id}/maintenance")]
-        public async Task<IActionResult> UpdateServerMaintenance(string id, [FromBody] UpdateMaintenanceRequest request)
-        {
-            var updated = await _networkMonitoring.UpdateMaintenanceAsync(id, request.maintenance);
-            if (updated is null)
-            {
-                return NotFound(new { success = false, message = "Server not found" });
-            }
-
-            return Ok(updated);
         }
 
         /// <summary>

@@ -18,7 +18,17 @@ interface InventoryRow {
 })
 export class Print implements OnInit {
   // Tab management
-  activeTab = signal<'label' | 'service-tag' | 'forms'>('label');
+  activeTab = signal<'label' | 'service-tag' | 'forms' | 'printers'>('label');
+
+  // Printer tab
+  printers = signal<string[]>([]);
+  printerSearch = signal('');
+  selectedPrinter = signal('');
+  selectedPdf = signal<File | null>(null);
+  printerLoading = signal(false);
+  printerPrinting = signal(false);
+  printerStatus = signal('');
+  printerError = signal('');
 
   // Forms Tab - PDF list
   pdfForms = [
@@ -73,6 +83,116 @@ export class Print implements OnInit {
       itContactNumbers: [{ value: this.itContactNumbersFixed, disabled: true }],
       sentBy: ['TH'],
       remarks: ['']
+    });
+  }
+
+  filteredPrinters(): string[] {
+    const search = this.printerSearch().trim().toLowerCase();
+    return this.printers().filter((printer) => !search || printer.toLowerCase().includes(search));
+  }
+
+  setPrinterSearch(value: string): void {
+    this.printerSearch.set(value);
+    if (value.trim().toLowerCase() !== this.selectedPrinter().toLowerCase()) {
+      this.selectedPrinter.set('');
+    }
+  }
+
+  selectPrinter(printer: string): void {
+    this.selectedPrinter.set(printer);
+    this.printerSearch.set(printer);
+  }
+
+  selectTab(tab: 'label' | 'service-tag' | 'forms' | 'printers'): void {
+    this.activeTab.set(tab);
+    if (tab === 'printers') {
+      this.loadPrinters();
+    }
+  }
+
+  loadPrinters(): void {
+    this.printerLoading.set(true);
+    this.printerError.set('');
+    this.http.get<string[]>(`${this.getApiBaseUrl()}/api/printers`).subscribe({
+      next: (printers) => {
+        this.printers.set(printers);
+        this.printerLoading.set(false);
+        if (!this.printers().includes(this.selectedPrinter())) {
+          this.selectedPrinter.set('');
+        }
+      },
+      error: (error) => {
+        this.printerLoading.set(false);
+        this.printerError.set(error.error?.error || 'Unable to connect to the print server.');
+      },
+    });
+  }
+
+  onPdfSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.printerError.set('');
+    this.printerStatus.set('');
+
+    if (!file) {
+      this.selectedPdf.set(null);
+      return;
+    }
+
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      this.selectedPdf.set(null);
+      input.value = '';
+      this.printerError.set('Only PDF files are supported.');
+      return;
+    }
+
+    this.selectedPdf.set(file);
+  }
+
+  async useTestPdf(): Promise<void> {
+    this.printerError.set('');
+    this.printerStatus.set('');
+    try {
+      const response = await fetch('/PDF/Mobile%20WiFi%20Access.pdf');
+      if (!response.ok) {
+        throw new Error('Test PDF could not be loaded.');
+      }
+      const blob = await response.blob();
+      this.selectedPdf.set(new File([blob], 'Mobile WiFi Access.pdf', { type: 'application/pdf' }));
+    } catch {
+      this.printerError.set('Unable to load the test PDF.');
+    }
+  }
+
+  printSelectedPdf(): void {
+    const file = this.selectedPdf();
+    const printer = this.selectedPrinter();
+    this.printerError.set('');
+    this.printerStatus.set('');
+
+    if (!file) {
+      this.printerError.set('No PDF selected.');
+      return;
+    }
+    if (!printer) {
+      this.printerError.set('Printer not found.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    formData.append('printerName', printer);
+    this.printerPrinting.set(true);
+
+    this.http.post<{ message: string }>(`${this.getApiBaseUrl()}/api/printers/print`, formData).subscribe({
+      next: (response) => {
+        this.printerPrinting.set(false);
+        this.printerStatus.set(response.message);
+      },
+      error: (error) => {
+        this.printerPrinting.set(false);
+        this.printerError.set(error.error?.error || 'Unable to send the print job.');
+      },
     });
   }
 

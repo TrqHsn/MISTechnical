@@ -64,6 +64,100 @@ h1 {
   animation: fadeIn 0.3s ease-in;
 }
 
+.printer-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #111;
+}
+
+.printer-container h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.printer-field {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.printer-field label {
+  font-weight: 700;
+}
+
+.printer-field input {
+  min-height: 42px;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  box-sizing: border-box;
+}
+
+.printer-picker {
+  position: relative;
+}
+
+.printer-results {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.printer-result {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 0;
+  background: #fff;
+  color: #111;
+  text-align: left;
+  cursor: pointer;
+}
+
+.printer-result:hover,
+.printer-result:focus {
+  background: #e0f2fe;
+  outline: none;
+}
+
+.selected-file,
+.printer-help {
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.test-pdf-button {
+  justify-self: start;
+}
+
+.printer-error {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.printer-status {
+  color: #166534;
+  font-weight: 700;
+}
+
+.printer-submit {
+  display: block;
+  margin: 1.5rem auto 0;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -844,4 +938,3 @@ h1 {
   transform: translateY(0);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
-
