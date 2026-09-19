@@ -48,7 +48,29 @@
     <div class="result-card selected-user-card">
       <div class="card-header user-card-header">
         <h3>User Details</h3>
-        <button class="close-btn" (click)="clearUserSelection()">✕</button>
+        <div class="user-card-actions">
+          @if (getSelectedUserPrincipalName(); as userPrincipalName) {
+          <a
+            class="contact-icon-btn"
+            [href]="getTeamsChatUrl(userPrincipalName)"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open Teams chat"
+            title="Open Teams chat"
+          >
+            <img src="/logo/Teams.webp" alt="" />
+          </a>
+          <a
+            class="contact-icon-btn"
+            [href]="'mailto:' + userPrincipalName"
+            aria-label="Send email with Outlook"
+            title="Send email with Outlook"
+          >
+            <img src="/logo/Outlook.webp" alt="" />
+          </a>
+          }
+          <button class="close-btn" (click)="clearUserSelection()">✕</button>
+        </div>
       </div>
       <div class="card-content user-card-content">
         @for (key of getObjectKeys(selectedUser()); track key) {

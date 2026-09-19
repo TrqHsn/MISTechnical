@@ -65,55 +65,6 @@
   font-size: clamp(0.8rem, 1vw, 0.95rem);
 }
 
-.fab-button {
-  position: fixed;
-  bottom: clamp(16px, 4vw, 24px);
-  right: clamp(16px, 4vw, 24px);
-  width: clamp(44px, 10vw, 56px);
-  min-width: clamp(44px, 10vw, 56px);
-  min-height: clamp(44px, 10vw, 56px);
-  height: clamp(44px, 10vw, 56px);
-  padding: 0;
-  display: grid;
-  place-items: center;
-  font-size: clamp(1.2rem, 2vw, 1.6rem);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.28);
-  z-index: 1050;
-}
-
-.fab-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.fab-menu {
-  position: fixed;
-  right: clamp(16px, 4vw, 24px);
-  bottom: clamp(16px, 4vw, 24px);
-  z-index: 1050;
-  display: grid;
-  justify-items: end;
-  gap: 10px;
-}
-
-.fab-menu .fab-button {
-  position: static;
-}
-
-.fab-menu-options {
-  display: grid;
-  gap: 8px;
-  justify-items: end;
-}
-
-.fab-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  padding: 9px 15px;
-  white-space: nowrap;
-}
-
 .audio-unlock-banner {
   position: fixed;
   left: 50%;

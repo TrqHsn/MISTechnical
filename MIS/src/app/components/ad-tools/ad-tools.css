@@ -429,6 +429,42 @@ textarea:focus {
   background: rgba(76, 175, 80, 0.24);
 }
 
+.user-card-header {
+  align-items: center;
+}
+
+.user-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.contact-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.45rem;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.contact-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.contact-icon-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.contact-icon-btn img {
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: contain;
+}
+
 .computer-card-header h3,
 .user-card-header h3 {
   font-size: 1rem;

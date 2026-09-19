@@ -212,6 +212,15 @@ export class AdToolsComponent {
     this.usersResults.set([]);
   }
 
+  getSelectedUserPrincipalName(): string | null {
+    const userPrincipalName = this.selectedUser()?.['userPrincipalName'];
+    return typeof userPrincipalName === 'string' && userPrincipalName.trim() ? userPrincipalName.trim() : null;
+  }
+
+  getTeamsChatUrl(userPrincipalName: string): string {
+    return `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(userPrincipalName)}`;
+  }
+
   clearUserSelection() {
     this.selectedUser.set(null);
   }

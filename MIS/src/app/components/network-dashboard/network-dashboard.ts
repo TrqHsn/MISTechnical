@@ -1,4 +1,4 @@
-import { Component, effect, OnDestroy, afterNextRender, signal, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, effect, HostListener, OnDestroy, afterNextRender, signal, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NetworkMonitorService } from '../../services/network-monitor.service';
@@ -23,7 +23,6 @@ export class NetworkDashboardComponent implements OnDestroy {
   private audioUnlocked = false;
   private latchedAlertLevels = new Map<string, 'yellow' | 'red'>();
   private monitoringStarted = signal(false);
-  menuOpen = false;
   showAudioModeDialog = true;
   alertMode: 'ringer' | 'silent' | null = null;
 
@@ -59,8 +58,11 @@ export class NetworkDashboardComponent implements OnDestroy {
       }, 1000);
 
       this.alertModeTimeoutId = window.setTimeout(() => {
-        if (this.alertMode === null) {
-          this.selectAlertMode('ringer');
+        this.alertModeTimeoutId = null;
+        if (this.showAudioModeDialog && this.alertMode === null) {
+          void this.selectAlertMode('ringer').catch((error) => {
+            console.warn('Failed to initialize the default ringer alert mode:', error);
+          });
         }
       }, 5000);
     });
@@ -226,17 +228,32 @@ export class NetworkDashboardComponent implements OnDestroy {
     });
   }
 
-  toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
-  }
+  @HostListener('window:keydown', ['$event'])
+  async handleKeyboardShortcut(event: KeyboardEvent): Promise<void> {
+    const target = event.target;
+    if (
+      target instanceof HTMLElement &&
+      (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+    ) {
+      return;
+    }
 
-  openAddServerDialog(): void {
-    this.menuOpen = false;
-    this.openAddDialog();
-  }
+    const usesShortcutModifier = event.ctrlKey && event.altKey && !event.shiftKey && !event.metaKey;
+    if (!usesShortcutModifier) {
+      return;
+    }
 
-  async toggleMute(): Promise<void> {
-    this.menuOpen = false;
+    if (event.key.toLowerCase() === 'n') {
+      event.preventDefault();
+      this.openAddDialog();
+      return;
+    }
+
+    if (event.key.toLowerCase() !== 'm') {
+      return;
+    }
+
+    event.preventDefault();
     if (this.alertMode === 'ringer') {
       this.alertMode = 'silent';
       this.stopOfflineAlert();
