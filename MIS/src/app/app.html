@@ -1,3 +1,6 @@
+@if (standaloneRoute()) {
+  <router-outlet></router-outlet>
+} @else {
 <app-universal-search [appButtons]="buttons" (actionTriggered)="handleUniversalSearchAction($event)" />
 
 <div class="container">
@@ -19,6 +22,7 @@
           <span [class.active]="clockWeekday() === $index">{{ day }}</span>
         }
       </div>
+      }
       <div class="ampm">{{ clockAmPm() }}</div>
       <div class="digits">
         <div [class]="clockHours()[0]">
@@ -150,3 +154,4 @@
   <!-- Universal Search Modal -->
   <app-universal-search></app-universal-search>
 </div>
+}

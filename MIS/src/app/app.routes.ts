@@ -83,6 +83,10 @@ export const routes: Routes = [
     path: 'display-test',
     loadComponent: () => import('./components/display-test/display-test.component').then(m => m.DisplayTestComponent)
   },
+  {
+    path: 'weekPlanner',
+    loadComponent: () => import('./components/week-planner/week-planner').then(m => m.WeekPlannerComponent)
+  },
   // ...existing code...
   // Fallback - redirect any unknown path to ad-tools
   { path: '**', redirectTo: 'ad-tools' }

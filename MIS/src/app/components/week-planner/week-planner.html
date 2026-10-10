@@ -1,0 +1,101 @@
+<main class="planner-shell">
+  <header class="planner-header">
+    <div>
+      <p class="eyebrow">MIS TECHNICAL TEAM</p>
+      <h1>Weekly Work Planner</h1>
+      <p class="week-label">{{ weekLabel() }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="nav-button" (click)="navigate(-1)">‹ Previous Week</button>
+      <button class="nav-button current" (click)="goTo(currentWeekStart())">Current Week</button>
+      <button class="nav-button" (click)="navigate(1)">Next Week ›</button>
+      @if (canReport()) { <button class="report-button" (click)="downloadReport()">Generate Weekly Report</button> }
+    </div>
+  </header>
+
+  <section class="running-card">
+    <div class="running-icon">▶</div>
+    <div>
+      <p class="eyebrow">RUNNING TASK</p>
+      @if (runningTask(); as task) {
+        <strong>{{ task.name }}</strong>
+        <span>{{ task.start }} - {{ task.end }} · {{ remaining(task) }}</span>
+      } @else {
+        <strong>No scheduled task</strong>
+        <span>{{ isCurrentWeek() ? 'Nothing is scheduled right now' : 'Viewing a historical week' }}</span>
+      }
+    </div>
+  </section>
+
+  @if (message()) { <div class="message">{{ message() }}</div> }
+
+  <section class="schedule-card">
+    <div class="schedule-grid">
+      <div class="time-head">TIME</div>
+      @for (day of days; track day; let dayIndex = $index) {
+        <div class="day-head" [class.today]="isCurrentWeek() && ((now().getDay() + 1) % 7) === dayIndex">
+          <b>{{ day }}</b>
+          <small>{{ formatDate(fromIso(selectedWeekStart())) }}</small>
+        </div>
+      }
+      <div class="time-axis">
+        @for (time of times; track time) { <span>{{ time }}</span> }
+      </div>
+      @for (day of days; track day; let dayIndex = $index) {
+        <div class="day-column">
+          @for (time of times; track time) {
+            <button class="slot" (click)="addAt(dayIndex, time)" [attr.aria-label]="'Add task ' + day + ' ' + time"></button>
+          }
+          @for (task of (week()?.tasks ?? []); track task.id) {
+            @if (task.day === dayIndex) {
+              <button class="task-block" [class.fixed]="task.category === 'Fixed'" [class.completed]="task.status === 'Completed'" [style]="taskStyle(task)" (click)="edit(task)">
+                <b>{{ task.name }}</b>
+                <span>{{ task.start }} - {{ task.end }}</span>
+                <small>{{ task.category === 'Fixed' ? 'FIXED' : 'NEED-BASED' }} · {{ task.status }}</small>
+              </button>
+            }
+          }
+        </div>
+      }
+    </div>
+    <p class="hint">Click an empty slot to add a task · Click a task to edit or remove it · Friday is a weekly holiday</p>
+  </section>
+
+  <section class="lower-grid">
+    <article class="panel">
+      <div class="panel-heading"><h2>Important Tasks</h2><button class="small-button" (click)="openImportant()">＋ Add</button></div>
+      @for (item of (week()?.importantTasks ?? []); track item.id) {
+        <button class="important-item" (click)="openImportant(item)">
+          <span [class.done]="item.status === 'Completed'">{{ item.name }}</span><small>{{ item.status }}</small>
+        </button>
+      } @empty { <p class="empty">No important tasks for this week.</p> }
+    </article>
+    <article class="panel notes-panel">
+      <div class="panel-heading"><h2>Weekly Notes</h2><span>Saved automatically</span></div>
+      <textarea [ngModel]="week()?.notes ?? ''" (ngModelChange)="updateNotes($event)" placeholder="Write general notes for this week..."></textarea>
+    </article>
+  </section>
+</main>
+
+@if (editor(); as task) {
+  <div class="modal-backdrop" (click)="closeEditor()"><form class="modal" (click)="$event.stopPropagation()" (ngSubmit)="saveTask()">
+    <div class="panel-heading"><h2>{{ task.id ? 'Edit Task' : 'Add Task' }}</h2><button type="button" class="close" (click)="closeEditor()">×</button></div>
+    <label>Task name<input name="name" [(ngModel)]="task.name" required autofocus></label>
+    <div class="form-row"><label>Category<select name="category" [(ngModel)]="task.category"><option value="NeedBased">Need-Based Task</option><option value="Fixed">Fixed Task</option></select></label><label>Day<select name="day" [(ngModel)]="task.day">@for (day of days; track day; let i = $index) { <option [ngValue]="i">{{ day }}</option> }</select></label></div>
+    <div class="form-row"><label>Start time<input type="time" name="start" step="900" min="07:30" max="16:15" [(ngModel)]="task.start"></label><label>End time<input type="time" name="end" step="900" min="07:45" max="16:30" [(ngModel)]="task.end"></label></div>
+    <label>Status<select name="status" [(ngModel)]="task.status">@for (status of statuses; track status) { <option [ngValue]="status">{{ status }}</option> }</select></label>
+    <label>Notes<textarea name="notes" [(ngModel)]="task.notes"></textarea></label>
+    <p class="fixed-warning" [class.visible]="task.category === 'Fixed'">Removing this Fixed Task removes its recurring schedule from future weeks.</p>
+    <div class="modal-actions"><button type="button" class="delete-button" [disabled]="!task.id" (click)="removeTask()">Remove</button><button type="submit" class="save-button">Save Task</button></div>
+  </form></div>
+}
+
+@if (showImportant() && importantEditor(); as item) {
+  <div class="modal-backdrop" (click)="showImportant.set(false)"><form class="modal small-modal" (click)="$event.stopPropagation()" (ngSubmit)="saveImportant()">
+    <div class="panel-heading"><h2>Important Task</h2><button type="button" class="close" (click)="showImportant.set(false)">×</button></div>
+    <label>Task name<input name="importantName" [(ngModel)]="item.name" required autofocus></label>
+    <label>Status<select name="importantStatus" [(ngModel)]="item.status">@for (status of statuses; track status) { <option [ngValue]="status">{{ status }}</option> }</select></label>
+    <label>Notes<textarea name="importantNotes" [(ngModel)]="item.notes"></textarea></label>
+    <div class="modal-actions"><button type="button" class="delete-button" [disabled]="!item.id" (click)="removeImportant()">Remove</button><button type="submit" class="save-button">Save</button></div>
+  </form></div>
+}

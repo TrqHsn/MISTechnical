@@ -1,5 +1,6 @@
 import { Component, signal, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
 import { ApiService } from './services/api';
 import { ToastComponent } from './components/toast/toast.component';
 import { UniversalSearchComponent } from './components/universal-search/universal-search';
@@ -43,6 +44,7 @@ export class App {
   clockAmPm = signal('AM');
   clockWeekday = signal(0);
   private _clockInterval: any;
+  readonly standaloneRoute = signal(false);
 
   // Unlock modal state
   unlockDialogVisible = signal(false);
@@ -52,10 +54,19 @@ export class App {
 
   constructor(
     private apiService: ApiService,
-    public navService: NavigationService
+    public navService: NavigationService,
+    private router: Router
   ) {
+    this.standaloneRoute.set(this.isStandaloneRoute(this.router.url));
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(event => {
+      this.standaloneRoute.set(this.isStandaloneRoute((event as NavigationEnd).urlAfterRedirects));
+    });
     this.startWorkTimer();
     this.startClock();
+  }
+
+  private isStandaloneRoute(url: string): boolean {
+    return url.split('?')[0].replace(/\/+$/, '') === '/weekPlanner';
   }
 
   @HostListener('document:keydown', ['$event'])
