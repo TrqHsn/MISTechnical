@@ -84,6 +84,12 @@ h1 {
   margin-bottom: 1rem;
 }
 
+.pdf-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
 .printer-field label {
   font-weight: 700;
 }

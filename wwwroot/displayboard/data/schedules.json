@@ -1,12 +1,12 @@
 [
   {
-    "Id": 5,
-    "Name": "test",
+    "Id": 6,
+    "Name": "Test",
     "ContentType": 1,
     "PlaylistId": null,
-    "MediaId": 30,
-    "StartTime": "19:26:00",
-    "EndTime": "19:27:00",
+    "MediaId": 41,
+    "StartTime": "20:55:00",
+    "EndTime": "23:59:00",
     "DayOfWeek": null,
     "IsActive": true,
     "Priority": 0,

@@ -18,9 +18,9 @@ interface InventoryRow {
 })
 export class Print implements OnInit {
   // Tab management
-  activeTab = signal<'label' | 'service-tag' | 'forms' | 'printers'>('label');
+  activeTab = signal<'label' | 'service-tag' | 'print'>('label');
 
-  // Printer tab
+  // Print tab
   printers = signal<string[]>([]);
   printerSearch = signal('');
   selectedPrinter = signal('');
@@ -103,9 +103,9 @@ export class Print implements OnInit {
     this.printerSearch.set(printer);
   }
 
-  selectTab(tab: 'label' | 'service-tag' | 'forms' | 'printers'): void {
+  selectTab(tab: 'label' | 'service-tag' | 'print'): void {
     this.activeTab.set(tab);
-    if (tab === 'printers') {
+    if (tab === 'print') {
       this.loadPrinters();
     }
   }
@@ -149,19 +149,25 @@ export class Print implements OnInit {
     this.selectedPdf.set(file);
   }
 
-  async useTestPdf(): Promise<void> {
+  private async loadPdfAsset(filename: string): Promise<void> {
     this.printerError.set('');
     this.printerStatus.set('');
+
     try {
-      const response = await fetch('/PDF/Mobile%20WiFi%20Access.pdf');
+      const response = await fetch(`/PDF/${encodeURIComponent(filename)}`);
       if (!response.ok) {
-        throw new Error('Test PDF could not be loaded.');
+        throw new Error('PDF could not be loaded.');
       }
+
       const blob = await response.blob();
-      this.selectedPdf.set(new File([blob], 'Mobile WiFi Access.pdf', { type: 'application/pdf' }));
+      this.selectedPdf.set(new File([blob], filename, { type: 'application/pdf' }));
     } catch {
-      this.printerError.set('Unable to load the test PDF.');
+      this.printerError.set(`Unable to load ${filename}.`);
     }
+  }
+
+  async useTestPdf(): Promise<void> {
+    await this.loadPdfAsset('Mobile WiFi Access.pdf');
   }
 
   printSelectedPdf(): void {
@@ -400,8 +406,8 @@ export class Print implements OnInit {
     void this.loadInventory();
 
     this.route.queryParams.subscribe(params => {
-      const tab = params['tab'] as 'label' | 'service-tag' | 'forms' | undefined;
-      if (tab === 'label' || tab === 'service-tag' || tab === 'forms') {
+      const tab = params['tab'] as 'label' | 'service-tag' | 'print' | undefined;
+      if (tab === 'label' || tab === 'service-tag' || tab === 'print') {
         this.activeTab.set(tab);
       }
     });
@@ -671,28 +677,7 @@ export class Print implements OnInit {
   clearAll(): void {
     this.serviceTagForm.reset();
   }
-  // Forms Tab - Print PDF method
   openFormItem(form: { name: string; file: string }) {
-    this.printPdf(form.file);
-  }
-
-  printPdf(filename: string) {
-    if (typeof window === 'undefined') return;
-
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    iframe.onload = () => {
-      setTimeout(() => {
-        try {
-          iframe.contentWindow?.print();
-        } catch (e) {
-          console.error('Print failed:', e);
-        }
-      }, 250);
-    };
-
-    iframe.src = `PDF/${filename}`;
+    void this.loadPdfAsset(form.file);
   }
 }

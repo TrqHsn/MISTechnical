@@ -306,6 +306,300 @@
       ],
       "importantTasks": [],
       "notes": ""
+    },
+    {
+      "weekStart": "2026-10-10",
+      "tasks": [
+        {
+          "id": "e24524fe-86ed-4bc6-8609-6ff4dc9431b0",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 0,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "92f817d2-e8bb-40c5-870a-83ff4c52bb5a",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 1,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "4a5d15da-e594-41e3-be2e-ecbf0aa0c8b7",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 2,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "b0a616c6-189f-4178-a740-409dd8297242",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 3,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "6e57a8a0-2988-4c37-a47c-b78ea8fa4529",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 5,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "c8d15476-36cc-4026-b886-32860e97ece7",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 4,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "1b4bc59f-9e35-4c6e-bd31-36edea0560dd",
+          "name": "SIL Printer check",
+          "category": "Fixed",
+          "day": 4,
+          "start": "10:00",
+          "end": "11:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "3b1af7f0-b3b0-4c6d-88d2-a84021573c01",
+          "name": "SDL Printer and Confarence room check",
+          "category": "Fixed",
+          "day": 5,
+          "start": "10:00",
+          "end": "12:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "7aa685d1-4c5b-4a4c-9d03-dc07ae882b21",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 0,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "47313bbf-1d6f-4ce4-a0f4-fb8b7b979ee5",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 1,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "3c0f1256-ea4f-4b73-819d-a849fd104c26",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 2,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "cf4dd052-8f9d-4e18-bfe4-1bdbb4600b94",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 3,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "71f13710-7fd9-48fd-a241-c331a81af22e",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 4,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "d666e02c-3787-4791-9fb7-a3643ab29c05",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 5,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        }
+      ],
+      "importantTasks": [],
+      "notes": ""
+    },
+    {
+      "weekStart": "2026-10-09",
+      "tasks": [
+        {
+          "id": "e24524fe-86ed-4bc6-8609-6ff4dc9431b0",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 0,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "92f817d2-e8bb-40c5-870a-83ff4c52bb5a",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 1,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "4a5d15da-e594-41e3-be2e-ecbf0aa0c8b7",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 2,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "b0a616c6-189f-4178-a740-409dd8297242",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 3,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "6e57a8a0-2988-4c37-a47c-b78ea8fa4529",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 5,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "c8d15476-36cc-4026-b886-32860e97ece7",
+          "name": "Ingress, CCTV cameras",
+          "category": "Fixed",
+          "day": 4,
+          "start": "07:30",
+          "end": "08:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "1b4bc59f-9e35-4c6e-bd31-36edea0560dd",
+          "name": "SIL Printer check",
+          "category": "Fixed",
+          "day": 4,
+          "start": "10:00",
+          "end": "11:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "3b1af7f0-b3b0-4c6d-88d2-a84021573c01",
+          "name": "SDL Printer and Confarence room check",
+          "category": "Fixed",
+          "day": 5,
+          "start": "10:00",
+          "end": "12:00",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "7aa685d1-4c5b-4a4c-9d03-dc07ae882b21",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 0,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "47313bbf-1d6f-4ce4-a0f4-fb8b7b979ee5",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 1,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "3c0f1256-ea4f-4b73-819d-a849fd104c26",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 2,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "cf4dd052-8f9d-4e18-bfe4-1bdbb4600b94",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 3,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "71f13710-7fd9-48fd-a241-c331a81af22e",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 4,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        },
+        {
+          "id": "d666e02c-3787-4791-9fb7-a3643ab29c05",
+          "name": "Launch",
+          "category": "Fixed",
+          "day": 5,
+          "start": "14:15",
+          "end": "15:15",
+          "notes": "",
+          "status": "Planned"
+        }
+      ],
+      "importantTasks": [],
+      "notes": ""
     }
   ]
 }

@@ -9,11 +9,8 @@
     <button class="tab-btn" [class.active]="activeTab() === 'service-tag'" (click)="selectTab('service-tag')">
       Service Tag
     </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'forms'" (click)="selectTab('forms')">
-      Forms
-    </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'printers'" (click)="selectTab('printers')">
-      Printers
+    <button class="tab-btn" [class.active]="activeTab() === 'print'" (click)="selectTab('print')">
+      Print
     </button>
   </div>
 
@@ -180,25 +177,7 @@
   </div>
   }
 
-  <!-- Forms Tab -->
-  @if (activeTab() === 'forms') {
-  <div class="tab-content">
-    <div class="forms-container">
-      <h2>Print Forms</h2>
-      <p class="forms-description">Click any form to open the print dialog</p>
-      
-      <div class="forms-list">
-        @for (form of pdfForms; track form.file) {
-          <button class="form-btn" (click)="openFormItem(form)">
-            {{ form.name }}
-          </button>
-        }
-      </div>
-    </div>
-  </div>
-  }
-
-  @if (activeTab() === 'printers') {
+  @if (activeTab() === 'print') {
   <div class="tab-content">
     <div class="printer-container">
       <h2>PDF Printing</h2>
@@ -209,9 +188,18 @@
         @if (selectedPdf(); as pdf) {
           <span class="selected-file">{{ pdf.name }}</span>
         }
-        <button type="button" class="btn btn-secondary test-pdf-button" (click)="useTestPdf()">
-          Use Mobile WiFi Access.pdf
-        </button>
+        <div class="pdf-shortcuts">
+          <button type="button" class="btn btn-secondary test-pdf-button" (click)="useTestPdf()">
+            Use Mobile WiFi Access.pdf
+          </button>
+          @for (form of pdfForms; track form.file) {
+            @if (form.file !== 'Mobile WiFi Access.pdf') {
+              <button type="button" class="btn btn-secondary test-pdf-button" (click)="openFormItem(form)">
+                Use {{ form.file }}
+              </button>
+            }
+          }
+        </div>
       </div>
 
       <div class="printer-field">
