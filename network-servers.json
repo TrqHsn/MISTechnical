@@ -42,18 +42,6 @@
     "LastDownTime": null
   },
   {
-    "Id": 9,
-    "Name": "Nester Production",
-    "Host": "SDLD560A",
-    "LastDownTime": null
-  },
-  {
-    "Id": 10,
-    "Name": "Nester 2 Costing",
-    "Host": "SDLD561B",
-    "LastDownTime": null
-  },
-  {
     "Id": 11,
     "Name": "Race SDL",
     "Host": "103.85.159.198",

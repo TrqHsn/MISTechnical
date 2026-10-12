@@ -165,6 +165,161 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.buttons-row .button-wrap {
+  --glow-color: #ff1f71;
+  position: relative;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  min-width: 64px;
+  height: 50px;
+  margin: 0;
+}
+
+.buttons-row .button-wrap:nth-child(3n + 2) {
+  --glow-color: #2db2ff;
+}
+
+.buttons-row .button-wrap:nth-child(3n) {
+  --glow-color: #1eff45;
+}
+
+.buttons-row .button-wrap::before,
+.buttons-row .button-wrap::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  z-index: 0;
+  width: 30px;
+  height: 10px;
+  border-radius: 10px;
+  background: var(--glow-color);
+  box-shadow:
+    0 0 5px var(--glow-color),
+    0 0 15px var(--glow-color),
+    0 0 30px var(--glow-color),
+    0 0 60px var(--glow-color);
+  transform: translateX(-50%);
+  transition:
+    width 500ms ease,
+    height 500ms ease,
+    top 500ms ease,
+    bottom 500ms ease,
+    border-radius 500ms ease;
+  transition-delay: 200ms;
+  pointer-events: none;
+}
+
+.buttons-row .button-wrap::before {
+  bottom: -5px;
+}
+
+.buttons-row .button-wrap::after {
+  top: -5px;
+}
+
+.buttons-row .button-wrap:hover::before,
+.buttons-row .button-wrap:has(.btn-active)::before {
+  bottom: 0;
+  width: 80%;
+  height: 50%;
+  border-radius: 30px;
+}
+
+.buttons-row .button-wrap:hover::after,
+.buttons-row .button-wrap:has(.btn-active)::after {
+  top: 0;
+  width: 80%;
+  height: 50%;
+  border-radius: 30px;
+}
+
+.buttons-row .btn {
+  all: unset;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 64px;
+  height: 100%;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 15px 15px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  transition: letter-spacing 500ms ease, background 500ms ease, box-shadow 500ms ease;
+}
+
+.buttons-row .btn span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.buttons-row .btn span::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.15), transparent);
+  transform: skewX(45deg) translateX(0);
+  filter: blur(0);
+  transition: transform 500ms ease;
+  pointer-events: none;
+}
+
+.buttons-row .button-wrap:hover .btn,
+.buttons-row .btn:focus-visible {
+  letter-spacing: 3px;
+}
+
+.buttons-row .button-wrap:hover .btn span::before {
+  transform: skewX(45deg) translateX(200px);
+}
+
+.buttons-row .btn:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 4px;
+}
+
+.buttons-row .btn:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.buttons-row .btn.btn-active {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 15px 15px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  transform: none;
+  animation: none;
+}
+
 /* Unlock modal styles */
 .modal-overlay {
   position: fixed;
@@ -395,10 +550,15 @@
     padding: 16px 0;
   }
 
-  .buttons-row .btn {
+  .buttons-row .button-wrap {
     flex: 1 1 calc(50% - 10px);
+    width: calc(50% - 10px);
     max-width: calc(50% - 10px);
     min-width: 130px;
+  }
+
+  .buttons-row .btn {
+    width: 100%;
   }
 
   .btn {
@@ -417,10 +577,15 @@
     padding: 20px 0;
   }
 
-  .buttons-row .btn {
+  .buttons-row .button-wrap {
     flex: 1 1 calc(33.333% - 10px);
+    width: calc(33.333% - 10px);
     max-width: calc(33.333% - 10px);
     min-width: 150px;
+  }
+
+  .buttons-row .btn {
+    width: 100%;
   }
 
   .btn {
@@ -453,11 +618,11 @@
     padding: 12px 0;
   }
 
-  .buttons-row .btn {
+  .buttons-row .button-wrap {
     flex: 1 1 calc(50% - 4px);
+    width: calc(50% - 4px);
     max-width: calc(50% - 4px);
     min-width: 0;
-    white-space: normal;
   }
 
   .btn {

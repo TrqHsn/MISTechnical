@@ -90,14 +90,16 @@
   <div class="buttons-row">
 
     @for (button of buttons; track button.id) {
-      <button 
-        class="btn" 
-        (click)="onTopButtonClick($event, button.id)"
-        [routerLink]="getButtonRoute(button.id)"
-        routerLinkActive="btn-active"
-        [attr.data-id]="button.id">
-        {{ button.name }}
-      </button>
+      <div class="button-wrap">
+        <button
+          class="btn"
+          (click)="onTopButtonClick($event, button.id)"
+          [routerLink]="getButtonRoute(button.id)"
+          routerLinkActive="btn-active"
+          [attr.data-id]="button.id">
+          <span>{{ button.name }}</span>
+        </button>
+      </div>
     }
   </div>
 

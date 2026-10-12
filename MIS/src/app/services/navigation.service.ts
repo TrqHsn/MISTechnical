@@ -16,10 +16,10 @@ export interface NavButton {
 export class NavigationService {
   // Route mapping for button IDs
   private routeMap: { [key: string]: string } = {
-    'testapi': '/ad-tools',
+    'ad': '/ad-tools',
     'print': '/print',
-    'oif': '/forms',
-    'inventory': '/inventory',
+    'forms': '/forms',
+    'search': '/inventory',
     'network': '/network',
     'devicetool': '/device-tool',
     'kiosk': '/sinage',
@@ -32,10 +32,10 @@ export class NavigationService {
 
   // Icon and metadata mapping
   private metadataMap: { [key: string]: { icon: string; description: string; keywords: string[] } } = {
-    'testapi': { icon: '🔧', description: 'Active Directory management tools', keywords: ['ad', 'active directory', 'tools', 'admin', 'users', 'computers'] },
+    'ad': { icon: '🔧', description: 'Active Directory management tools', keywords: ['ad', 'active directory', 'tools', 'admin', 'users', 'computers'] },
     'print': { icon: '🖨️', description: 'Print thermal labels for devices', keywords: ['print', 'label', 'thermal', 'printer'] },
-    'oif': { icon: '📝', description: 'OS installation and device assignment forms', keywords: ['forms', 'os', 'installation', 'device'] },
-    'inventory': { icon: '📦', description: 'Search hardware inventory database', keywords: ['inventory', 'search', 'hardware', 'stock'] },
+    'forms': { icon: '📝', description: 'OS installation and device assignment forms', keywords: ['forms', 'os', 'installation', 'device'] },
+    'search': { icon: '📦', description: 'Search hardware inventory database', keywords: ['inventory', 'search', 'hardware', 'stock'] },
     'network': { icon: '🌐', description: 'Ping, IP scanner, and attendance device management', keywords: ['network', 'ping', 'scan', 'attendance'] },
     'devicetool': { icon: '🔧', description: 'Device management utilities', keywords: ['device', 'tool', 'management'] },
     'kiosk': { icon: '📺', description: 'Manage kiosk media, playlists, and schedules', keywords: ['kiosk', 'display', 'signage', 'admin'] },
