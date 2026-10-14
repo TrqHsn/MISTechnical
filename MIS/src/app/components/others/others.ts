@@ -17,7 +17,7 @@ export class OthersComponent {
     { label: 'Introduction', description: 'Overview', action: 'introduction' },
     { label: 'Network Dashboard', description: 'Nework monitor', action: 'button-2' },
     { label: 'Guest QR', description: 'Guest Wi-Fi access', action: 'guest-wifi' },
-    { label: 'Wake on LAN', description: 'Wake network devices', action: 'wake-on-lan' },
+    { label: 'Mail Storage', description: 'Create mail-storage notification drafts', action: 'mail-storage' },
     { label: 'Button 5', description: 'Coming soon', action: 'button-5' },
     { label: 'Button 6', description: 'Coming soon', action: 'button-6' }
   ];
@@ -48,6 +48,11 @@ export class OthersComponent {
     if (action === 'wake-on-lan') {
       const url = '/network-dashboard?tab=wol';
       window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (action === 'mail-storage') {
+      window.open('/mail-storage-notification', '_blank', 'noopener,noreferrer');
       return;
     }
 

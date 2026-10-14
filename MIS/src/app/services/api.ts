@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 
 export interface User {
   [key: string]: any;
+  samAccountName?: string;
+  displayName?: string;
+  userPrincipalName?: string;
+  email?: string;
+  managerEmail?: string;
   telephoneNumber?: string;
 }
 
@@ -107,5 +112,16 @@ export class ApiService {
 
   generateEmail(formData: any): Observable<Blob> {
     return this.http.post(`${this.apiUrl}/email/generate`, formData, { responseType: 'blob' });
+  }
+
+  generateMailStorageNotification(payload: {
+    samAccountName: string;
+    category: 'Archive Mail' | 'Mailbox';
+    htmlBody: string;
+    includeManagerInCc: boolean;
+  }): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/mail-storage-notification/generate`, payload, {
+      responseType: 'blob'
+    });
   }
 }

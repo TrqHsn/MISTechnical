@@ -34,6 +34,8 @@ export class AdToolsComponent {
   usersSearchInput = signal('');
   usersResults = signal<User[]>([]);
   selectedUser = signal<User | null>(null);
+  selectedUserLoading = signal(false);
+  selectedUserError = signal('');
   usersLoading = signal(false);
   usersShowDropdown = signal(false);
   private usersSearchSubject = new Subject<string>();
@@ -210,6 +212,30 @@ export class AdToolsComponent {
     this.usersShowDropdown.set(false);
     this.usersSearchInput.set('');
     this.usersResults.set([]);
+    this.selectedUserLoading.set(false);
+    this.selectedUserError.set('');
+
+    const samAccountName = user.samAccountName || user['sAMAccountName'];
+    if (!samAccountName) {
+      this.selectedUserError.set('Unable to load user details: SAM account name is missing.');
+      return;
+    }
+
+    this.selectedUserLoading.set(true);
+    this.selectedUserError.set('');
+    this.apiService.getUserBySamAccountName(samAccountName).subscribe({
+      next: detailedUser => {
+        this.selectedUser.set(detailedUser);
+        this.selectedUserLoading.set(false);
+      },
+      error: error => {
+        console.error('Failed to load selected user details', error);
+        this.selectedUserLoading.set(false);
+        this.selectedUserError.set(
+          error.error?.message || error.message || 'Unable to load complete user details from Active Directory.'
+        );
+      }
+    });
   }
 
   getSelectedUserPrincipalName(): string | null {
@@ -223,6 +249,8 @@ export class AdToolsComponent {
 
   clearUserSelection() {
     this.selectedUser.set(null);
+    this.selectedUserLoading.set(false);
+    this.selectedUserError.set('');
   }
 
   // Enter handler for users search - selects first result
@@ -371,7 +399,7 @@ export class AdToolsComponent {
 
   // Get object keys for card display
   getObjectKeys(obj: any): string[] {
-    return obj ? Object.keys(obj) : [];
+    return obj ? Object.keys(obj).filter(key => key !== 'email' && key !== 'managerEmail') : [];
   }
 
   // Last Device Tab methods

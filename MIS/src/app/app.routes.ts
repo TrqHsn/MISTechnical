@@ -24,6 +24,11 @@ export const routes: Routes = [
   }
   ,
   {
+    path: 'mail-storage-notification',
+    loadComponent: () => import('./components/mail-storage-notification/mail-storage-notification.component').then(m => m.MailStorageNotificationComponent)
+  }
+  ,
+  {
     path: 'stress-cpu-gpu',
     loadComponent: () => import('./components/stress-cpu-gpu/stress-cpu-gpu.component').then(m => m.StressCpuGpuComponent)
   }

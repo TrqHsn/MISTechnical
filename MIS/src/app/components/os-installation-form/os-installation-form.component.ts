@@ -542,6 +542,9 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
       site: this.sitePreview(),
       company: this.divisionPreview()
     };
+    const actionTypeLabel = this.getActionTypeLabel(formData.actionType || '');
+    const computerName = formData.newComputerName || formData.oldComputerName || '';
+    const emlFilename = `IT Computer Form IT003 v3.0_${actionTypeLabel}_${computerName}.eml`;
 
     console.log('downloadEmail invoked', formData);
 
@@ -551,7 +554,7 @@ export class OsInstallationFormComponent implements OnInit, OnDestroy {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'email.eml';
+        a.download = emlFilename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:5001
+
+### Generate a single unsent mail-storage notification draft
+POST {{baseUrl}}/api/mail-storage-notification/generate
+Content-Type: application/json
+
+{
+  "samAccountName": "jsmith",
+  "category": "Archive Mail",
+  "htmlBody": "<p>Hello, your archive mailbox is nearly full.</p>",
+  "includeManagerInCc": true
+}

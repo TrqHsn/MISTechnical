@@ -72,6 +72,12 @@
           <button class="close-btn" (click)="clearUserSelection()">✕</button>
         </div>
       </div>
+      @if (selectedUserLoading()) {
+        <div class="loading" role="status">Loading complete user details...</div>
+      }
+      @if (selectedUserError()) {
+        <div class="message error" role="alert">{{ selectedUserError() }}</div>
+      }
       <div class="card-content user-card-content">
         @for (key of getObjectKeys(selectedUser()); track key) {
         <div class="property-btn user-property">

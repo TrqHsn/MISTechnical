@@ -1,0 +1,234 @@
+<main class="notification-page">
+  <header class="page-header">
+    <div>
+      <h1>Mail Storage Notification</h1>
+      <p>Create an individual Outlook draft for one Active Directory user.</p>
+    </div>
+    @if (selectedUser()) {
+      <button type="button" class="button button-secondary" (click)="startNextUser()">← Search another user</button>
+    }
+  </header>
+
+  @if (!selectedUser()) {
+    <section class="panel search-panel" aria-labelledby="user-search-heading">
+      <h2 id="user-search-heading">1. Find a user</h2>
+      <label for="user-search">Search by display name, UPN, or SAM account name</label>
+      <div class="search-box">
+        <input
+          id="user-search"
+          type="search"
+          autocomplete="off"
+          [value]="searchInput()"
+          placeholder="Type at least 2 characters..."
+          (input)="onSearchInput($any($event.target).value)"
+          (focus)="dropdownOpen.set(true)"
+          (keydown.escape)="dropdownOpen.set(false)"
+        />
+        @if (searchLoading()) {
+          <span class="search-status" aria-live="polite">Searching...</span>
+        }
+      </div>
+
+      @if (searchError()) {
+        <p class="message message-error" role="alert">{{ searchError() }}</p>
+      }
+      @if (searchInput().trim().length === 1) {
+        <p class="hint">Enter one more character to search.</p>
+      }
+      @if (dropdownOpen() && searchResults().length) {
+        <div class="user-results" role="listbox" aria-label="Matching Active Directory users">
+          @for (user of searchResults(); track user.samAccountName || user['sAMAccountName']) {
+            <button
+              type="button"
+              class="user-result"
+              role="option"
+              (click)="selectUser(user)"
+            >
+              <strong>{{ user.displayName || user['displayName'] || user.samAccountName || user['sAMAccountName'] }}</strong>
+              <span>Email: {{ user.email || user['email'] || 'Not listed in Active Directory' }}</span>
+              <span>SAM: {{ user.samAccountName || user['sAMAccountName'] || 'Unavailable' }}</span>
+            </button>
+          }
+        </div>
+      }
+      @if (dropdownOpen() && !searchLoading() && searchInput().trim().length >= 2 && !searchResults().length && !searchError()) {
+        <p class="hint">No matching users found.</p>
+      }
+      @if (userLoading()) {
+        <p class="message" aria-live="polite">Loading user and manager email details...</p>
+      }
+      @if (selectedUserError()) {
+        <p class="message message-error" role="alert">{{ selectedUserError() }}</p>
+      }
+    </section>
+  } @else {
+    <section class="panel workflow-panel" aria-labelledby="compose-heading">
+      <h2 id="compose-heading">2. Compose and review</h2>
+
+      <div class="recipient-card">
+        <div>
+          <span class="field-label">Selected user</span>
+          <strong>{{ selectedUser()?.displayName || selectedUser()?.['displayName'] || selectedUser()?.samAccountName || selectedUser()?.['sAMAccountName'] }}</strong>
+        </div>
+        <div>
+          <label class="field-label" for="recipient-email">To</label>
+          <input
+            id="recipient-email"
+            type="email"
+            [value]="selectedUser()?.email || selectedUser()?.['email'] || ''"
+            readonly
+          />
+          @if (!selectedUser()?.email && !selectedUser()?.['email']) {
+            <p class="message message-warning">This user has no email address in Active Directory. An EML cannot be generated.</p>
+          }
+        </div>
+        <div>
+          <span class="field-label">SAM account name</span>
+          <span>{{ selectedUser()?.samAccountName || selectedUser()?.['sAMAccountName'] }}</span>
+        </div>
+        <div class="manager-email">
+          <span class="field-label">Manager email</span>
+          <span>{{ selectedUser()?.managerEmail || 'Unavailable in Active Directory' }}</span>
+        </div>
+        <label class="manager-option">
+          <input
+            type="checkbox"
+            [checked]="includeManagerInCc()"
+            (change)="includeManagerInCc.set($any($event.target).checked); generated.set(false)"
+          />
+          <span>Include manager in CC</span>
+        </label>
+        @if (includeManagerInCc() && !selectedUser()?.managerEmail) {
+          <p class="message message-warning" role="alert">
+            Manager email is unavailable in Active Directory. Disable “Include manager in CC” before generating this draft.
+          </p>
+        }
+      </div>
+
+      <div class="compose-grid">
+        <div class="compose-column">
+          <section class="compose-section">
+            <h3>3. Notification category</h3>
+            <div class="category-options">
+              <label>
+                <input type="radio" name="notification-category" value="Archive Mail"
+                  [checked]="category() === 'Archive Mail'" (change)="setCategory($any($event.target).value)" />
+                <span>Archive Mail</span>
+              </label>
+              <label>
+                <input type="radio" name="notification-category" value="Mailbox"
+                  [checked]="category() === 'Mailbox'" (change)="setCategory($any($event.target).value)" />
+                <span>Mailbox</span>
+              </label>
+            </div>
+            <div class="subject-preview"><strong>Subject:</strong> {{ subject() }}</div>
+          </section>
+
+          <section class="compose-section">
+            <h3>4. Email body</h3>
+            <div class="toolbar" role="toolbar" aria-label="Email body formatting">
+              <label class="toolbar-select">
+                <span class="visually-hidden">Font family</span>
+                <select aria-label="Font family" (change)="format('fontName', $any($event.target).value)">
+                  <option value="Aptos" selected>Aptos (Body)</option>
+                  <option value="Arial">Arial</option>
+                  <option value="Calibri">Calibri</option>
+                </select>
+              </label>
+              <label class="toolbar-select">
+                <span class="visually-hidden">Font size</span>
+                <select aria-label="Font size" (change)="format('fontSize', $any($event.target).value)">
+                  <option value="">Font size</option>
+                  <option value="2">Small</option>
+                  <option value="3">Normal</option>
+                  <option value="4">Large</option>
+                  <option value="5">Extra large</option>
+                  <option value="6">Heading</option>
+                </select>
+              </label>
+              <button type="button" aria-label="Bold" title="Bold" (mousedown)="$event.preventDefault()" (click)="format('bold')"><strong>B</strong></button>
+              <button type="button" aria-label="Italic" title="Italic" (mousedown)="$event.preventDefault()" (click)="format('italic')"><em>I</em></button>
+              <button type="button" aria-label="Underline" title="Underline" (mousedown)="$event.preventDefault()" (click)="format('underline')"><u>U</u></button>
+              <button type="button" aria-label="Bulleted list" title="Bulleted list" (mousedown)="$event.preventDefault()" (click)="format('insertUnorderedList')">• List</button>
+              <button type="button" aria-label="Numbered list" title="Numbered list" (mousedown)="$event.preventDefault()" (click)="format('insertOrderedList')">1. List</button>
+              <button type="button" aria-label="Insert hyperlink" title="Insert hyperlink" (mousedown)="$event.preventDefault()" (click)="insertLink()">Link</button>
+              <button type="button" aria-label="Align left" title="Align left" (mousedown)="$event.preventDefault()" (click)="format('justifyLeft')">⇤</button>
+              <button type="button" aria-label="Align center" title="Align center" (mousedown)="$event.preventDefault()" (click)="format('justifyCenter')">≡</button>
+              <button type="button" aria-label="Align right" title="Align right" (mousedown)="$event.preventDefault()" (click)="format('justifyRight')">⇥</button>
+            </div>
+            <div
+              #bodyEditor
+              class="body-editor"
+              contenteditable="true"
+              role="textbox"
+              aria-label="Formatted email body"
+              aria-multiline="true"
+              (input)="setEditorBody()"
+              (paste)="generated.set(false)"
+            ></div>
+            <p class="hint">Formatted paste is supported. New messages start with Aptos (Body).</p>
+          </section>
+        </div>
+      </div>
+
+      @if (generationError()) {
+        <p class="message message-error" role="alert">{{ generationError() }}</p>
+      }
+      @if (generated()) {
+        <p class="message message-success" role="status">The individual EML draft was downloaded. Start another user when ready.</p>
+      }
+      <div class="actions">
+        <button
+          type="button"
+          class="button button-primary"
+          (click)="generateEml()"
+          [disabled]="generating() || !selectedUser()?.email || !bodyHasContent() || (includeManagerInCc() && !selectedUser()?.managerEmail)"
+        >
+          {{ generating() ? 'Generating...' : 'Generate EML' }}
+        </button>
+        <button
+          type="button"
+          class="button button-preview"
+          (click)="previewOpen.set(true)"
+          [disabled]="!selectedUser()"
+        >
+          Preview
+        </button>
+        @if (generated()) {
+          <button type="button" class="button button-secondary" (click)="startNextUser()">Start next user</button>
+        }
+      </div>
+    </section>
+  }
+
+  @if (previewOpen() && selectedUser()) {
+    <div class="preview-backdrop" (click)="closePreview()">
+      <section
+        class="preview-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="email-preview-heading"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="preview-dialog-header">
+          <div>
+            <h2 id="email-preview-heading">Email preview</h2>
+            <p>Review the recipients, subject, and formatted message before generating the EML.</p>
+          </div>
+          <button type="button" class="preview-close" aria-label="Close email preview" (click)="closePreview()">×</button>
+        </header>
+        <div class="email-preview">
+          <dl class="preview-headers">
+            <dt>To</dt>
+            <dd>{{ selectedUser()?.email || selectedUser()?.['email'] || 'Unavailable' }}</dd>
+            <dt>CC</dt>
+            <dd>{{ ccAddresses().join('; ') }}</dd>
+            <dt>Subject</dt>
+            <dd>{{ subject() }}</dd>
+          </dl>
+          <div class="preview-body" [innerHTML]="htmlBody()"></div>
+        </div>
+      </section>
+    </div>
+  }
+</main>

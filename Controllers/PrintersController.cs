@@ -46,7 +46,7 @@ public sealed class PrintersController : ControllerBase
     [HttpPost("print")]
     [RequestSizeLimit(MaxPdfSize)]
     public async Task<IActionResult> PrintPdf(
-        [FromForm] IFormFile? file,
+        IFormFile? file,
         [FromForm] string? printerName,
         CancellationToken cancellationToken)
     {

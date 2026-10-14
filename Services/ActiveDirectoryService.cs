@@ -25,13 +25,14 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 using var entry = new DirectoryEntry(_domainPath);
                 using var searcher = new DirectorySearcher(entry)
                 {
-                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(Name=*{searchTerm}*)(DisplayName=*{searchTerm}*)(sAMAccountName=*{searchTerm}*)(userPrincipalName=*{searchTerm}*)))",
-                    SearchScope = SearchScope.Subtree
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(Name=*{EscapeLdapFilterValue(searchTerm)}*)(DisplayName=*{EscapeLdapFilterValue(searchTerm)}*)(sAMAccountName=*{EscapeLdapFilterValue(searchTerm)}*)(userPrincipalName=*{EscapeLdapFilterValue(searchTerm)}*)))",
+                    SearchScope = SearchScope.Subtree,
+                    SizeLimit = 50
                 };
 
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
-                    "sAMAccountName", "displayName", "userPrincipalName", "title", 
+                    "sAMAccountName", "displayName", "userPrincipalName", "mail", "description", "title",
                     "department", "company", "telephoneNumber", "physicalDeliveryOfficeName", "manager", "userAccountControl"
                 });
 
@@ -62,18 +63,26 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 using var entry = new DirectoryEntry(_domainPath);
                 using var searcher = new DirectorySearcher(entry)
                 {
-                    Filter = $"(&(objectClass=user)(objectCategory=person)(sAMAccountName={samAccountName}))",
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(sAMAccountName={EscapeLdapFilterValue(samAccountName)}))",
                     SearchScope = SearchScope.Subtree
                 };
 
                 searcher.PropertiesToLoad.AddRange(new[]
                 {
-                    "sAMAccountName", "displayName", "userPrincipalName", "title", 
+                    "sAMAccountName", "displayName", "userPrincipalName", "mail", "description", "title",
                     "department", "company", "telephoneNumber", "physicalDeliveryOfficeName", "manager", "userAccountControl"
                 });
 
                 var result = searcher.FindOne();
-                return result != null ? MapToUserDto(result) : null;
+                var user = result != null ? MapToUserDto(result) : null;
+                if (user != null && result!.Properties["manager"].Count > 0)
+                {
+                    var managerDn = result.Properties["manager"][0]?.ToString();
+                    if (!string.IsNullOrWhiteSpace(managerDn))
+                        user.ManagerEmail = GetEmailByDistinguishedName(managerDn);
+                }
+
+                return user;
             }
             catch (Exception ex)
             {
@@ -510,6 +519,12 @@ public class ActiveDirectoryService : IActiveDirectoryService
             if (result.Properties["userPrincipalName"].Count > 0)
                 user.UserPrincipalName = result.Properties["userPrincipalName"][0]?.ToString();
 
+            if (result.Properties["mail"].Count > 0)
+                user.Email = result.Properties["mail"][0]?.ToString();
+
+            if (result.Properties["description"].Count > 0)
+                user.Description = result.Properties["description"][0]?.ToString();
+
             // title
             if (result.Properties["title"].Count > 0)
                 user.Title = result.Properties["title"][0]?.ToString();
@@ -556,6 +571,33 @@ public class ActiveDirectoryService : IActiveDirectoryService
         {
             return null;
         }
+    }
+
+    private string? GetEmailByDistinguishedName(string distinguishedName)
+    {
+        using var entry = new DirectoryEntry(_domainPath);
+        using var searcher = new DirectorySearcher(entry)
+        {
+            Filter = $"(&(objectCategory=person)(distinguishedName={EscapeLdapFilterValue(distinguishedName)}))",
+            SearchScope = SearchScope.Subtree,
+            SizeLimit = 1
+        };
+        searcher.PropertiesToLoad.Add("mail");
+
+        var manager = searcher.FindOne();
+        return manager?.Properties["mail"].Count > 0
+            ? manager.Properties["mail"][0]?.ToString()
+            : null;
+    }
+
+    private static string EscapeLdapFilterValue(string value)
+    {
+        return value
+            .Replace("\\", "\\5c", StringComparison.Ordinal)
+            .Replace("*", "\\2a", StringComparison.Ordinal)
+            .Replace("(", "\\28", StringComparison.Ordinal)
+            .Replace(")", "\\29", StringComparison.Ordinal)
+            .Replace("\0", "\\00", StringComparison.Ordinal);
     }
 
     private ComputerDto? MapToComputerDto(SearchResult result)
