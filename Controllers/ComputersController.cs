@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ADApi.Services;
 using ADApi.Models;
+using System.Net;
 
 namespace ADApi.Controllers;
 
@@ -9,12 +10,71 @@ namespace ADApi.Controllers;
 public class ComputersController : ControllerBase
 {
     private readonly IActiveDirectoryService _adService;
+    private readonly IComputerOuMoverService _computerOuMover;
     private readonly ILogger<ComputersController> _logger;
 
-    public ComputersController(IActiveDirectoryService adService, ILogger<ComputersController> logger)
+    public ComputersController(
+        IActiveDirectoryService adService,
+        IComputerOuMoverService computerOuMover,
+        ILogger<ComputersController> logger)
     {
         _adService = adService;
+        _computerOuMover = computerOuMover;
         _logger = logger;
+    }
+
+    /// <summary>Lists computer objects directly inside the domain's default Computers container.</summary>
+    [HttpGet("unassigned")]
+    public async Task<ActionResult<IReadOnlyList<UnassignedComputerResponse>>> GetUnassignedComputers(
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await _computerOuMover.GetUnassignedComputersAsync(cancellationToken));
+        }
+        catch (ComputerOuMoverException ex)
+        {
+            _logger.LogWarning(ex, "Unable to list unassigned computers");
+            return StatusCode((int)ex.StatusCode, new { error = "Unable to list unassigned computers", message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Active Directory failed while listing unassigned computers");
+            return StatusCode(500, new
+            {
+                error = "Active Directory request failed",
+                message = "Unable to list computers. Verify Active Directory connectivity and the API process account's permissions."
+            });
+        }
+    }
+
+    /// <summary>Moves an eligible unassigned computer to its server-selected destination OU.</summary>
+    [HttpPost("unassigned/{objectGuid}/move")]
+    public async Task<ActionResult<ComputerMoveResponse>> MoveUnassignedComputer(
+        string objectGuid,
+        CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(objectGuid, out var parsedGuid) || parsedGuid == Guid.Empty)
+            return BadRequest(new { error = "Invalid computer identifier", message = "A valid computer object GUID is required." });
+
+        try
+        {
+            return Ok(await _computerOuMover.MoveComputerAsync(parsedGuid, cancellationToken));
+        }
+        catch (ComputerOuMoverException ex)
+        {
+            _logger.LogWarning(ex, "Unable to move computer with object GUID {ObjectGuid}", parsedGuid);
+            return StatusCode((int)ex.StatusCode, new { error = "Computer move failed", message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Active Directory failed while moving computer with object GUID {ObjectGuid}", parsedGuid);
+            return StatusCode(500, new
+            {
+                error = "Active Directory move failed",
+                message = "The computer could not be moved. Verify Active Directory connectivity, destination OUs, and the API process account's permissions."
+            });
+        }
     }
 
     /// <summary>
@@ -133,5 +193,4 @@ public class ComputersController : ControllerBase
             }
         }
     }
-
 

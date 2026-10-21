@@ -2,66 +2,62 @@
   <header class="page-header">
     <div>
       <h1>Mail Storage Notification</h1>
-      <p>Create an individual Outlook draft for one Active Directory user.</p>
     </div>
-    @if (selectedUser()) {
-      <button type="button" class="button button-secondary" (click)="startNextUser()">← Search another user</button>
-    }
   </header>
 
-  @if (!selectedUser()) {
-    <section class="panel search-panel" aria-labelledby="user-search-heading">
-      <h2 id="user-search-heading">1. Find a user</h2>
-      <label for="user-search">Search by display name, UPN, or SAM account name</label>
-      <div class="search-box">
-        <input
-          id="user-search"
-          type="search"
-          autocomplete="off"
-          [value]="searchInput()"
-          placeholder="Type at least 2 characters..."
-          (input)="onSearchInput($any($event.target).value)"
-          (focus)="dropdownOpen.set(true)"
-          (keydown.escape)="dropdownOpen.set(false)"
-        />
-        @if (searchLoading()) {
-          <span class="search-status" aria-live="polite">Searching...</span>
+  <section class="panel search-panel" aria-labelledby="user-search-heading">
+    <h2 id="user-search-heading">1. Find or change user</h2>
+    <label for="user-search">Search by display name, UPN, or SAM account name</label>
+    <div class="search-box">
+      <input
+        id="user-search"
+        type="search"
+        autocomplete="off"
+        [value]="searchInput()"
+        placeholder="Type at least 2 characters..."
+        (input)="onSearchInput($any($event.target).value)"
+        (focus)="dropdownOpen.set(true)"
+        (keydown.escape)="dropdownOpen.set(false)"
+      />
+      @if (searchLoading()) {
+        <span class="search-status" aria-live="polite">Searching...</span>
+      }
+    </div>
+
+    @if (searchError()) {
+      <p class="message message-error" role="alert">{{ searchError() }}</p>
+    }
+    @if (searchInput().trim().length === 1) {
+      <p class="hint">Enter one more character to search.</p>
+    }
+    @if (dropdownOpen() && searchResults().length) {
+      <div class="user-results" role="listbox" aria-label="Matching Active Directory users">
+        @for (user of searchResults(); track user.samAccountName || user['sAMAccountName']) {
+          <button
+            type="button"
+            class="user-result"
+            role="option"
+            (click)="selectUser(user)"
+          >
+            <strong>{{ user.displayName || user['displayName'] || user.samAccountName || user['sAMAccountName'] }}</strong>
+            <span>Email: {{ user.email || user['email'] || 'Not listed in Active Directory' }}</span>
+            <span>SAM: {{ user.samAccountName || user['sAMAccountName'] || 'Unavailable' }}</span>
+          </button>
         }
       </div>
+    }
+    @if (dropdownOpen() && !searchLoading() && searchInput().trim().length >= 2 && !searchResults().length && !searchError()) {
+      <p class="hint">No matching users found.</p>
+    }
+    @if (userLoading()) {
+      <p class="message" aria-live="polite">Loading user and manager email details...</p>
+    }
+    @if (selectedUserError()) {
+      <p class="message message-error" role="alert">{{ selectedUserError() }}</p>
+    }
+  </section>
 
-      @if (searchError()) {
-        <p class="message message-error" role="alert">{{ searchError() }}</p>
-      }
-      @if (searchInput().trim().length === 1) {
-        <p class="hint">Enter one more character to search.</p>
-      }
-      @if (dropdownOpen() && searchResults().length) {
-        <div class="user-results" role="listbox" aria-label="Matching Active Directory users">
-          @for (user of searchResults(); track user.samAccountName || user['sAMAccountName']) {
-            <button
-              type="button"
-              class="user-result"
-              role="option"
-              (click)="selectUser(user)"
-            >
-              <strong>{{ user.displayName || user['displayName'] || user.samAccountName || user['sAMAccountName'] }}</strong>
-              <span>Email: {{ user.email || user['email'] || 'Not listed in Active Directory' }}</span>
-              <span>SAM: {{ user.samAccountName || user['sAMAccountName'] || 'Unavailable' }}</span>
-            </button>
-          }
-        </div>
-      }
-      @if (dropdownOpen() && !searchLoading() && searchInput().trim().length >= 2 && !searchResults().length && !searchError()) {
-        <p class="hint">No matching users found.</p>
-      }
-      @if (userLoading()) {
-        <p class="message" aria-live="polite">Loading user and manager email details...</p>
-      }
-      @if (selectedUserError()) {
-        <p class="message message-error" role="alert">{{ selectedUserError() }}</p>
-      }
-    </section>
-  } @else {
+  @if (selectedUser()) {
     <section class="panel workflow-panel" aria-labelledby="compose-heading">
       <h2 id="compose-heading">2. Compose and review</h2>
 
@@ -86,6 +82,16 @@
           <span class="field-label">SAM account name</span>
           <span>{{ selectedUser()?.samAccountName || selectedUser()?.['sAMAccountName'] }}</span>
         </div>
+        <div>
+          <span class="field-label">Account status</span>
+          @if (selectedUser()?.enabled === true) {
+            <span class="account-status account-status-enabled">Enabled</span>
+          } @else if (selectedUser()?.enabled === false) {
+            <span class="account-status account-status-disabled">Disabled</span>
+          } @else {
+            <span class="account-status account-status-unknown">Unable to verify</span>
+          }
+        </div>
         <div class="manager-email">
           <span class="field-label">Manager email</span>
           <span>{{ selectedUser()?.managerEmail || 'Unavailable in Active Directory' }}</span>
@@ -101,6 +107,15 @@
         @if (includeManagerInCc() && !selectedUser()?.managerEmail) {
           <p class="message message-warning" role="alert">
             Manager email is unavailable in Active Directory. Disable “Include manager in CC” before generating this draft.
+          </p>
+        }
+        @if (selectedUser()?.enabled === false) {
+          <p class="message message-error" role="alert">
+            This Active Directory account is disabled. EML generation is unavailable for this user.
+          </p>
+        } @else if (selectedUser()?.enabled !== true) {
+          <p class="message message-warning" role="alert">
+            The account status could not be verified. EML generation is unavailable until Active Directory confirms the account is enabled.
           </p>
         }
       </div>
@@ -182,7 +197,7 @@
           type="button"
           class="button button-primary"
           (click)="generateEml()"
-          [disabled]="generating() || !selectedUser()?.email || !bodyHasContent() || (includeManagerInCc() && !selectedUser()?.managerEmail)"
+          [disabled]="generating() || selectedUser()?.enabled !== true || !selectedUser()?.email || !bodyHasContent() || (includeManagerInCc() && !selectedUser()?.managerEmail)"
         >
           {{ generating() ? 'Generating...' : 'Generate EML' }}
         </button>
@@ -194,9 +209,6 @@
         >
           Preview
         </button>
-        @if (generated()) {
-          <button type="button" class="button button-secondary" (click)="startNextUser()">Start next user</button>
-        }
       </div>
     </section>
   }

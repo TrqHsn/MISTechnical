@@ -28,40 +28,13 @@ export class MailStorageNotificationComponent implements OnDestroy {
     return this.bodyEditorElement;
   }
 
-  private readonly initialBodyHtml = `<p>Hi,</p><p><br></p>
-<table width="400" style="border-collapse: collapse; font-family: Calibri, sans-serif;">
-  <tr>
-    <td style="padding: 5px 0 10px 0;">
-      <span style="font-size: 28px; color: #C00000;">ᝰ✍🏻</span>
-      <b style="color: #C00000; font-size: 13px;">Regards,</b>
-      <br>
-      <b style="font-family: 'Courier New'; font-size: 24px; color: #007177;">Tareque Hasan</b>
-    </td>
-  </tr>
-  <tr>
-    <td style="background-color: #EAEAEA; padding: 5px;">
-      <table width="100%" style="border-collapse: collapse;">
-        <tr>
-          <td style="font-family: 'Courier New'; font-size: 18px; color: #444;">
-            <b>Executive || MIS</b>
-          </td>
-          <td align="right">
-            <a href="https://teams.microsoft.com/l/chat/0/0?users=tareque.hasan@dewhirst.com"
-               style="text-decoration: none; font-family: 'Courier New'; font-size: 14px; color: #444;">💬 | Chat</a>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-  <tr>
-    <td style="padding-top: 10px; font-size: 12px; font-family: 'Courier New'; color: #828282;">
-      email:
-      <a href="mailto:tareque.hasan@dewhirst.com" style="color: #467886;">tareque.hasan@dewhirst.com</a>
-      <br>
-      Shanta Denims Limited, Savar, Dhaka 1349, Bangladesh
-    </td>
-  </tr>
-</table>`;
+  private readonly initialBodyHtml = `<div>Hi,</div>
+<div><br></div>
+<div><b>With regards</b></div>
+<div><a href="https://teams.microsoft.com/l/chat/0/0?users=Tareque.Hasan%40dewhirst.com"><img src="/signature/teams-icon.png" width="19" height="20" alt="Microsoft Teams" style="vertical-align: middle;"></a> <b><a href="https://teams.microsoft.com/l/chat/0/0?users=Tareque.Hasan%40dewhirst.com">Tareque Hasan</a></b> | <b>Executive, MIS</b></div>
+<div>🏢 Shanta Industries Limited | Plot No 198 &amp; 201/220 &amp; 223/156 &amp; 177 | DEPZ Extension Area | Ganakbari, Savar | Dhaka | Bangladesh.</div>
+<div>🌐 <a href="http://www.dewhirst.com/">www.dewhirst.com</a> &nbsp;| 📧 <a href="mailto:tareque.hasan@dewhirst.com">tareque.hasan@dewhirst.com</a></div>
+<div><br></div>`;
 
   readonly mandatoryCc = 'ridoan.zahan@dewhirst.com';
   searchInput = signal('');
@@ -74,8 +47,8 @@ export class MailStorageNotificationComponent implements OnDestroy {
   selectedUserError = signal('');
   category = signal<NotificationCategory>('Archive Mail');
   includeManagerInCc = signal(true);
-  htmlBody = signal('');
-  bodyHasContent = signal(false);
+  htmlBody = signal(this.initialBodyHtml);
+  bodyHasContent = signal(true);
   generating = signal(false);
   generated = signal(false);
   generationError = signal('');
@@ -150,7 +123,7 @@ export class MailStorageNotificationComponent implements OnDestroy {
     this.selectedUserError.set('');
     this.userLoading.set(true);
     this.selectedUser.set(null);
-    this.resetComposition();
+    this.clearGenerationState();
 
     this.apiService.getUserBySamAccountName(samAccountName).pipe(
       takeUntil(this.destroy$)
@@ -240,18 +213,6 @@ export class MailStorageNotificationComponent implements OnDestroy {
     }
   }
 
-  startNextUser(): void {
-    this.previewOpen.set(false);
-    this.selectedUser.set(null);
-    this.searchInput.set('');
-    this.searchResults.set([]);
-    this.searchError.set('');
-    this.selectedUserError.set('');
-    this.dropdownOpen.set(false);
-    this.userLoading.set(false);
-    this.resetComposition();
-  }
-
   closePreview(): void {
     this.previewOpen.set(false);
   }
@@ -276,17 +237,10 @@ export class MailStorageNotificationComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
-  private resetComposition(): void {
+  private clearGenerationState(): void {
     this.previewOpen.set(false);
-    this.category.set('Archive Mail');
-    this.includeManagerInCc.set(true);
-    this.htmlBody.set(this.initialBodyHtml);
-    this.bodyHasContent.set(true);
     this.generated.set(false);
-    this.generating.set(false);
     this.generationError.set('');
-    this.savedEditorRange = null;
-    if (this.bodyEditor) this.bodyEditor.nativeElement.innerHTML = this.initialBodyHtml;
   }
 
   private getErrorMessage(error: unknown, fallback: string): string {

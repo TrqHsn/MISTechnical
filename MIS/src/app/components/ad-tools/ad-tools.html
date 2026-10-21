@@ -236,10 +236,10 @@
   <!-- Last Device Tab -->
   @if (activeTab() === 'last-device') {
   <div class="tab-content last-device-content">
-    @if (lastDevicesLoading()) {
-    <div class="loading">Loading last device numbers...</div>
-    } @else if (lastDevicesLoaded()) {
-    <div class="devices-display">
+    <section class="devices-display">
+      @if (lastDevicesLoading()) {
+      <div class="loading">Loading last device numbers...</div>
+      } @else if (lastDevicesLoaded()) {
       <h3>Next Device Name</h3>
       <div class="devices-grid">
         @for (prefix of ['SDLL', 'SDLD', 'DBOL']; track prefix) {
@@ -250,10 +250,61 @@
         </div>
         }
       </div>
-    </div>
-    } @else {
-    <div class="no-data">Click Load to fetch the latest device numbers</div>
-    }
+      } @else {
+      <div class="no-data">Click Load to fetch the latest device numbers</div>
+      }
+    </section>
+
+    <section class="unassigned-section" aria-labelledby="unassigned-computers-heading">
+      <div class="unassigned-header">
+        <h2 id="unassigned-computers-heading">Unassigned Computers</h2>
+        <button class="refresh-btn" type="button" (click)="refreshUnassignedComputers()"
+          [disabled]="unassignedComputersLoading() || movingComputerGuids().size > 0">
+          {{ unassignedComputersLoading() ? 'Refreshing...' : 'Refresh' }}
+        </button>
+      </div>
+
+      @if (unassignedComputersError()) {
+      <div class="message error" role="alert">{{ unassignedComputersError() }}</div>
+      }
+      @if (unassignedComputersSuccess()) {
+      <div class="message success" role="status">{{ unassignedComputersSuccess() }}</div>
+      }
+      @if (unassignedComputersLoading() && !unassignedComputersLoaded()) {
+      <div class="loading" role="status">Loading computers from Active Directory...</div>
+      }
+      @if (unassignedComputersLoaded() && unassignedComputers().length === 0 && !unassignedComputersLoading() && !unassignedComputersError()) {
+      <div class="no-data" role="status">No unassigned computers were found.</div>
+      }
+      @if (unassignedComputers().length > 0) {
+      <div class="unassigned-table-wrap">
+        <table class="unassigned-table">
+          <thead>
+            <tr>
+              <th scope="col">Computer Name</th>
+              <th scope="col">Destination</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (computer of unassignedComputers(); track computer.objectGuid) {
+            <tr>
+              <td>{{ computer.name }}</td>
+              <td>{{ computer.destination ?? 'Unknown prefix' }}</td>
+              <td>
+                <button class="move-btn" type="button" (click)="moveUnassignedComputer(computer)"
+                  [disabled]="!computer.destination || movingComputerGuids().size > 0 || unassignedComputersLoading()"
+                  [attr.aria-label]="'Move ' + computer.name">
+                  {{ movingComputerGuids().has(computer.objectGuid) ? 'Moving...' : 'Move' }}
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </section>
   </div>
   }
 

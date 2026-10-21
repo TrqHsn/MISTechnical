@@ -3,6 +3,8 @@ using System.Text;
 using ClosedXML.Excel;
 using System.IO;
 using System.IO;
+using System.Net;
+using System.Reflection;
 
 namespace ADApi.Controllers
 {
@@ -86,16 +88,27 @@ namespace ADApi.Controllers
             // Dynamic subject: subject will be file name
             var subject = filename;
 
-            // Simple dynamic body with HTML formatting
-            var body = $@"Dear Team,<br><br>
-Please process ""{filename}""<br><br>
-<body style=""font-family: Calibri, sans-serif;"">  <table width=""400"" style=""border-collapse: collapse;"">      <!-- Header -->   <tr>     <td style=""padding: 5px 0 10px 0;"">       <span style=""font-size: 28px; color: #C00000;"">ᝰ✍🏻</span>       <b style=""color: #C00000; font-size: 13px;"">Regards,</b>       <br>       <b style=""font-family: 'Courier New'; font-size: 24px; color: #007177;"">         Tareque Hasan       </b>     </td>   </tr>    <!-- Role + Chat -->   <tr>     <td style=""background: #EAEAEA; padding: 5px;"">       <table width=""100%"" style=""border-collapse: collapse;"">         <tr>           <td style=""font-family: 'Courier New'; font-size: 18px; color: #444;"">             <b>Executive || MIS</b>           </td>           <td align=""right"">             <a href=""https://teams.microsoft.com/l/chat/0/0?users=tareque.hasan@dewhirst.com""                style=""text-decoration:none; font-family: 'Courier New'; font-size: 14px; color:#444;"">                💬 | Chat             </a>           </td>         </tr>       </table>     </td>   </tr>    <!-- Contact -->   <tr>     <td style=""padding-top: 10px; font-size: 12px; font-family: 'Courier New'; color: #828282;"">       email:        <a href=""mailto:tareque.hasan@dewhirst.com"" style=""color:#467886;"">         tareque.hasan@dewhirst.com       </a>       <br>       Shanta Denims Limited, Savar, Dhaka 1349, Bangladesh     </td>   </tr>  </table>  </body>";
+            var safeFilename = WebUtility.HtmlEncode(filename);
+            var body = $@"<div style=""font-family: Aptos, Calibri, Arial, sans-serif;"">
+<div>Dear Team,</div>
+<div><br></div>
+<div>Please process ""{safeFilename}""</div>
+<div><br></div>
+<div><b>With regards</b></div>
+<div><a href=""https://teams.microsoft.com/l/chat/0/0?users=Tareque.Hasan%40dewhirst.com""><img src=""cid:teams-signature-icon"" width=""19"" height=""20"" alt=""Microsoft Teams"" style=""vertical-align: middle;""></a> <b><a href=""https://teams.microsoft.com/l/chat/0/0?users=Tareque.Hasan%40dewhirst.com"">Tareque Hasan</a></b> | <b>Executive, MIS</b></div>
+<div>🏢 Shanta Industries Limited | Plot No 198 &amp; 201/220 &amp; 223/156 &amp; 177 | DEPZ Extension Area | Ganakbari, Savar | Dhaka | Bangladesh.</div>
+<div>🌐 <a href=""http://www.dewhirst.com/"">www.dewhirst.com</a> &nbsp;| 📧 <a href=""mailto:tareque.hasan@dewhirst.com"">tareque.hasan@dewhirst.com</a></div>
+</div>";
 
-            // Encode attachment in Base64
-            var attachmentBase64 = Convert.ToBase64String(attachmentBytes);
+            using var iconResource = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("ADApi.Assets.TeamsSignatureIcon.png")
+                ?? throw new FileNotFoundException("Embedded Teams signature icon resource is missing.");
+            using var iconStream = new MemoryStream();
+            iconResource.CopyTo(iconStream);
+            var signatureIcon = iconStream.ToArray();
 
-            // MIME multipart/mixed
-            var boundary = "----=_NextPart_" + Guid.NewGuid().ToString();
+            var mixedBoundary = "----=_NextPart_" + Guid.NewGuid().ToString("N");
+            var relatedBoundary = "----=_Related_" + Guid.NewGuid().ToString("N");
 
             var eml = new StringBuilder();
             eml.AppendLine("From: tareque.hasan@dewhirst.com");
@@ -104,24 +117,46 @@ Please process ""{filename}""<br><br>
             eml.AppendLine($"Subject: {subject}");
             eml.AppendLine("X-Unsent: 1");
             eml.AppendLine("MIME-Version: 1.0");
-            eml.AppendLine($"Content-Type: multipart/mixed; boundary=\"{boundary}\"");
+            eml.AppendLine($"Content-Type: multipart/mixed; boundary=\"{mixedBoundary}\"");
             eml.AppendLine();
-            eml.AppendLine($"--{boundary}");
+            eml.AppendLine($"--{mixedBoundary}");
+            eml.AppendLine($"Content-Type: multipart/related; boundary=\"{relatedBoundary}\"; type=\"text/html\"");
+            eml.AppendLine();
+            eml.AppendLine($"--{relatedBoundary}");
             eml.AppendLine("Content-Type: text/html; charset=utf-8");
-            eml.AppendLine("Content-Transfer-Encoding: 7bit");
+            eml.AppendLine("Content-Transfer-Encoding: base64");
             eml.AppendLine();
-            eml.AppendLine(body);
+            AppendBase64Lines(eml, Encoding.UTF8.GetBytes(body));
             eml.AppendLine();
-            eml.AppendLine($"--{boundary}");
+            eml.AppendLine($"--{relatedBoundary}");
+            eml.AppendLine("Content-Type: image/png; name=\"teams-icon.png\"");
+            eml.AppendLine("Content-Transfer-Encoding: base64");
+            eml.AppendLine("Content-ID: <teams-signature-icon>");
+            eml.AppendLine("Content-Disposition: inline; filename=\"teams-icon.png\"");
+            eml.AppendLine();
+            AppendBase64Lines(eml, signatureIcon);
+            eml.AppendLine();
+            eml.AppendLine($"--{relatedBoundary}--");
+            eml.AppendLine();
+            eml.AppendLine($"--{mixedBoundary}");
             eml.AppendLine("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             eml.AppendLine("Content-Transfer-Encoding: base64");
             eml.AppendLine($"Content-Disposition: attachment; filename=\"{filename}.xlsx\"");
             eml.AppendLine();
-            eml.AppendLine(attachmentBase64);
+            AppendBase64Lines(eml, attachmentBytes);
             eml.AppendLine();
-            eml.AppendLine($"--{boundary}--");
+            eml.AppendLine($"--{mixedBoundary}--");
 
             return eml.ToString();
+        }
+
+        private static void AppendBase64Lines(StringBuilder builder, byte[] bytes)
+        {
+            var base64 = Convert.ToBase64String(bytes);
+            for (var offset = 0; offset < base64.Length; offset += 76)
+            {
+                builder.AppendLine(base64.Substring(offset, Math.Min(76, base64.Length - offset)));
+            }
         }
 
         private string GetActionTypeLabel(string actionType)

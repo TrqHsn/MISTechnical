@@ -10,10 +10,27 @@ export interface User {
   email?: string;
   managerEmail?: string;
   telephoneNumber?: string;
+  enabled?: boolean;
 }
 
 export interface Computer {
   [key: string]: any;
+}
+
+export interface UnassignedComputer {
+  objectGuid: string;
+  name: string;
+  destination: 'SDL' | 'DBO' | null;
+  destinationPath: string | null;
+  destinationDistinguishedName: string | null;
+}
+
+export interface ComputerMoveResult {
+  name: string;
+  destination: 'SDL' | 'DBO';
+  destinationPath: string;
+  destinationDistinguishedName: string;
+  message: string;
 }
 
 export interface SmbItem {
@@ -71,6 +88,17 @@ export class ApiService {
 
   getComputerByName(computerName: string): Observable<Computer> {
     return this.http.get<Computer>(`${this.apiUrl}/computers/${encodeURIComponent(computerName)}`);
+  }
+
+  getUnassignedComputers(): Observable<UnassignedComputer[]> {
+    return this.http.get<UnassignedComputer[]>(`${this.apiUrl}/computers/unassigned`);
+  }
+
+  moveUnassignedComputer(objectGuid: string): Observable<ComputerMoveResult> {
+    return this.http.post<ComputerMoveResult>(
+      `${this.apiUrl}/computers/unassigned/${encodeURIComponent(objectGuid)}/move`,
+      {}
+    );
   }
 
   updateComputerDescription(computerName: string, description: string): Observable<any> {

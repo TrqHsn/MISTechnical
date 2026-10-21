@@ -18,16 +18,16 @@ export class App {
   @ViewChild(UniversalSearchComponent) universalSearch?: UniversalSearchComponent;
 
   buttons = [
-    { name: '【ＡＤ】', id: 'ad' },
+    { name: 'ＡＤ', id: 'ad' },
     { name: '🖨️', id: 'print' },
-    { name: 'Forms', id: 'forms' },
+    { name: '📄', id: 'forms' },
     { name: '🛠️', id: 'devicetool' },
     { name: '🔍', id: 'search' },
-    { name: '🌐', id: 'network' },
+    { name: '🛜', id: 'network' },
     { name: '🖥️', id: 'kiosk' },
     // { name: 'Links', id: 'links' },
     { name: '📁', id: 'files' },
-    { name: 'Others', id: 'others' },
+    { name: '…', id: 'others' },
     { name: '🔓', id: 'unlock' }
   ];
 

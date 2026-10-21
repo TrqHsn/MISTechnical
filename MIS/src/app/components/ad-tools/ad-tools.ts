@@ -1,8 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, Subject } from 'rxjs';
-import { ApiService, User, Computer } from '../../services/api';
+import { ApiService, User, Computer, UnassignedComputer } from '../../services/api';
 import { lastValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { ActivatedRoute } from '@angular/router';
@@ -71,6 +72,12 @@ export class AdToolsComponent {
   lastDevices = signal<{ [key: string]: number }>({ SDLL: 0, SDLD: 0, DBOL: 0 });
   lastDevicesLoading = signal(false);
   lastDevicesLoaded = signal(false);
+  unassignedComputers = signal<UnassignedComputer[]>([]);
+  unassignedComputersLoading = signal(false);
+  unassignedComputersLoaded = signal(false);
+  unassignedComputersError = signal('');
+  unassignedComputersSuccess = signal('');
+  movingComputerGuids = signal<ReadonlySet<string>>(new Set());
 
   // Update User Tab (from update-user-info)
   fileName = signal('');
@@ -96,6 +103,10 @@ export class AdToolsComponent {
         const tab = params['tab'] as 'users' | 'computers' | 'update-description' | 'last-device' | 'update-user';
         if (tab === 'users' || tab === 'computers' || tab === 'update-description' || tab === 'last-device' || tab === 'update-user') {
           this.activeTab.set(tab);
+          if (tab === 'last-device') {
+            this.loadLastDevices();
+            this.loadUnassignedComputers();
+          }
         }
       }
     });
@@ -427,7 +438,94 @@ export class AdToolsComponent {
     this.activeTab.set(tab as any);
     if (tab === 'last-device') {
       this.loadLastDevices();
+      this.loadUnassignedComputers();
     }
+  }
+
+  loadUnassignedComputers() {
+    if (this.unassignedComputersLoading()) {
+      return;
+    }
+
+    this.unassignedComputersLoading.set(true);
+    this.unassignedComputersError.set('');
+    this.apiService.getUnassignedComputers().subscribe({
+      next: computers => {
+        this.unassignedComputers.set(computers);
+        this.unassignedComputersLoaded.set(true);
+        this.unassignedComputersLoading.set(false);
+      },
+      error: error => {
+        console.error('Error loading unassigned computers:', error);
+        this.unassignedComputersError.set(
+          this.getRequestErrorMessage(error, 'Unable to load unassigned computers from Active Directory.')
+        );
+        this.unassignedComputersLoading.set(false);
+      }
+    });
+  }
+
+  refreshUnassignedComputers() {
+    this.unassignedComputersSuccess.set('');
+    this.loadUnassignedComputers();
+  }
+
+  moveUnassignedComputer(computer: UnassignedComputer) {
+    if (!computer.destination || !computer.destinationPath ||
+        this.movingComputerGuids().size > 0 ||
+        this.unassignedComputersLoading()) {
+      return;
+    }
+
+    const destinationDetails = computer.destinationDistinguishedName
+      ? `\nResolved Active Directory OU: ${computer.destinationDistinguishedName}`
+      : '';
+    const confirmation = `Move ${computer.name} to ${computer.destinationPath}?${destinationDetails}`;
+    if (typeof window === 'undefined' || !window.confirm(confirmation)) {
+      return;
+    }
+
+    this.movingComputerGuids.update(current => new Set([...current, computer.objectGuid]));
+    this.unassignedComputersError.set('');
+    this.unassignedComputersSuccess.set('');
+    this.apiService.moveUnassignedComputer(computer.objectGuid).subscribe({
+      next: result => {
+        this.unassignedComputers.update(current =>
+          current.filter(item => item.objectGuid !== computer.objectGuid)
+        );
+        this.unassignedComputersSuccess.set(result.message);
+        this.loadUnassignedComputers();
+        this.movingComputerGuids.update(current => {
+          const updated = new Set(current);
+          updated.delete(computer.objectGuid);
+          return updated;
+        });
+      },
+      error: error => {
+        console.error(`Error moving computer ${computer.name}:`, error);
+        this.unassignedComputersError.set(
+          this.getRequestErrorMessage(error, `Unable to move ${computer.name}.`)
+        );
+        this.movingComputerGuids.update(current => {
+          const updated = new Set(current);
+          updated.delete(computer.objectGuid);
+          return updated;
+        });
+      }
+    });
+  }
+
+  private getRequestErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      const body = error.error;
+      if (body && typeof body === 'object' && 'message' in body && typeof body.message === 'string') {
+        return body.message;
+      }
+      if (error.status === 0) {
+        return 'The API could not be reached. Check the network connection and try again.';
+      }
+    }
+    return error instanceof Error ? error.message : fallback;
   }
 
   // Update User Tab methods

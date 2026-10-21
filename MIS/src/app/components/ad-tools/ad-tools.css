@@ -738,15 +738,90 @@ textarea:focus {
 
 /* Last Device Tab */
 .last-device-content {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
 .devices-display {
   width: 100%;
   text-align: center;
+  min-height: 180px;
+}
+
+.unassigned-section {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.unassigned-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.unassigned-header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.refresh-btn,
+.move-btn {
+  border: 0;
+  border-radius: 7px;
+  padding: 0.6rem 1rem;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.move-btn {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+}
+
+.refresh-btn:disabled,
+.move-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.unassigned-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.unassigned-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.unassigned-table th,
+.unassigned-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.92);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.unassigned-table th {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+@media (max-width: 600px) {
+  .unassigned-header {
+    align-items: flex-start;
+  }
+
+  .unassigned-table th,
+  .unassigned-table td {
+    padding: 0.55rem;
+  }
 }
 
 .devices-display h3 {

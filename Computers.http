@@ -1,0 +1,17 @@
+@baseUrl = http://localhost:5001/api/computers
+@objectGuid = 00000000-0000-0000-0000-000000000000
+
+### List computer accounts directly inside the configured domain Computers container
+GET {{baseUrl}}/unassigned
+
+### Move one eligible computer by its Active Directory object GUID
+POST {{baseUrl}}/unassigned/{{objectGuid}}/move
+Content-Type: application/json
+
+{}
+
+### Invalid object GUID returns 400 Bad Request
+POST {{baseUrl}}/unassigned/not-a-guid/move
+Content-Type: application/json
+
+{}

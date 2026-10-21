@@ -177,6 +177,30 @@ h1 {
   min-width: 0;
 }
 
+.account-status {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.account-status-enabled {
+  color: #17633a;
+  background: #eaf8f0;
+}
+
+.account-status-disabled {
+  color: #9d1c1c;
+  background: #fff0ef;
+}
+
+.account-status-unknown {
+  color: #775400;
+  background: #fff7df;
+}
+
 .manager-option {
   display: inline-flex;
   align-items: center;

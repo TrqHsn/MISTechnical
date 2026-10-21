@@ -2,6 +2,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Reflection;
 using ADApi.Models;
 using ADApi.Services;
 using Ganss.Xss;
@@ -57,6 +58,15 @@ public sealed class MailStorageNotificationController : ControllerBase
         if (user is null)
             return NotFound(new { error = "User not found", message = "The selected user could not be found in Active Directory." });
 
+        if (user.Enabled != true)
+            return BadRequest(new
+            {
+                error = user.Enabled == false ? "Account disabled" : "Account status unavailable",
+                message = user.Enabled == false
+                    ? "The selected Active Directory account is disabled. An EML draft cannot be generated."
+                    : "The selected user's account status could not be verified. An EML draft cannot be generated."
+            });
+
         if (string.IsNullOrWhiteSpace(user.SamAccountName) ||
             !Regex.IsMatch(user.SamAccountName, @"^[A-Za-z0-9._-]{1,20}$"))
             return BadRequest(new { error = "Invalid account name", message = "The selected user's account name cannot be used for a safe EML filename." });
@@ -95,7 +105,31 @@ public sealed class MailStorageNotificationController : ControllerBase
             return BadRequest(new { error = "Email body required", message = "Enter some email body text before generating the draft." });
         sanitizedBody = $"<div style=\"font-family: Aptos, Calibri, Arial, sans-serif;\">{sanitizedBody}</div>";
 
-        var eml = BuildEml(toAddress, ccAddresses, subject, sanitizedBody);
+        byte[]? signatureIcon = null;
+        if (sanitizedBody.Contains("src=\"/signature/teams-icon.png\"", StringComparison.OrdinalIgnoreCase))
+        {
+            using var resource = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("ADApi.Assets.TeamsSignatureIcon.png");
+            if (resource is null)
+            {
+                _logger.LogError("Embedded Teams signature icon resource is missing");
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    error = "Signature asset unavailable",
+                    message = "The signature icon could not be loaded to build the EML."
+                });
+            }
+
+            using var iconStream = new MemoryStream();
+            await resource.CopyToAsync(iconStream, cancellationToken);
+            signatureIcon = iconStream.ToArray();
+            sanitizedBody = sanitizedBody.Replace(
+                "src=\"/signature/teams-icon.png\"",
+                "src=\"cid:teams-signature-icon\"",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        var eml = BuildEml(toAddress, ccAddresses, subject, sanitizedBody, signatureIcon);
         var currentMonth = DateTime.Now.ToString("yyyy-MM");
         var filename = $"{user.SamAccountName}_MailboxCleanup_{currentMonth}.eml";
         return File(Encoding.UTF8.GetBytes(eml), "message/rfc822", filename);
@@ -105,11 +139,15 @@ public sealed class MailStorageNotificationController : ControllerBase
     {
         var sanitizer = new HtmlSanitizer();
         sanitizer.AllowedTags.Add("font");
+        sanitizer.AllowedTags.Add("img");
         sanitizer.AllowedAttributes.Add("face");
         sanitizer.AllowedAttributes.Add("size");
         sanitizer.AllowedAttributes.Add("style");
         sanitizer.AllowedAttributes.Add("align");
         sanitizer.AllowedAttributes.Add("width");
+        sanitizer.AllowedAttributes.Add("height");
+        sanitizer.AllowedAttributes.Add("src");
+        sanitizer.AllowedAttributes.Add("alt");
         sanitizer.AllowedCssProperties.Add("font-family");
         sanitizer.AllowedCssProperties.Add("font-size");
         sanitizer.AllowedCssProperties.Add("font-weight");
@@ -125,6 +163,7 @@ public sealed class MailStorageNotificationController : ControllerBase
         sanitizer.AllowedCssProperties.Add("padding-right");
         sanitizer.AllowedCssProperties.Add("border-collapse");
         sanitizer.AllowedCssProperties.Add("width");
+        sanitizer.AllowedCssProperties.Add("vertical-align");
         return sanitizer;
     }
 
@@ -145,24 +184,63 @@ public sealed class MailStorageNotificationController : ControllerBase
         }
     }
 
-    private static string BuildEml(string toAddress, IReadOnlyList<string> ccAddresses, string subject, string htmlBody)
+    private static string BuildEml(
+        string toAddress,
+        IReadOnlyList<string> ccAddresses,
+        string subject,
+        string htmlBody,
+        byte[]? signatureIcon)
     {
         var encodedSubject = Convert.ToBase64String(Encoding.UTF8.GetBytes(subject));
         var encodedBody = Convert.ToBase64String(Encoding.UTF8.GetBytes(htmlBody));
+        var boundary = $"----=_MailStorage_{Guid.NewGuid():N}";
         var lines = new List<string>
         {
             $"To: {toAddress}",
             $"Cc: {string.Join(", ", ccAddresses)}",
             $"Subject: =?UTF-8?B?{encodedSubject}?=",
             "X-Unsent: 1",
-            "MIME-Version: 1.0",
-            "Content-Type: text/html; charset=utf-8",
-            "Content-Transfer-Encoding: base64",
-            string.Empty
+            "MIME-Version: 1.0"
         };
 
-        lines.AddRange(Enumerable.Range(0, (encodedBody.Length + 75) / 76)
-            .Select(index => encodedBody.Substring(index * 76, Math.Min(76, encodedBody.Length - index * 76))));
+        if (signatureIcon is null)
+        {
+            lines.Add("Content-Type: text/html; charset=utf-8");
+            lines.Add("Content-Transfer-Encoding: base64");
+            lines.Add(string.Empty);
+            AddBase64Lines(lines, encodedBody);
+            return string.Join("\r\n", lines) + "\r\n";
+        }
+
+        lines.Add($"Content-Type: multipart/related; boundary=\"{boundary}\"; type=\"text/html\"");
+        lines.Add(string.Empty);
+        lines.Add($"--{boundary}");
+        lines.Add("Content-Type: text/html; charset=utf-8");
+        lines.Add("Content-Transfer-Encoding: base64");
+        lines.Add(string.Empty);
+        AddBase64Lines(lines, encodedBody);
+
+        var encodedIcon = Convert.ToBase64String(signatureIcon);
+        lines.AddRange(new[]
+        {
+            string.Empty,
+            $"--{boundary}",
+            "Content-Type: image/png; name=\"teams-icon.png\"",
+            "Content-Transfer-Encoding: base64",
+            "Content-ID: <teams-signature-icon>",
+            "Content-Disposition: inline; filename=\"teams-icon.png\"",
+            string.Empty
+        });
+        AddBase64Lines(lines, encodedIcon);
+        lines.Add(string.Empty);
+        lines.Add($"--{boundary}--");
+
         return string.Join("\r\n", lines) + "\r\n";
+    }
+
+    private static void AddBase64Lines(List<string> lines, string base64)
+    {
+        lines.AddRange(Enumerable.Range(0, (base64.Length + 75) / 76)
+            .Select(index => base64.Substring(index * 76, Math.Min(76, base64.Length - index * 76))));
     }
 }

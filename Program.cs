@@ -31,6 +31,9 @@ builder.Services.AddHostedService(provider => provider.GetRequiredService<Invent
 
 // Register Active Directory service
 builder.Services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
+builder.Services.Configure<ComputerOuMoverOptions>(
+    builder.Configuration.GetSection(ComputerOuMoverOptions.SectionName));
+builder.Services.AddScoped<IComputerOuMoverService, ComputerOuMoverService>();
 
 // Register Kiosk/Digital Signage service
 builder.Services.AddSingleton<IKioskService, KioskService>();

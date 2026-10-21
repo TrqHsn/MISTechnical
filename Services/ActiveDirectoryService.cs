@@ -16,6 +16,15 @@ public class ActiveDirectoryService : IActiveDirectoryService
 
     public async Task<List<UserDto>> SearchUsersByNameAsync(string searchTerm)
     {
+        var normalizedSearchTerm = searchTerm.Trim();
+        var escapedSearchTerm = EscapeLdapFilterValue(normalizedSearchTerm);
+        var nameParts = normalizedSearchTerm
+            .Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(EscapeLdapFilterValue)
+            .ToArray();
+        var allNamePartsMatch = string.Concat(nameParts.Select(part =>
+            $"(|(Name=*{part}*)(DisplayName=*{part}*)(givenName=*{part}*)(sn=*{part}*))"));
+
         return await Task.Run(() =>
         {
             var users = new List<UserDto>();
@@ -25,7 +34,7 @@ public class ActiveDirectoryService : IActiveDirectoryService
                 using var entry = new DirectoryEntry(_domainPath);
                 using var searcher = new DirectorySearcher(entry)
                 {
-                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(Name=*{EscapeLdapFilterValue(searchTerm)}*)(DisplayName=*{EscapeLdapFilterValue(searchTerm)}*)(sAMAccountName=*{EscapeLdapFilterValue(searchTerm)}*)(userPrincipalName=*{EscapeLdapFilterValue(searchTerm)}*)))",
+                    Filter = $"(&(objectClass=user)(objectCategory=person)(|(|(Name=*{escapedSearchTerm}*)(DisplayName=*{escapedSearchTerm}*)(sAMAccountName=*{escapedSearchTerm}*)(userPrincipalName=*{escapedSearchTerm}*))(&{allNamePartsMatch})))",
                     SearchScope = SearchScope.Subtree,
                     SizeLimit = 50
                 };
