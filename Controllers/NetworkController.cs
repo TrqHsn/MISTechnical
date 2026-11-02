@@ -19,6 +19,7 @@ namespace ADApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:NetworkDashboard")]
     public class NetworkController : ControllerBase
     {
         private readonly ILogger<NetworkController> _logger;

@@ -12,6 +12,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/mail-storage-notification")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:MailboxQuota")]
 public sealed class MailStorageNotificationController : ControllerBase
 {
     private const string MandatoryCc = "ridoan.zahan@dewhirst.com";

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
+import { AuthService } from '../../services/auth.service';
 
 interface WakeOnLanDevice {
   id: string;
@@ -20,6 +21,7 @@ interface WakeOnLanDevice {
 export class NetworkComponent implements OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private readonly auth = inject(AuthService);
 
   private getApiBaseUrl(): string {
     if (this.isBrowser) {
@@ -112,7 +114,7 @@ export class NetworkComponent implements OnDestroy {
     const url = `${this.getApiBaseUrl()}/api/network/ping/start`;
     
     // Use fetch to POST the request and get the stream
-    fetch(url, {
+    this.auth.authorizedFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -268,7 +270,7 @@ export class NetworkComponent implements OnDestroy {
 
     const url = `${this.getApiBaseUrl()}/api/network/scan/stream?baseIp=${encodeURIComponent(baseIp)}`;
 
-    fetch(url, {
+    this.auth.authorizedFetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'text/event-stream',

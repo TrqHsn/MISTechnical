@@ -6,6 +6,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/printers")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:Printer")]
 [SupportedOSPlatform("windows")]
 public sealed class PrintersController : ControllerBase
 {

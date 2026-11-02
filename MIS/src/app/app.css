@@ -988,3 +988,15 @@
     font-size: 10px;
   }
 }
+.session-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  transform: translateY(-2mm);
+}
+
+.session-bar button {
+  cursor: pointer;
+}

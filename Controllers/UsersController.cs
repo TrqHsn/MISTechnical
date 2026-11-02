@@ -6,6 +6,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:ADTools")]
 public class UsersController : ControllerBase
 {
     private readonly IActiveDirectoryService _adService;
@@ -150,5 +151,4 @@ public class UsersController : ControllerBase
         }
     }
 }
-
 

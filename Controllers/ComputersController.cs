@@ -7,6 +7,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:DeviceManagement|ADTools")]
 public class ComputersController : ControllerBase
 {
     private readonly IActiveDirectoryService _adService;
@@ -193,4 +194,3 @@ public class ComputersController : ControllerBase
             }
         }
     }
-

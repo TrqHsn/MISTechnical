@@ -10,6 +10,7 @@ namespace ADApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:Forms")]
     public class EmailController : ControllerBase
     {
         [HttpPost("generate")]

@@ -1,10 +1,11 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import { ApiService, User } from '../../services/api';
 import * as XLSX from 'xlsx';
 import * as QRCode from 'qrcode';
+import { AuthService } from '../../services/auth.service';
 
 // Interface for Excel row data
 interface ExcelRow {
@@ -40,6 +41,7 @@ interface DeviceRow {
   styleUrl: './search.component.css'
 })
 export class SearchComponent {
+  private readonly auth = inject(AuthService);
   activeTab = signal<'inventory' | 'contacts' | 'devices'>('inventory');
 
   // Dynamically generate API URL based on environment
@@ -689,7 +691,7 @@ export class SearchComponent {
 
     try {
       if (forceRefresh) {
-        const refreshResponse = await fetch(`${this.getApiBaseUrl()}/api/inventory/refresh`, {
+        const refreshResponse = await this.auth.authorizedFetch(`${this.getApiBaseUrl()}/api/inventory/refresh`, {
           method: 'POST'
         });
 
@@ -698,12 +700,12 @@ export class SearchComponent {
         }
       }
 
-      const statusResponse = await fetch(`${this.getApiBaseUrl()}/api/inventory/status`);
+      const statusResponse = await this.auth.authorizedFetch(`${this.getApiBaseUrl()}/api/inventory/status`);
       const status = statusResponse.ok ? await statusResponse.json() : null;
       const sourceLabel = status?.source === 'cache' ? 'Previous Cache' : 'Server';
       this.inventorySourceLabel.set(sourceLabel);
 
-      const response = await fetch(this.apiUrl);
+      const response = await this.auth.authorizedFetch(this.apiUrl);
 
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);

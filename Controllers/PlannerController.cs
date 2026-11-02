@@ -7,6 +7,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/planner")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:WeekPlanner")]
 public sealed class PlannerController : ControllerBase
 {
     private static readonly SemaphoreSlim FileLock = new(1, 1);

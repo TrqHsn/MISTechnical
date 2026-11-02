@@ -1,9 +1,10 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import * as XLSX from 'xlsx';
+import { AuthService } from '../../services/auth.service';
 
 interface InventoryRow {
   [key: string]: unknown;
@@ -17,6 +18,7 @@ interface InventoryRow {
   styleUrl: './print.css',
 })
 export class Print implements OnInit {
+  private readonly auth = inject(AuthService);
   // Tab management
   activeTab = signal<'label' | 'service-tag' | 'print'>('label');
 
@@ -418,7 +420,7 @@ export class Print implements OnInit {
     this.inventoryError.set('');
 
     try {
-      const response = await fetch(`${this.getApiBaseUrl()}/api/inventory/csv`);
+      const response = await this.auth.authorizedFetch(`${this.getApiBaseUrl()}/api/inventory/csv`);
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }

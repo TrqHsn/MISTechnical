@@ -4,6 +4,15 @@
 <app-universal-search [appButtons]="buttons" (actionTriggered)="handleUniversalSearchAction($event)" />
 
 <div class="container">
+  <div class="session-bar">
+    @if (authService.user(); as currentUser) {
+      <span>{{ currentUser.displayName }}</span>
+      @if (authService.hasRole('Admin')) {
+        <a routerLink="/admin">Admin</a>
+      }
+      <button type="button" (click)="logout()">Sign out</button>
+    }
+  </div>
   <!-- Title Section with Floating Background -->
   <div class="title-card">
     <h1 class="title">MIS Technical Team</h1>
@@ -89,7 +98,7 @@
   <!-- Buttons Row (single-line) -->
   <div class="buttons-row">
 
-    @for (button of buttons; track button.id) {
+    @for (button of visibleButtons(); track button.id) {
       <div class="button-wrap">
         <button
           class="btn"

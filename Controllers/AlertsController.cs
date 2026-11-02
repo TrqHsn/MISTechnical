@@ -6,6 +6,7 @@ namespace ADApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:Alerts")]
     [SupportedOSPlatform("windows")]
     public class AlertsController : ControllerBase
     {

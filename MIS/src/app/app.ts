@@ -5,6 +5,7 @@ import { ApiService } from './services/api';
 import { ToastComponent } from './components/toast/toast.component';
 import { UniversalSearchComponent } from './components/universal-search/universal-search';
 import { NavigationService } from './services/navigation.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -55,7 +56,8 @@ export class App {
   constructor(
     private apiService: ApiService,
     public navService: NavigationService,
-    private router: Router
+    private router: Router,
+    public authService: AuthService
   ) {
     this.standaloneRoute.set(this.isStandaloneRoute(this.router.url));
     this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(event => {
@@ -66,7 +68,8 @@ export class App {
   }
 
   private isStandaloneRoute(url: string): boolean {
-    return url.split('?')[0].replace(/\/+$/, '') === '/weekPlanner';
+    const route = url.split('?')[0].replace(/\/+$/, '');
+    return route === '/weekPlanner' || route === '/login' || route === '/access-denied';
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -97,6 +100,34 @@ export class App {
 
   getButtonRoute(buttonId: string): string | null {
     return this.navService.getRoute(buttonId);
+  }
+
+  visibleButtons() {
+    const permissions: Record<string, string> = {
+      ad: 'ADTools',
+      print: 'Printer',
+      forms: 'Forms',
+      devicetool: 'DeviceManagement',
+      search: 'Inventory',
+      network: 'NetworkDashboard',
+      kiosk: 'Kiosk',
+      files: 'Files',
+      others: 'OtherTools',
+      unlock: 'ADTools'
+    };
+    return this.buttons.filter(button =>
+      this.authService.canAccess(permissions[button.id] ?? '')
+    );
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => void this.router.navigate(['/login']),
+      error: () => {
+        this.authService.clearLocalSession();
+        void this.router.navigate(['/login']);
+      }
+    });
   }
 
   openUnlockDialog() {

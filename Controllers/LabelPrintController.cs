@@ -8,6 +8,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/print")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:Printer")]
 [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 public class LabelPrintController : ControllerBase
 {

@@ -5,6 +5,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/smb")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:Files")]
 public class SmbController : ControllerBase
 {
     private readonly ISmbService _smbService;

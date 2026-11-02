@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { catchError, of, tap } from 'rxjs';
+import { AuthService } from './auth.service';
 
 export interface NetworkLogEntry {
   timestamp: string;
@@ -82,16 +83,18 @@ const getApiBaseUrl = (): string => {
 
 const getHubUrl = (): string => {
   if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    return `http://${hostname}:5001/hubs/network-dashboard`;
+    const { protocol, hostname } = window.location;
+    const hubProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${hubProtocol}//${hostname}:5001/hubs/network-dashboard`;
   }
-  return 'http://localhost:5001/hubs/network-dashboard';
+  return 'ws://localhost:5001/hubs/network-dashboard';
 };
 
 @Injectable({
   providedIn: 'root',
 })
 export class NetworkMonitorService {
+  private readonly auth = inject(AuthService);
   readonly servers = signal<NetworkServer[]>([]);
   readonly livePing = signal<Record<string, LivePingState>>({});
   private readonly livePingControllers = new Map<string, { controller: AbortController; sessionId: string }>();
@@ -117,7 +120,10 @@ export class NetworkMonitorService {
     }
 
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl(this.hubUrl, { withCredentials: true })
+      .withUrl(this.hubUrl, {
+        withCredentials: true,
+        accessTokenFactory: () => this.auth.accessToken ?? ''
+      })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();
@@ -215,7 +221,7 @@ export class NetworkMonitorService {
     this.livePingControllers.set(serverId, { controller, sessionId: '' });
     this.setLivePingState(serverId, { active: true, visible: true, output: '🔄 Starting live ping...', status: 'starting' });
 
-    fetch(`${this.apiBaseUrl}/network/ping/start`, {
+    this.auth.authorizedFetch(`${this.apiBaseUrl}/network/ping/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: server.host }),

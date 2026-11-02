@@ -6,6 +6,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:Kiosk")]
 public class KioskController : ControllerBase
 {
     private readonly IKioskService _kioskService;
@@ -499,6 +500,7 @@ public class KioskController : ControllerBase
     /// Get current active content for TV display
     /// This is the critical endpoint that the TV polls
     /// </summary>
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     [HttpGet("display/content")]
     public async Task<ActionResult<ActiveContentResponse>> GetActiveContent([FromQuery] string? displayId = null)
     {

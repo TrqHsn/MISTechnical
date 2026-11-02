@@ -5,6 +5,7 @@ namespace ADApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.Authorization.Authorize(Policy = "Component:Inventory")]
 public class InventoryController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;
