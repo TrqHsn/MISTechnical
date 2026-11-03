@@ -14,7 +14,10 @@ export const authGuard: CanActivateFn | CanActivateChildFn = async (_route, stat
 export const homeRedirectGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  return router.createUrlTree([await auth.ensureAuthenticated() ? '/ad-tools' : '/login']);
+  if (!await auth.ensureAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+  return router.createUrlTree([auth.getDefaultHomeRoute()]);
 };
 
 export const permissionGuard: CanActivateFn = route => {

@@ -6,18 +6,19 @@
 
 h1 {
   margin-bottom: 1.5rem;
-  color: #333;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 h2 {
   margin-bottom: 1rem;
-  color: #555;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 h3 {
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* Tabs */
@@ -25,40 +26,42 @@ h3 {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 2rem;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.18);
 }
 
 .tab-btn {
   padding: 0.75rem 1.5rem;
-  background: none;
+  background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   cursor: pointer;
   font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
   transition: all 0.2s;
 }
 
 .tab-btn:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .tab-btn.active {
   border-bottom-color: #ffffff;
   font-weight: bold;
   color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .tab-btn.preview-btn {
   margin-left: auto;
-  background-color: #28a745;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
-  border-radius: 4px;
+  border-radius: 8px;
   border-bottom: none;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
 }
 
 .tab-btn.preview-btn:hover {
-  background-color: #218838;
+  background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
 }
 
 /* Tab Content */
@@ -188,14 +191,18 @@ h3 {
 
 /* Upload Section */
 .upload-section {
-  background-color: #f8f9fa;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 20px;
   margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
 }
 
 .upload-info {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   margin-bottom: 1rem;
   font-style: italic;
@@ -211,33 +218,43 @@ h3 {
 .upload-form input[type='file'] {
   flex: 1;
   min-width: 200px;
+  color: white;
 }
 
 .upload-form input[type='text'] {
   flex: 1;
   min-width: 200px;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.45);
+  color: #ffffff;
+}
+
+.upload-form input[type='text']::placeholder {
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .upload-form button {
-  padding: 0.5rem 1.5rem;
-  background-color: #28a745;
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
 }
 
 .upload-form button:disabled {
-  background-color: #6c757d;
+  background: rgba(148, 163, 184, 0.4);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .selected-file {
   margin-top: 0.5rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   font-style: italic;
 }
 
@@ -294,10 +311,14 @@ h3 {
 
 /* Editor Section */
 .editor-section {
-  background-color: #f8f9fa;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 20px;
   margin: 1rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
 }
 
 .form-group {
@@ -308,16 +329,28 @@ h3 {
   display: block;
   margin-bottom: 0.3rem;
   font-weight: bold;
-  color: #555;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
   font-size: 1rem;
+  background: rgba(15, 23, 42, 0.42);
+  color: #ffffff;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.form-group select option {
+  color: #1f2937;
 }
 
 .form-row {
@@ -337,28 +370,41 @@ h3 {
   gap: 1rem;
   align-items: center;
   margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background-color: white;
-  border-radius: 4px;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .playlist-item span {
   font-weight: bold;
   min-width: 30px;
+  color: #ffffff;
 }
 
 .playlist-item select {
   flex: 2;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+  color: #ffffff;
 }
 
 .playlist-item input {
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+  color: #ffffff;
 }
 
 /* Playlists List */
@@ -369,34 +415,36 @@ h3 {
 
 .playlist-card,
 .schedule-card {
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
   padding: 1rem;
   margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .schedule-card.inactive {
-  opacity: 0.6;
-  background-color: #f8f9fa;
+  opacity: 0.7;
+  background: rgba(15, 23, 42, 0.2);
 }
 
 .playlist-card h4,
 .schedule-card h4 {
   margin: 0 0 0.5rem 0;
-  color: #333;
+  color: #ffffff;
 }
 
 .playlist-card p,
 .schedule-card p {
   margin: 0.3rem 0;
-  color: #666;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .playlist-card small,
 .schedule-card small {
-  color: #999;
+  color: rgba(255, 255, 255, 0.65);
   font-size: 0.85rem;
 }
 
@@ -404,35 +452,46 @@ h3 {
   display: flex;
   gap: 0.5rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
 .card-actions button {
-  padding: 0.4rem 0.8rem;
-  background-color: #007bff;
+  padding: 0.5rem 0.85rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .card-actions button:hover {
-  background-color: #0056b3;
+  background: linear-gradient(135deg, #5b67d8 0%, #6a3fb7 100%);
 }
 
 .card-actions .btn-delete {
   margin-left: auto;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.card-actions .btn-delete:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
 }
 
 /* Display Settings Tab */
 .settings-section {
-  background: #f9f9f9;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 2rem;
-  border-radius: 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
 }
 
 .settings-description {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 1.5rem;
   font-size: 1rem;
 }
@@ -445,38 +504,39 @@ h3 {
 }
 
 .display-mode-card {
-  background: white;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.3s;
   text-align: left;
   position: relative;
+  color: #ffffff;
 }
 
 .display-mode-card:hover {
-  border-color: #007bff;
+  border-color: rgba(255, 255, 255, 0.42);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.28);
 }
 
 .display-mode-card.active {
-  border-color: #28a745;
-  background: #f0fff4;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+  border-color: rgba(167, 243, 208, 0.9);
+  background: rgba(16, 185, 129, 0.18);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.24);
 }
 
 .mode-label {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #333;
+  color: #ffffff;
   margin-bottom: 0.5rem;
 }
 
 .mode-description {
   font-size: 0.9rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.4;
 }
 
@@ -484,7 +544,7 @@ h3 {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: #28a745;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -493,20 +553,22 @@ h3 {
 }
 
 .settings-info {
-  background: white;
+  background: rgba(15, 23, 42, 0.22);
   padding: 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #007bff;
+  border-radius: 14px;
+  border-left: 4px solid #a5b4fc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .settings-info h4 {
   margin-top: 0;
-  color: #007bff;
+  color: #dbeafe;
 }
 
 .settings-info ul {
   margin: 1rem 0;
   padding-left: 1.5rem;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .settings-info li {
@@ -515,12 +577,12 @@ h3 {
 }
 
 .settings-note {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.45);
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: 8px;
   margin-top: 1rem;
-  color: #856404;
+  color: #fef3c7;
 }
 
 /* Responsive */
@@ -531,6 +593,11 @@ h3 {
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .playlist-item {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .tabs {

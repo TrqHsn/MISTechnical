@@ -4,15 +4,21 @@
 <app-universal-search [appButtons]="buttons" (actionTriggered)="handleUniversalSearchAction($event)" />
 
 <div class="container">
-  <div class="session-bar">
-    @if (authService.user(); as currentUser) {
-      <span>{{ currentUser.displayName }}</span>
-      @if (authService.hasRole('Admin')) {
-        <a routerLink="/admin">Admin</a>
-      }
-      <button type="button" (click)="logout()">Sign out</button>
-    }
+  <div class="animated-bg" aria-hidden="true">
+    <ul class="circles">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
   </div>
+
   <!-- Title Section with Floating Background -->
   <div class="title-card">
     <h1 class="title">MIS Technical Team</h1>
@@ -23,92 +29,18 @@
     </div>
   </div>
 
-  <!-- DIGITAL CLOCK DISABLED - Say "enable digital clock" to re-enable
-  <div id="clock" class="light">
-    <div class="display">
-      <div class="weekdays">
-        @for (day of ['SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI']; track $index) {
-          <span [class.active]="clockWeekday() === $index">{{ day }}</span>
-        }
-      </div>
-      }
-      <div class="ampm">{{ clockAmPm() }}</div>
-      <div class="digits">
-        <div [class]="clockHours()[0]">
-          <span class="d1"></span>
-          <span class="d2"></span>
-          <span class="d3"></span>
-          <span class="d4"></span>
-          <span class="d5"></span>
-          <span class="d6"></span>
-          <span class="d7"></span>
-        </div>
-        <div [class]="clockHours()[1]">
-          <span class="d1"></span>
-          <span class="d2"></span>
-          <span class="d3"></span>
-          <span class="d4"></span>
-          <span class="d5"></span>
-          <span class="d6"></span>
-          <span class="d7"></span>
-        </div>
-        <div class="dots"></div>
-        <div [class]="clockMinutes()[0]">
-          <span class="d1"></span>
-          <span class="d2"></span>
-          <span class="d3"></span>
-          <span class="d4"></span>
-          <span class="d5"></span>
-          <span class="d6"></span>
-          <span class="d7"></span>
-        </div>
-        <div [class]="clockMinutes()[1]">
-          <span class="d1"></span>
-          <span class="d2"></span>
-          <span class="d3"></span>
-          <span class="d4"></span>
-          <span class="d5"></span>
-          <span class="d6"></span>
-          <span class="d7"></span>
-        </div>
-        <div class="dots"></div>
-        <div [class]="clockSeconds()[0]">
-          <span class="d1"></span>
-          <span class="d2"></span>
-          <span class="d3"></span>
-          <span class="d4"></span>
-          <span class="d5"></span>
-          <span class="d6"></span>
-          <span class="d7"></span>
-        </div>
-        <div [class]="clockSeconds()[1]">
-          <span class="d1"></span>
-          <span class="d2"></span>
-          <span class="d3"></span>
-          <span class="d4"></span>
-          <span class="d5"></span>
-          <span class="d6"></span>
-          <span class="d7"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-  -->
-
   <!-- Buttons Row (single-line) -->
   <div class="buttons-row">
 
     @for (button of visibleButtons(); track button.id) {
-      <div class="button-wrap">
-        <button
-          class="btn"
-          (click)="onTopButtonClick($event, button.id)"
-          [routerLink]="getButtonRoute(button.id)"
-          routerLinkActive="btn-active"
-          [attr.data-id]="button.id">
-          <span>{{ button.name }}</span>
-        </button>
-      </div>
+      <button
+        class="btn-174"
+        (click)="onTopButtonClick($event, button.id)"
+        [routerLink]="getButtonRoute(button.id)"
+        routerLinkActive="btn-174-active"
+        [attr.data-id]="button.id">
+        <span>{{ button.name }}</span>
+      </button>
     }
   </div>
 
@@ -164,5 +96,15 @@
 
   <!-- Universal Search Modal -->
   <app-universal-search></app-universal-search>
+
+  <div class="session-bar">
+    @if (authService.user(); as currentUser) {
+      <span>{{ currentUser.displayName }}</span>
+      @if (authService.hasRole('Admin')) {
+        <a routerLink="/admin">Admin</a>
+      }
+      <button type="button" (click)="logout()">Sign out</button>
+    }
+  </div>
 </div>
 }

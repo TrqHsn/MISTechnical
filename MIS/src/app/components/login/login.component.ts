@@ -158,9 +158,11 @@ export class LoginComponent {
     this.auth.login(this.username, this.password).subscribe({
       next: () => {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        const destination = returnUrl?.startsWith('/') && !returnUrl.startsWith('//')
-          ? returnUrl
-          : '/ad-tools';
+        const destination = this.auth.hasRole('RestrictedUser')
+          ? this.auth.getDefaultHomeRoute()
+          : returnUrl?.startsWith('/') && !returnUrl.startsWith('//')
+            ? returnUrl
+            : this.auth.getDefaultHomeRoute();
         void this.router.navigateByUrl(destination);
       },
       error: () => {

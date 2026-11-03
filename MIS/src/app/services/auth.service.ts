@@ -130,7 +130,11 @@ export class AuthService {
   }
 
   hasRole(role: string): boolean {
-    return this.userState()?.roles.includes(role) ?? false;
+    return this.userState()?.roles.some(userRole => userRole.toLowerCase() === role.toLowerCase()) ?? false;
+  }
+
+  getDefaultHomeRoute(): string {
+    return this.hasRole('RestrictedUser') ? '/sinage' : '/ad-tools';
   }
 
   logout(): Observable<void> {
