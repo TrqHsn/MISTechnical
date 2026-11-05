@@ -18,7 +18,7 @@ export class OthersComponent {
     { label: 'Network Dashboard', description: 'Nework monitor', action: 'button-2' },
     { label: 'Guest QR', description: 'Guest Wi-Fi access', action: 'guest-wifi' },
     { label: 'Mail Storage', description: 'Create mail-storage notification drafts', action: 'mail-storage' },
-    { label: 'Button 5', description: 'Coming soon', action: 'button-5' },
+    { label: 'PDF Tool', description: 'PDF manipulation tools', action: 'pdf-tool' },
     { label: 'Button 6', description: 'Coming soon', action: 'button-6' }
   ];
 
@@ -58,6 +58,12 @@ export class OthersComponent {
 
     if (action === 'guest-wifi') {
       void this.openGuestWifiModal();
+    }
+
+    if (action === 'pdf-tool') {
+      const url = '/PDF Tool.html';
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
     }
   }
 

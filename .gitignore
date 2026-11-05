@@ -4,6 +4,7 @@
 *.db
 *.db-shm
 *.db-wal
+App_Data/auth-signing-key
 
 # User-specific files
 *.suo
@@ -69,4 +70,3 @@ artifacts/
 # JetBrains Rider
 .idea/
 *.sln.iml
-

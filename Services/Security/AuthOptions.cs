@@ -10,13 +10,51 @@ public sealed class AuthOptions
     public int AccessTokenMinutes { get; set; } = 20;
     public string? DatabasePath { get; set; }
 
-    public string ResolveDatabasePath()
+    public string ResolveDatabasePath(string? contentRootPath = null)
     {
         if (!string.IsNullOrWhiteSpace(DatabasePath))
             return Path.GetFullPath(DatabasePath);
 
-        var applicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        return Path.Combine(applicationData, "ADApi", "auth.db");
+        return Path.Combine(contentRootPath ?? Directory.GetCurrentDirectory(), "App_Data", "auth.db");
+    }
+
+    public string ResolveSigningKey(string contentRootPath)
+    {
+        var keyPath = Path.Combine(contentRootPath, "App_Data", "auth-signing-key");
+        Directory.CreateDirectory(Path.GetDirectoryName(keyPath)!);
+
+        if (string.IsNullOrWhiteSpace(SigningKey))
+        {
+            if (File.Exists(keyPath))
+            {
+                SigningKey = File.ReadAllText(keyPath).Trim();
+            }
+            else
+            {
+                SigningKey = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
+                try
+                {
+                    using var stream = new FileStream(keyPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                    var keyBytes = System.Text.Encoding.UTF8.GetBytes(SigningKey);
+                    stream.Write(keyBytes);
+                    stream.Flush(flushToDisk: true);
+                }
+                catch (IOException) when (File.Exists(keyPath))
+                {
+                    SigningKey = File.ReadAllText(keyPath).Trim();
+                }
+            }
+        }
+        else if (!File.Exists(keyPath))
+        {
+            using var stream = new FileStream(keyPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            var keyBytes = System.Text.Encoding.UTF8.GetBytes(SigningKey);
+            stream.Write(keyBytes);
+            stream.Flush(flushToDisk: true);
+        }
+
+        GetSigningKey();
+        return SigningKey;
     }
 
     public byte[] GetSigningKey()

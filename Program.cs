@@ -17,8 +17,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 var authOptions = builder.Configuration.GetSection(AuthOptions.SectionName).Get<AuthOptions>() ?? new AuthOptions();
-var databasePath = authOptions.ResolveDatabasePath();
-Directory.CreateDirectory(Path.GetDirectoryName(databasePath)!);
+var databasePath = await PortableAuthData.InitializeAsync(authOptions, builder.Environment.ContentRootPath);
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -27,7 +26,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlite($"Data Source={databasePath}"));
-builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
+builder.Services.Configure<AuthOptions>(options =>
+{
+    builder.Configuration.GetSection(AuthOptions.SectionName).Bind(options);
+    options.SigningKey = authOptions.SigningKey;
+});
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     {
         options.User.RequireUniqueEmail = false;

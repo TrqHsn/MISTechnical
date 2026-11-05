@@ -5,39 +5,39 @@ and JWT bearer tokens for API requests. Refresh tokens are stored as hashes,
 rotated on use, and held in HttpOnly cookies. The access token is kept in
 Angular memory only.
 
-## Local development
+## Portable local setup
 
-Run these commands from the repository root in PowerShell:
-
-```powershell
-dotnet restore
-dotnet tool install --global dotnet-ef --version 9.0.0
-$key = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
-dotnet user-secrets set "Authentication:SigningKey" $key --project .\ADApi.csproj
-Remove-Variable key
-dotnet run --project .\ADApi.csproj -- --migrate-auth
-```
-
-The signing key is generated locally and stored in .NET user-secrets, not in
-the repository. Keep the key stable across restarts. In production, provide
-`Authentication:SigningKey` through the deployment secret store or a protected
-environment variable (`Authentication__SigningKey`) instead.
-
-The default SQLite file is:
+By default, authentication data is stored in `App_Data` beside the application:
 
 ```text
-%LOCALAPPDATA%\ADApi\auth.db
+App_Data\auth.db
+App_Data\auth-signing-key
 ```
 
-Set `Authentication__DatabasePath` to a persistent, backed-up location when
-deploying as a Windows service or under a dedicated service identity. Ensure
-the service identity can read and write the containing directory. The database
-file and its WAL files are ignored by Git.
+On first start, the application generates a random signing key and saves it
+beside the SQLite account database. If the previous default database exists at
+`%LOCALAPPDATA%\ADApi\auth.db`, it is copied into `App_Data` on first start
+without deleting the original. Existing .NET user-secrets or an
+`Authentication__SigningKey` environment variable are retained and copied to
+the portable key file when it is first created.
+
+To carry the same accounts to another PC, stop the application and copy the
+entire project/application folder, including `App_Data`. The database and key
+must travel together. The destination must be able to write to `App_Data`.
+Never commit or distribute this folder to untrusted users: it contains the
+signing key and password hashes. Back it up securely.
+
+Setting `Authentication__DatabasePath` overrides the portable database
+location. Setting `Authentication__SigningKey` (or the environment variable
+`Authentication__SigningKey`) overrides the key file; keep that secret stable
+and transfer it separately if copying the application. For services or
+deployments with separate data storage, configure both values through a
+protected secret/configuration store.
 
 ## Create the initial administrator
 
-The application does not create an administrator automatically. After
-configuring the signing key, run this once from an interactive terminal:
+The application does not create an administrator automatically. Run this
+once from an interactive terminal:
 
 ```powershell
 dotnet run --project .\ADApi.csproj -- --bootstrap-admin admin
@@ -119,4 +119,6 @@ permission-checked API endpoints.
 - Back up the SQLite file and signing key together. Losing the signing key
   invalidates access tokens. Rotate keys deliberately and plan for active
   sessions to reauthenticate.
+- Configure the exact Angular origins in `Program.cs` for a new PC/network;
+  credentialed CORS does not allow arbitrary origins.
 - Do not commit credentials, user secrets, refresh tokens, or the database.
