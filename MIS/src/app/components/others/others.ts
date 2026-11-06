@@ -19,7 +19,7 @@ export class OthersComponent {
     { label: 'Guest QR', description: 'Guest Wi-Fi access', action: 'guest-wifi' },
     { label: 'Mail Storage', description: 'Create mail-storage notification drafts', action: 'mail-storage' },
     { label: 'PDF Tool', description: 'PDF manipulation tools', action: 'pdf-tool' },
-    { label: 'Button 6', description: 'Coming soon', action: 'button-6' }
+    { label: 'Email Viewer', description: 'View eml, msg, oft files', action: 'email-viewer' }
   ];
 
   guestWifiModalOpen = signal(false);
@@ -62,6 +62,11 @@ export class OthersComponent {
 
     if (action === 'pdf-tool') {
       const url = '/PDF Tool.html';
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (action === 'email-viewer') {
+      const url = '/Email viewer.html';
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }

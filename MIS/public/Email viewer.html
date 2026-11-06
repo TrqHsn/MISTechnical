@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email Viewer</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--text:#1d2330;--muted:#5b6575;--accent:#0f5ea8;--border:#dde2ea;--warn:#7a5200;--warnbg:#fff6e0;--err:#9b1c1c;--errbg:#fdeaea}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.top{background:var(--accent);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.brand{font-size:18px;font-weight:600}
+.fmts span{background:rgba(255,255,255,.18);border-radius:999px;padding:3px 10px;margin-left:6px;font-size:12px;font-family:Consolas,monospace}
+main{max-width:1200px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.drop{background:var(--card);border:2px dashed var(--border);border-radius:10px;padding:12px 16px;text-align:center;transition:.15s}
+.drop.over{border-color:var(--accent);background:#eaf3fc}
+.drop-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.drop .btn{margin-top:0;padding:7px 16px;font-size:13px}
+.muted{color:var(--muted);font-size:13px}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 18px;font-size:14px;cursor:pointer;margin-top:12px}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{background:#b9c3d0;cursor:not-allowed}
+.btn-sm{padding:6px 12px;margin:0;font-size:13px;white-space:nowrap}
+.status{padding:10px 14px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:14px}
+.status.error{background:var(--errbg);color:var(--err);border-color:#f2c4c4}
+.status.warn{background:var(--warnbg);color:var(--warn);border-color:#f0d89a}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--accent);border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.filebar{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;font-size:14px}
+.filebar strong{word-break:break-all}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.empty{text-align:center;color:var(--muted);padding:48px 20px}
+.subj{font-size:22px;margin:0 0 14px;word-break:break-word}
+dl.meta{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0;font-size:14px}
+dl.meta dt{color:var(--muted);font-weight:600}
+dl.meta dd{margin:0;word-break:break-word}
+.warns{display:flex;flex-direction:column;gap:6px}
+.warn-item{background:var(--warnbg);color:var(--warn);border:1px solid #f0d89a;border-radius:8px;padding:8px 12px;font-size:13px}
+.frame{width:100%;height:86vh;min-height:448px;border:1px solid var(--border);border-radius:10px;background:#fff}
+h2{font-size:16px;margin:0 0 10px}
+.atts{list-style:none;padding:0;margin:0}
+.att{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.att:last-child{border-bottom:0}
+.att-info{min-width:0}
+.att-name{font-weight:600;word-break:break-all}
+.att-meta{color:var(--muted);font-size:12px;margin-top:2px}
+.att-note{color:var(--warn);font-size:12px;margin-top:2px}
+.tag{display:inline-block;font-size:11px;font-weight:600;background:#e7eef8;color:var(--accent);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+@media (max-width:600px){dl.meta{grid-template-columns:1fr}dl.meta dt{margin-top:6px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">&#9993; Offline Email Viewer - MIS Technical Team</div>
+  <div class="fmts"><span>.eml</span><span>.msg</span><span>.oft</span></div>
+</header>
+<main>
+  <div id="drop" class="drop" tabindex="0" role="button" aria-label="Drop an email file here or press Enter to browse">
+    <div class="drop-title">Drop an email file here</div>
+    <button id="browse" class="btn" type="button">Browse files</button>
+    <input id="file" type="file" accept=".eml,.msg,.oft,message/rfc822" hidden>
+  </div>
+  <div id="status" class="status" hidden></div>
+  <div id="fileBar" class="filebar" hidden><strong id="fname"></strong><span id="fmeta" class="muted"></span></div>
+  <div id="empty" class="card empty">No email open. Choose a file above to view it.</div>
+  <section id="viewer" hidden>
+    <div class="card">
+      <h1 id="subj" class="subj"></h1>
+      <dl class="meta">
+        <dt>From</dt><dd id="from"></dd>
+        <dt>To</dt><dd id="to"></dd>
+        <dt>CC</dt><dd id="cc"></dd>
+        <dt>BCC</dt><dd id="bcc"></dd>
+        <dt>Sent</dt><dd id="date"></dd>
+      </dl>
+    </div>
+    <div id="warn" class="warns" hidden></div>
+    <iframe id="frame" class="frame" title="Email body" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>
+    <section class="card" style="margin-top:16px">
+      <h2>Attachments (<span id="acount">0</span>)</h2>
+      <ul id="atts" class="atts"></ul>
+    </section>
+  </section>
+  <p>Developed by MIS Technical Team</p>
+</main>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const MAX = 200 * 1048576, LARGE = 25 * 1048576;
+const CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; frame-src 'none'; form-action 'none'; base-uri 'none'";
+const EXT = {'application/pdf':'.pdf','image/png':'.png','image/jpeg':'.jpg','image/gif':'.gif','image/webp':'.webp','text/plain':'.txt','text/html':'.html','message/rfc822':'.eml','application/zip':'.zip'};
+const CP = {65001:'utf-8',1250:'windows-1250',1251:'windows-1251',1252:'windows-1252',1253:'windows-1253',1254:'windows-1254',1255:'windows-1255',1256:'windows-1256',1257:'windows-1257',1258:'windows-1258',932:'shift_jis',936:'gbk',949:'euc-kr',950:'big5',20866:'koi8-r',28591:'iso-8859-1',28592:'iso-8859-2',28595:'iso-8859-5',28597:'iso-8859-7',28598:'iso-8859-8',28605:'iso-8859-15'};
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const E = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const fmtSize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : n < 1073741824 ? (n / 1048576).toFixed(2) + ' MB' : (n / 1073741824).toFixed(2) + ' GB';
+const b2s = u => { let s = ''; for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return s; };
+const s2b = s => { const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i) & 255; return u; };
+const b64 = u => btoa(b2s(u));
+const cname = n => (n || '').split(/[\\/]/).pop().replace(/[\x00-\x1f]/g, '').trim() || 'attachment';
+const fa = (n, e) => { n = (n || '').trim(); e = (e || '').trim(); return n && e && n.toLowerCase() !== e.toLowerCase() ? `${n} <${e}>` : e || n; };
+const fdate = v => { const d = v instanceof Date ? v : new Date(String(v || '').replace(/\([^)]*\)/g, '').trim()); return isNaN(d) ? String(v || '') : d.toLocaleString(undefined, {dateStyle: 'full', timeStyle: 'medium'}); };
+
+function smart(b) { try { return new TextDecoder('utf-8', {fatal: true}).decode(b); } catch (e) { return new TextDecoder('windows-1252').decode(b); } }
+function dec(b, cs, w) {
+  cs = (cs || '').trim().replace(/["']/g, '').toLowerCase();
+  if (!cs) return smart(b);
+  if (/^(us-)?ascii$|unknown/.test(cs)) cs = 'windows-1252';
+  try { return new TextDecoder(cs).decode(b); }
+  catch (e) { if (w) w.push(`Unsupported character encoding "${cs}"; text was decoded as Windows-1252.`); return new TextDecoder('windows-1252').decode(b); }
+}
+const sniff = b => { const m = /charset\s*=\s*["']?\s*([\w.:-]+)/i.exec(b2s(b.subarray(0, 4096))); return m ? m[1] : null; };
+
+const BT = new Int16Array(256).fill(-1);
+'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('').forEach((c, i) => BT[c.charCodeAt(0)] = i);
+BT[45] = 62; BT[95] = 63;
+function b64d(s, w) {
+  const o = new Uint8Array(Math.floor(s.length * 3 / 4) + 3);
+  let n = 0, a = 0, k = 0, bad = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c === 61) continue;
+    const v = c < 256 ? BT[c] : -1;
+    if (v < 0) { if (c > 32) bad++; continue; }
+    a = ((a << 6) | v) & 0xFFFFFF; k += 6;
+    if (k >= 8) { k -= 8; o[n++] = (a >> k) & 255; }
+  }
+  if (bad && w) w.push(`Invalid Base64 data: ${bad} unexpected character(s) were ignored.`);
+  return o.subarray(0, n);
+}
+const qp = s => s.replace(/=[ \t]*\r?\n/g, '').replace(/=([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+
+function mw(s) {
+  let t = smart(s2b(s || ''));
+  t = t.replace(/(=\?[^?\s]+\?[bBqQ]\?[^?\s]*\?=)\s+(?==\?)/g, '$1');
+  return t.replace(/=\?([^?\s*]+)[^?\s]*\?([bBqQ])\?([^?\s]*)\?=/g, (m, cs, e, d) => {
+    const b = (e === 'b' || e === 'B') ? b64d(d) : s2b(d.replace(/_/g, ' ').replace(/=([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16))));
+    return dec(b, cs);
+  });
+}
+function hdrs(t) {
+  const L = [];
+  for (const l of t.split(/\r?\n/)) {
+    if (!l || /^From /.test(l)) continue;
+    if ((l[0] === ' ' || l[0] === '\t') && L.length) { L[L.length - 1][1] += ' ' + l.trim(); continue; }
+    const i = l.indexOf(':');
+    if (i > 0) L.push([l.slice(0, i).trim().toLowerCase(), l.slice(i + 1).trim()]);
+  }
+  return {get: n => { const e = L.find(x => x[0] === n); return e ? e[1] : null; }};
+}
+function ct(v) {
+  const main = (v || '').split(';')[0].trim().toLowerCase(), p = {};
+  const re = /;\s*([^\s=;]+)\s*=\s*(?:"((?:[^"\\]|\\.)*)"|([^;]*))/g; let x;
+  while ((x = re.exec(v || ''))) p[x[1].toLowerCase()] = x[2] !== undefined ? x[2].replace(/\\(.)/g, '$1') : x[3].trim();
+  return {v: main, p};
+}
+function fname(p) {
+  let f;
+  if (p['filename*'] !== undefined) {
+    const q = /^([^']*)'[^']*'(.*)$/.exec(p['filename*']);
+    f = dec(s2b((q ? q[2] : p['filename*']).replace(/%([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))), q ? q[1] : 'utf-8');
+  } else f = p.filename !== undefined ? mw(p.filename) : p.name !== undefined ? mw(p.name) : '';
+  return cname(f) === 'attachment' && !f.trim() ? '' : cname(f);
+}
+function parts(body, bd, w) {
+  const d = '--' + bd;
+  const fd = f => { let i = body.indexOf(d, f); while (i > 0 && body[i - 1] !== '\n') i = body.indexOf(d, i + 1); return i; };
+  const out = [];
+  let p = body.startsWith(d) ? 0 : fd(0);
+  if (p < 0) return null;
+  while (p >= 0) {
+    if (body.startsWith('--', p + d.length)) return out;
+    const e0 = body.indexOf('\n', p + d.length);
+    if (e0 < 0) break;
+    const s = e0 + 1, n = fd(s);
+    let e = n < 0 ? body.length : n - 1;
+    if (n >= 0 && e > s && body[e - 1] === '\r') e--;
+    out.push(body.slice(s, Math.max(s, e)));
+    if (n < 0) { w.push('Multipart message is missing its closing boundary; content may be truncated.'); return out; }
+    p = n;
+  }
+  return out;
+}
+function ent(raw, depth, w) {
+  const m = /\r?\n\r?\n/.exec(raw); let h, b;
+  if (/^\r?\n/.test(raw)) { h = ''; b = raw.replace(/^\r?\n/, ''); }
+  else if (m) { h = raw.slice(0, m.index); b = raw.slice(m.index + m[0].length); }
+  else { h = raw; b = ''; }
+  const H = hdrs(h), C = ct(H.get('content-type') || 'text/plain'), D = ct(H.get('content-disposition') || '');
+  const e = {H, type: C.v || 'text/plain', cp: C.p, disp: D.v, name: fname(D.p) || fname(C.p),
+    cid: (H.get('content-id') || '').replace(/^<|>$/g, '').trim().toLowerCase() || null,
+    cte: (H.get('content-transfer-encoding') || '7bit').toLowerCase(), body: b};
+  if (e.type.startsWith('multipart/')) {
+    if (!C.p.boundary) { w.push('Malformed MIME: a multipart section has no boundary.'); e.type = 'text/plain'; }
+    else if (depth < 30) {
+      const ps = parts(b, C.p.boundary, w);
+      if (ps) { e.multi = ps.map(x => ent(x, depth + 1, w)); return e; }
+      w.push(`Malformed MIME: boundary "${C.p.boundary}" was not found.`); e.type = 'text/plain';
+    }
+  }
+  return e;
+}
+const leafBytes = (e, w) => e.cte === 'base64' ? b64d(e.body, w) : e.cte === 'quoted-printable' ? s2b(qp(e.body)) : s2b(e.body);
+const leafText = (e, w) => { const b = leafBytes(e, w); return dec(b, e.cp.charset || (e.type === 'text/html' ? sniff(b) : null), w); };
+
+function parseEml(bytes, w) {
+  const root = ent(b2s(bytes), 0, w), H = root.H;
+  if (!H.get('from') && !H.get('subject') && !H.get('date') && !H.get('content-type') && !H.get('message-id'))
+    throw new Error('No e-mail headers were found. The file may be corrupted or not an EML file.');
+  const leaves = [];
+  (function walk(e) { if (e.multi) e.multi.forEach(walk); else leaves.push(e); })(root);
+  const M = {subject: mw(H.get('subject')), from: mw(H.get('from')), to: mw(H.get('to')), cc: mw(H.get('cc')), bcc: mw(H.get('bcc')),
+    date: fdate(H.get('date') || ''), html: null, text: null, atts: [], cid: new Map()};
+  if (leaves.some(e => e.type === 'application/pkcs7-mime')) w.push('This message is S/MIME protected; its content cannot be displayed without the private key.');
+  for (const e of leaves) {
+    const isText = e.type === 'text/html' || e.type === 'text/plain';
+    if (isText && e.disp !== 'attachment' && !e.name && !e.cid) {
+      const t = leafText(e, w);
+      if (e.type === 'text/html') { if (M.html === null) M.html = t; }
+      else if (M.text === null) M.text = t;
+      continue;
+    }
+    const data = leafBytes(e, w), embedded = e.type === 'message/rfc822';
+    const a = {name: e.name || (embedded ? 'embedded-message.eml' : 'attachment' + (EXT[e.type] || '')), mime: e.type, data, size: data.length,
+      inline: !!e.cid || e.disp === 'inline', embedded, cid: e.cid, note: data.length ? '' : 'This attachment is empty.'};
+    if (a.cid) M.cid.set(a.cid, 'data:' + e.type + ';base64,' + b64(data));
+    M.atts.push(a);
+  }
+  if (M.html === null && M.text === null) w.push('No text or HTML body was found in this message.');
+  M.warnings = w;
+  return M;
+}
+
+function cfb(u) {
+  if (u.length < 512) throw new Error('file is too small');
+  const dv = new DataView(u.buffer, u.byteOffset, u.byteLength);
+  const SS = 2 ** dv.getUint16(30, true), MS = 2 ** dv.getUint16(32, true);
+  if (SS < 128 || SS > 65536 || MS < 4 || MS > SS) throw new Error('invalid OLE header');
+  const nFAT = dv.getUint32(44, true), dirS = dv.getUint32(48, true), cut = dv.getUint32(56, true), mfS = dv.getUint32(60, true), nDIF = dv.getUint32(72, true);
+  const sec = s => { const o = (s + 1) * SS; if (s >= 0xFFFFFFFA || o >= u.length) throw new Error('sector out of range'); const r = new Uint8Array(SS); r.set(u.subarray(o, Math.min(o + SS, u.length))); return r; };
+  const dif = [];
+  for (let i = 0; i < 109; i++) { const v = dv.getUint32(76 + 4 * i, true); if (v < 0xFFFFFFFA) dif.push(v); }
+  for (let s = dv.getUint32(68, true), k = 0; k < nDIF && s < 0xFFFFFFFA && k < 100000; k++) {
+    const d = new DataView(sec(s).buffer);
+    for (let i = 0; i < SS / 4 - 1; i++) { const v = d.getUint32(4 * i, true); if (v < 0xFFFFFFFA) dif.push(v); }
+    s = d.getUint32(SS - 4, true);
+  }
+  const F = [];
+  for (const s of dif.slice(0, nFAT || dif.length)) { const d = new DataView(sec(s).buffer); for (let i = 0; i < SS / 4; i++) F.push(d.getUint32(4 * i, true)); }
+  const chain = s => { const c = []; while (s < 0xFFFFFFFA) { if (c.length > F.length || s >= F.length) throw new Error('broken sector chain'); c.push(s); s = F[s]; } return c; };
+  const all = s => { const c = chain(s), r = new Uint8Array(c.length * SS); c.forEach((x, i) => r.set(sec(x), i * SS)); return r; };
+  const rd = (s, z) => { const r = new Uint8Array(z); let p = 0; for (const x of chain(s)) { if (p >= z) break; const n = Math.min(SS, z - p); r.set(sec(x).subarray(0, n), p); p += n; } return r; };
+  const dir = all(dirS), dv2 = new DataView(dir.buffer), Ent = [];
+  for (let o = 0; o + 128 <= dir.length; o += 128) {
+    const n = dv2.getUint16(o + 64, true);
+    Ent.push({name: n >= 4 ? new TextDecoder('utf-16le').decode(dir.subarray(o, o + Math.min(n, 64) - 2)) : '', type: dir[o + 66],
+      l: dv2.getUint32(o + 68, true), r: dv2.getUint32(o + 72, true), c: dv2.getUint32(o + 76, true),
+      s: dv2.getUint32(o + 116, true), z: dv2.getUint32(o + 120, true) + dv2.getUint32(o + 124, true) * 4294967296});
+  }
+  if (!Ent.length || Ent[0].type !== 5) throw new Error('directory not found');
+  const mini = rd(Ent[0].s, Ent[0].z);
+  const MF = mfS < 0xFFFFFFFA ? new Uint32Array(all(mfS).buffer) : new Uint32Array(0);
+  const rs = e => {
+    if (!e.z) return new Uint8Array(0);
+    if (e.z >= cut) return rd(e.s, e.z);
+    const r = new Uint8Array(e.z); let s = e.s, p = 0, g = 0;
+    while (s < 0xFFFFFFFA && p < e.z) {
+      if (s >= MF.length || g++ > MF.length) throw new Error('broken mini-sector chain');
+      const n = Math.min(MS, e.z - p); r.set(mini.subarray(s * MS, s * MS + n), p); p += n; s = MF[s];
+    }
+    return r;
+  };
+  const seen = new Set();
+  const node = i => {
+    const e = Ent[i], n = {c: new Map(), e};
+    if (e.c < Ent.length) {
+      const st = [e.c];
+      while (st.length) {
+        const k = st.pop();
+        if (k >= Ent.length || seen.has(k)) continue;
+        seen.add(k);
+        const x = Ent[k];
+        n.c.set(x.name.toLowerCase(), node(k));
+        st.push(x.l, x.r);
+      }
+    }
+    return n;
+  };
+  return {root: node(0), read: n => rs(n.e)};
+}
+function props(n, h, read) {
+  const m = new Map(), ps = n.c.get('__properties_version1.0');
+  if (!ps) return m;
+  const d = read(ps), v = new DataView(d.buffer, d.byteOffset, d.byteLength);
+  for (let o = h; o + 16 <= d.length; o += 16) {
+    const t = v.getUint16(o, true), id = v.getUint16(o + 2, true);
+    const p = {t, lo: v.getUint32(o + 8, true), hi: v.getUint32(o + 12, true), d: null};
+    if (t === 0x0D) p.emb = true;
+    if (t === 0x1E || t === 0x1F || t === 0x102) {
+      const key = ('__substg1.0_' + id.toString(16).padStart(4, '0') + t.toString(16).padStart(4, '0')).toLowerCase();
+      const s = n.c.get(key);
+      if (s && s.e.type === 2) p.d = read(s);
+    }
+    m.set(id, p);
+  }
+  return m;
+}
+const S = (m, id, cs) => { const p = m.get(id); if (!p || !p.d) return null; return p.t === 0x1F ? new TextDecoder('utf-16le').decode(p.d).replace(/\0+$/, '') : dec(p.d, cs); };
+const I = (m, id) => { const p = m.get(id); return p && p.t !== 0x1E && p.t !== 0x1F && p.t !== 0x102 ? p.lo | 0 : null; };
+const T = (m, id) => { const p = m.get(id); if (!p || p.t !== 0x40) return null; const ms = Number(((BigInt(p.hi) << 32n) | BigInt(p.lo)) / 10000n) - 11644473600000; return isNaN(ms) ? null : new Date(ms); };
+const byKey = ([a], [b]) => a < b ? -1 : a > b ? 1 : 0;
+
+function parseOutlook(u, fmt, w) {
+  let C;
+  try { C = cfb(u); } catch (e) { throw new Error(`Invalid or corrupted ${fmt.toUpperCase()} file (${e.message}).`); }
+  const R = C.root, rd = C.read;
+  if (!R.c.has('__properties_version1.0')) throw new Error(`Unsupported ${fmt.toUpperCase()} structure: MAPI property data was not found.`);
+  const P = props(R, 32, rd), cp = I(P, 0x3FDE), cs = CP[cp];
+  const cls = S(P, 0x1A, cs) || '';
+  if (/SMIME|Secure/i.test(cls)) w.push('This item is S/MIME protected; its content cannot be displayed without the private key.');
+  else if (cls && !/^IPM\.(Note|Post)/i.test(cls)) w.push(`This item is type "${cls}". Only mail fields are shown, so some content may be missing.`);
+  if (fmt === 'oft') w.push('This is an Outlook template (.oft); its content is shown as a message.');
+  const addr = (ids, q) => ids.map(i => S(q, i, cs)).find(a => a && !a.startsWith('/')) || '';
+  const from = fa(S(P, 0x0C1A, cs) || S(P, 0x0042, cs), addr([0x5D01, 0x39FE, 0x0C1F, 0x65], P));
+  const rec = [...R.c].filter(([k]) => k.startsWith('__recip_version1.0_')).sort(byKey)
+    .map(([, n]) => { const q = props(n, 8, rd); return {t: I(q, 0x0C15) || 1, x: fa(S(q, 0x3001, cs), addr([0x39FE, 0x3003], q))}; });
+  const j = t => rec.filter(r => r.t === t && r.x).map(r => r.x).join(', ');
+  const to = j(1) || S(P, 0x0E04, cs) || '', cc = j(2) || S(P, 0x0E03, cs) || '', bcc = j(3) || S(P, 0x0E02, cs) || '';
+  const dt = T(P, 0x39) || T(P, 0xE06);
+  const th = S(P, 0x7D, cs);
+  const M = {subject: S(P, 0x37, cs) || S(P, 0xE1D, cs) || '', from, to, cc, bcc,
+    date: fdate(dt || (th && hdrs(th).get('date')) || ''), html: null, text: S(P, 0x1000, cs), atts: [], cid: new Map()};
+  const hp = P.get(0x1013);
+  if (hp && hp.d) M.html = hp.t === 0x1F ? S(P, 0x1013, cs) : dec(hp.d, cs || sniff(hp.d), w);
+  for (const [, n] of [...R.c].filter(([k]) => k.startsWith('__attach_version1.0_')).sort(byKey)) {
+    const q = props(n, 8, rd), dp = q.get(0x3701), method = I(q, 0x3705) ?? 1;
+    const nm = S(q, 0x3707, cs) || S(q, 0x3704, cs) || '';
+    const mime = S(q, 0x370E, cs) || '';
+    const cid = (S(q, 0x3712, cs) || '').replace(/^<|>$/g, '').trim().toLowerCase() || null;
+    const data = method === 1 && dp && dp.d ? dp.d : null;
+    let note = '';
+    if (method === 1 && !data) note = dp && dp.emb ? 'Embedded Outlook item: its content cannot be extracted in this viewer.' : 'Attachment content is missing from the file.';
+    else if (method === 5) note = 'Embedded Outlook item: its content cannot be extracted in this viewer.';
+    else if (method !== 1) note = 'Linked attachment: the file itself is not stored in this item.';
+    M.atts.push({name: cname(nm), mime, data, size: data ? data.length : (I(q, 0xE20) || 0), inline: !!cid, cid, embedded: !!(dp && dp.emb), note});
+    if (data && cid) M.cid.set(cid, 'data:' + (mime || 'application/octet-stream') + ';base64,' + b64(data));
+  }
+  if (M.html === null && M.text === null) w.push(P.has(0x1009) ? 'This item has only a compressed RTF body, which this viewer cannot render.' : 'No text or HTML body was found in this item.');
+  M.warnings = w;
+  return M;
+}
+
+function detect(ext, u) {
+  if (u.length >= 8 && [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1].every((x, i) => u[i] === x)) return ext === 'oft' ? 'oft' : 'msg';
+  if (ext === 'msg' || ext === 'oft') throw new Error(`The .${ext} file is not a valid Outlook item.`);
+  if (ext === 'eml') return 'eml';
+  return /^(Return-Path|Received|From|Date|Subject|MIME-Version|Message-ID|Content-Type):/mi.test(b2s(u.subarray(0, 2048))) ? 'eml' : null;
+}
+
+function build(M) {
+  const src = M.html && M.html.trim() ? M.html : M.text != null ? `<pre class="plain">${esc(M.text)}</pre>` : '<p class="none">This message has no displayable body.</p>';
+  const d = new DOMParser().parseFromString(src, 'text/html');
+  let blocked = 0, missing = 0;
+  const cssFix = css => css.replace(/@import[^;]*;?/gi, '').replace(/expression\s*\(/gi, 'x(')
+    .replace(/(-moz-binding|behaviou?r)\s*:[^;}]*/gi, '')
+    .replace(/url\(\s*(['"]?)\s*([^'")]*?)\s*\1\s*\)/gi, (m, q, u) => {
+      const l = u.toLowerCase();
+      if (l.startsWith('cid:')) { const x = M.cid.get(l.slice(4)); if (x) return `url("${x}")`; missing++; return 'none'; }
+      if (l.startsWith('data:image/')) return m;
+      blocked++; return 'none';
+    });
+  d.querySelectorAll('script,iframe,frame,frameset,object,embed,applet,link,base,form,input,button,select,textarea,noscript,audio,video,source,track,svg,math,meta[http-equiv],style[src]').forEach(x => x.remove());
+  d.querySelectorAll('style').forEach(s => s.textContent = cssFix(s.textContent));
+  for (const el of d.querySelectorAll('*')) {
+    for (const a of [...el.attributes]) {
+      const n = a.name.toLowerCase(), v = a.value.trim(), l = v.replace(/[\u0000-\u0020]/g, '').toLowerCase();
+      if (n.startsWith('on') || n === 'srcdoc' || n === 'formaction' || n === 'srcset' || n === 'action') { el.removeAttribute(a.name); continue; }
+      if (n === 'style') { el.setAttribute('style', cssFix(v)); continue; }
+      if (n === 'href' || n === 'xlink:href') { if (/^(javascript|vbscript|data):/.test(l)) el.removeAttribute(a.name); continue; }
+      if (/^(src|background|poster|lowsrc)$/.test(n)) {
+        if (l.startsWith('cid:')) { const x = M.cid.get(l.slice(4)); if (x) el.setAttribute(a.name, x); else { el.removeAttribute(a.name); missing++; } continue; }
+        if (l.startsWith('data:image/')) continue;
+        if (/^(https?:|\/\/|ftp:)/.test(l)) blocked++;
+        el.removeAttribute(a.name);
+      }
+    }
+    if (el.tagName === 'A') { el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener noreferrer'); }
+  }
+  const mc = d.createElement('meta'); mc.setAttribute('charset', 'utf-8');
+  const cp = d.createElement('meta'); cp.httpEquiv = 'Content-Security-Policy'; cp.content = CSP;
+  const st = d.createElement('style');
+  st.textContent = 'html,body{margin:0;background:#fff}body{padding:16px 20px;font-family:"Segoe UI",Arial,sans-serif;font-size:15px;line-height:1.55;color:#1f2328;overflow-wrap:anywhere}img{max-width:100%;height:auto}pre.plain{white-space:pre-wrap;font-family:Consolas,monospace;margin:0}.none{color:#666;font-style:italic}';
+  d.head.prepend(mc, cp, st);
+  return {html: '<!DOCTYPE html>' + d.documentElement.outerHTML, blocked, missing};
+}
+
+function save(a) {
+  const n = (a.name.replace(/[<>:"\/\\|?*\x00-\x1f]/g, '_').slice(0, 180) || 'attachment') + (/\.[^.]+$/.test(a.name) ? '' : (EXT[a.mime] || ''));
+  const url = URL.createObjectURL(new Blob([a.data], {type: a.mime || 'application/octet-stream'}));
+  const k = E('a'); k.href = url; k.download = n; document.body.append(k); k.click(); k.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+function setMsg(kind, msg) {
+  const s = $('status'); s.replaceChildren(); s.className = kind ? 'status ' + kind : 'status';
+  if (!msg) { s.hidden = true; return; }
+  s.hidden = false;
+  if (kind === 'loading') s.append(E('span', 'spin'));
+  s.append(document.createTextNode(msg));
+}
+function render(M, f) {
+  $('empty').hidden = true; $('viewer').hidden = false; $('fileBar').hidden = false;
+  $('fname').textContent = f.name;
+  $('fmeta').textContent = `${M.fmt.toUpperCase()} · ${fmtSize(f.size)}`;
+  $('subj').textContent = M.subject || '(no subject)';
+  $('from').textContent = M.from || '—'; $('to').textContent = M.to || '—';
+  $('cc').textContent = M.cc || '—'; $('bcc').textContent = M.bcc || '—'; $('date').textContent = M.date || '—';
+  const {html, blocked, missing} = build(M);
+  const W = [...M.warnings];
+  if (blocked) W.push(`Remote content blocked: ${blocked} external image or resource(s) were not loaded.`);
+  if (missing) W.push(`${missing} inline image reference(s) could not be resolved from the message.`);
+  const wb = $('warn'); wb.replaceChildren();
+  [...new Set(W)].forEach(t => wb.append(E('div', 'warn-item', t)));
+  wb.hidden = !W.length;
+  $('frame').srcdoc = html;
+  const ul = $('atts'); ul.replaceChildren();
+  $('acount').textContent = M.atts.length;
+  if (!M.atts.length) ul.append(E('li', 'muted', 'No attachments'));
+  M.atts.forEach(a => {
+    const li = E('li', 'att'), info = E('div', 'att-info');
+    const nm = E('div', 'att-name', a.name);
+    if (a.inline) nm.append(E('span', 'tag', 'Inline'));
+    if (a.embedded) nm.append(E('span', 'tag', 'Embedded'));
+    info.append(nm, E('div', 'att-meta', `${a.mime || 'application/octet-stream'} · ${a.data ? fmtSize(a.size) : 'size unknown'}`));
+    if (a.note) info.append(E('div', 'att-note', a.note));
+    const btn = E('button', 'btn btn-sm', 'Download');
+    btn.type = 'button';
+    if (a.data) btn.onclick = () => save(a); else btn.disabled = true;
+    li.append(info, btn); ul.append(li);
+  });
+  window.scrollTo(0, 0);
+}
+async function openFile(f) {
+  if (!f) return;
+  if (f.size > MAX) { setMsg('error', `"${f.name}" is ${fmtSize(f.size)}, which is above the ${fmtSize(MAX)} limit.`); return; }
+  setMsg('loading', `Reading ${f.name} (${fmtSize(f.size)})…`);
+  await new Promise(r => setTimeout(r, 30));
+  try {
+    const u = new Uint8Array(await f.arrayBuffer());
+    const ext = (f.name.includes('.') ? f.name.split('.').pop() : '').toLowerCase();
+    const fmt = detect(ext, u);
+    if (!fmt) { setMsg('warn', `Unsupported file format: "${f.name}". Please choose an .eml, .msg or .oft file.`); return; }
+    const w = f.size > LARGE ? [`Large file (${fmtSize(f.size)}): parsing may take a moment.`] : [];
+    const M = fmt === 'eml' ? parseEml(u, w) : parseOutlook(u, fmt, w);
+    M.fmt = fmt;
+    render(M, f);
+    setMsg('', '');
+  } catch (e) {
+    console.error(e);
+    setMsg('error', `Could not open "${f.name}": ${e.message || e}`);
+  }
+}
+
+const dz = $('drop');
+['dragenter', 'dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove('over'); }));
+dz.addEventListener('drop', e => {
+  const fs = e.dataTransfer.files;
+  if (fs.length > 1) setMsg('', 'Multiple files dropped; opening the first one.');
+  openFile(fs[0]);
+});
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+$('browse').onclick = () => $('file').click();
+dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
+$('file').onchange = e => { const f = e.target.files[0]; e.target.value = ''; openFile(f); };
+})();
+</script>
+</body>
+</html>
